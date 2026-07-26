@@ -9,4 +9,4 @@ Write `Solution.TryEnterWithTimeoutAsync()`:
 ## Hints
 1. `Monitor.TryEnter(Gate, 500)` returns `true` if got the lock.
 2. Always release with `Monitor.Exit(Gate)` inside `try/finally`.
-3. No `lock` keyword â   this exercise is specifically about Monitor.
+3. No `lock` keyword â€” this exercise is specifically about Monitor.

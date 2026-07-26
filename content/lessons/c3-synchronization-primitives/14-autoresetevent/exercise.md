@@ -5,8 +5,8 @@ Write `Solution.SignalAndWaitAsync()`:
 3. Wait 100ms.
 4. Return `"signalled"`.
 
-The harness has a waiter blocking on WaitOne â   your Set() should release it.
+The harness has a waiter blocking on WaitOne â€” your Set() should release it.
 
 ## Hints
 1. `Evt.Set()` signals exactly one waiting thread.
-2. No Wait/Reset needed for this exercise â   just Set() and return.
+2. No Wait/Reset needed for this exercise â€” just Set() and return.

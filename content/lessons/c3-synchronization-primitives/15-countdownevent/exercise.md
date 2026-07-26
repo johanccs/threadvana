@@ -7,5 +7,5 @@ Write `Solution.WaitForWorkersAsync()`:
 
 ## Hints
 1. `var cde = new CountdownEvent(3); Task.Run(() => { Work(); cde.Signal(); });`
-2. `cde.Wait()` blocks â   do it after starting all workers.
+2. `cde.Wait()` blocks â€” do it after starting all workers.
 3. Return `"done"` after Wait unblocks.

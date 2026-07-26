@@ -14,10 +14,10 @@ interview:
 ---
 ## What is it?
 
-Transient failures are temporary hiccups Ã Æ Ã â  Ã â  Ã Æ Ã¢â ¬Å¡Ã â  Ã Â¢Ã Æ Ã â  Ã â  Ã Â¢Ã Æ Ã Â¢Ã Â¢Ã¢â ¬Å¡Ã Â¬Ã â ¦Ã Â¡Ã Æ Ã¢â ¬Å¡Ã â  Ã Â¬Ã Æ Ã â  Ã â  Ã Â¢Ã Æ Ã Â¢Ã Â¢Ã¢â  Â¬Ã Â¡Ã â  Ã Â¬Ã Æ Ã¢â ¬Å¡Ã â  Ã Â  a network glitch, a database deadlock victim, a rate-limit response. Retry with exponential backoff is the standard pattern: try, wait a bit, try again with a longer wait, give up after N attempts.
+Transient failures are temporary hiccups ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â a network glitch, a database deadlock victim, a rate-limit response. Retry with exponential backoff is the standard pattern: try, wait a bit, try again with a longer wait, give up after N attempts.
 
 ## Key takeaways
 
 - Retry loop: N attempts, `Task.Delay` with growing duration.
-- Exponential: delay Ã Æ Ã â  Ã â  Ã Æ Ã¢â ¬Â 'Ã Æ Ã â  Ã â  Ã Â¢Ã Æ Ã Â¢Ã Â¢Ã¢â  Â¬Ã Â¡Ã â  Ã Â¬" 2^attempt. Add jitter.
+- Exponential: delay ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬" 2^attempt. Add jitter.
 - Only retry transient errors; fail fast on permanent ones.

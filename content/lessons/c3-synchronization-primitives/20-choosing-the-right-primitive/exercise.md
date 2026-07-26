@@ -1,7 +1,7 @@
-Review-only lesson â   read the decision map, run the demo.
+Review-only lesson â€” read the decision map, run the demo.
 
 ## Hints
-1. This is a review lesson â   the method body only needs to return the expected string: `return "ok";`.
+1. This is a review lesson â€” the method body only needs to return the expected string: `return "ok";`.
 2. Check the method name the harness calls: `Solution.PickPrimitive()`.
 3. If it fails to compile, make sure the return type is `string`, not `void`.
 

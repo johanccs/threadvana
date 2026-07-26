@@ -10,9 +10,9 @@ correct answer letter (A, B, C, or D).
    B: Task.Run; C: Parallel.For on pixel rows; D: async/await)
 4. A file watcher runs for the app's entire lifetime. Best thread type? (A: ThreadPool;
    B: new Thread + IsBackground = false; C: new Thread + IsBackground = true; D: Timer)
-5. `lock(obj) { Thread.Sleep(10000); }` â   what is wrong? (A: wrong object type;
+5. `lock(obj) { Thread.Sleep(10000); }` â€” what is wrong? (A: wrong object type;
    B: lock should be async; C: sleeping inside a lock starves others; D: nothing)
-6. `await Task.Run(() => File.ReadAllText("big.txt"))` â   what is wrong? (A: nothing;
+6. `await Task.Run(() => File.ReadAllText("big.txt"))` â€” what is wrong? (A: nothing;
    B: not awaited; C: Task.Run for I/O wastes a pool thread; D: missing using)
 7. You see a method `async void HandleClick()`. Should you worry? (A: no; B: yes, it
    cannot be awaited and exceptions crash the process)
@@ -25,7 +25,7 @@ correct answer letter (A, B, C, or D).
     C: the field is not published; D: bools are always atomic)
 
 ## Hints
-1. B (++ is not atomic â   read-add-write)
+1. B (++ is not atomic â€” read-add-write)
 2. B (freezes UI, .Wait() is synchronous)
 3. C (CPU-bound large data = Parallel.For)
 4. B (long-running dedicated thread, foreground so app stays alive)

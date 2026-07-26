@@ -1,6 +1,6 @@
 Trace the state machine by hand.
 
-The exercise uses a three-step async method â   `Solution.MakeToastAsync()` â   that
+The exercise uses a three-step async method â€” `Solution.MakeToastAsync()` â€” that
 awaits `SpreadButterAsync()` then `AddJamAsync()` then returns "toast". The
 provided helper methods record the ORDER they ran in `Solution.Log`.
 
@@ -9,7 +9,7 @@ questions by setting the corresponding fields:
 
 1. How many times does the state machine "pause" (return before the method is
    finished)? Set `Solution.Pauses` to the correct number.
-2. Which runs FIRST â   the `StartToasting()` call at the top of the method, or
+2. Which runs FIRST â€” the `StartToasting()` call at the top of the method, or
    `SpreadButterAsync()` starting? Set `Solution.FirstToRun` to either
    `"StartToasting"` or `"SpreadButter"`.
 3. After the first await completes, what does execution do next? Set
@@ -20,4 +20,4 @@ questions by setting the corresponding fields:
 2. Async methods start synchronously! Everything BEFORE the first `await` runs
    immediately on the calling thread.
 3. After the first await finishes, the state machine jumps to the line RIGHT
-   AFTER that await â   which is AddJamAsync.
+   AFTER that await â€” which is AddJamAsync.

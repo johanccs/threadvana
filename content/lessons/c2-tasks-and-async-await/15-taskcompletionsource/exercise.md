@@ -9,6 +9,6 @@ The harness calls `WaitForSignalAsync`, verifies it hasn't finished yet, then ca
 and verifies the task completes.
 
 ## Hints
-1. `new TaskCompletionSource().Task` gives you a plain `Task` (no result â   use non-generic TCS).
-2. `TrySetResult()` succeeds once â   use `null` or a default value if needed (for non-generic).
+1. `new TaskCompletionSource().Task` gives you a plain `Task` (no result â€” use non-generic TCS).
+2. `TrySetResult()` succeeds once â€” use `null` or a default value if needed (for non-generic).
 3. Store the TCS in a `static TaskCompletionSource?` field so both methods can access it.

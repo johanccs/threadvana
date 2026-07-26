@@ -11,11 +11,11 @@ After calling `Solution.Run()`:
   to getting the lock).
 
 Your job: set `Solution.MinWaitMs` to the MINIMUM number of milliseconds the starving
-worker MUST have waited (the greedy worker holds the lock for at least 5 Ã  50 = 250 ms).
+worker MUST have waited (the greedy worker holds the lock for at least 5 Ã— 50 = 250 ms).
 Just write the number.
 
 ## Hints
-1. The greedy worker holds the lock for 5 chunks Ã  50ms = 250ms, and the starving
+1. The greedy worker holds the lock for 5 chunks Ã— 50ms = 250ms, and the starving
    worker is already waiting before the first chunk begins.
 2. The answer is 250 (minimum). Set `MinWaitMs = 250`.
 3. The harness runs Run(), checks that `StarvingWaitedMs >= MinWaitMs`.

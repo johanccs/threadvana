@@ -15,13 +15,13 @@
     "id": "c3-synchronization-primitives",
     "order": 3,
     "title": "Synchronization Primitives",
-    "description": "When threads share data, things break in sneaky ways. Learn lock, Semaphore, SemaphoreSlim and friends â   the tools that keep threads from stepping on each other."
+    "description": "When threads share data, things break in sneaky ways. Learn lock, Semaphore, SemaphoreSlim and friends â€” the tools that keep threads from stepping on each other."
   },
   {
     "id": "c4-concurrent-collections-and-parallelism",
     "order": 4,
     "title": "Concurrent Collections & Parallelism",
-    "description": "Ready-made thread-safe collections, Parallel loops, PLINQ, Channels and TPL Dataflow â   the heavy machinery for doing lots of work fast and safely."
+    "description": "Ready-made thread-safe collections, Parallel loops, PLINQ, Channels and TPL Dataflow â€” the heavy machinery for doing lots of work fast and safely."
   },
   {
     "id": "c5-real-world-and-interview-prep",

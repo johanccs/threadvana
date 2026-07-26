@@ -2,7 +2,7 @@
 id: c1-l09-meet-the-thread-pool
 category: c1-threading-foundations
 order: 9
-title: Meet the Thread Pool Ã Â¢Ã¢â  Â¬ Borrow Workers Instead of Hiring
+title: Meet the Thread Pool  -  Borrow Workers Instead of Hiring
 difficulty: beginner
 description: "Meet the thread pool: a team of reusable worker threads that saves you from the cost of creating threads manually."
 visualization: thread-pool

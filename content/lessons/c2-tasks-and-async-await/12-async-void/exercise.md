@@ -1,5 +1,5 @@
 The starter gives you an `async void` method `Solution.LaunchWorkers()` that calls a helper
-`Solution.WorkerAsync(int id)`. This is broken â   the caller cannot track the work, and if
+`Solution.WorkerAsync(int id)`. This is broken â€” the caller cannot track the work, and if
 `WorkerAsync` somehow throws, it will crash the process.
 
 Your job:
@@ -8,10 +8,10 @@ Your job:
 2. Start two workers inside it (id 1 and id 2) and await both.
 3. To prove the fix: change the return statement to `return Task.WhenAll(w1, w2)`.
 
-The harness will `await Solution.LaunchWorkers()` and verify it completes â   something
+The harness will `await Solution.LaunchWorkers()` and verify it completes â€” something
 impossible with the original `async void` signature.
 
 ## Hints
-1. `async void` â   `async Task` is a one-word change; change the return type and the harness can await it.
-2. `Task.WhenAll` returns a Task â   you can await it or return it directly.
+1. `async void` â†’ `async Task` is a one-word change; change the return type and the harness can await it.
+2. `Task.WhenAll` returns a Task â€” you can await it or return it directly.
 3. If you changed the return type, also change any `return 0;` statement.

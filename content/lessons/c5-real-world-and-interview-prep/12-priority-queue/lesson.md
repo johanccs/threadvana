@@ -8,7 +8,7 @@ description: "Build a priority work queue: high-priority items jump the line ahe
 explainer: channel
 interview:
   - q: "How would you implement a thread-safe priority queue?"
-    a: "Use a lock-guarded SortedSet or a min-heap per priority level, or use multiple ConcurrentQueues Ã Â¢Ã¢â  Â¬ one per priority Ã Â¢Ã¢â  Â¬ and always dequeue from the highest-priority non-empty queue first. The multiple-queue approach avoids lock contention at the cost of fairness across priorities."
+    a: "Use a lock-guarded SortedSet or a min-heap per priority level, or use multiple ConcurrentQueues  -  one per priority  -  and always dequeue from the highest-priority non-empty queue first. The multiple-queue approach avoids lock contention at the cost of fairness across priorities."
 ---
 
 Write `Solution.EnqueueAsync(int priority, string work)` and `DequeueAsync()`. Use 3 `ConcurrentQueue<string>` for low/medium/high priority. Dequeue checks high first, then medium, then low.

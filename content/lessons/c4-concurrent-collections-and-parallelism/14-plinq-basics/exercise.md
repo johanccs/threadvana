@@ -6,4 +6,4 @@ Write `Solution.ComputeParallelSumAsync()`:
 
 ## Hints
 1. `Data.AsParallel().Select(n => n * n).Sum()` does it all.
-2. No `Interlocked` needed â   `.Sum()` is thread-safe in PLINQ.
+2. No `Interlocked` needed â€” `.Sum()` is thread-safe in PLINQ.

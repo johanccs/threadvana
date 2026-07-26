@@ -1,9 +1,9 @@
 Switch to the thread-safe version.
 
-The starter uses a normal `Dictionary<int, int>` â   two threads both add 500 items.
+The starter uses a normal `Dictionary<int, int>` â€” two threads both add 500 items.
 But the dictionary breaks under concurrent writes and the test fails.
 
-Switch to `ConcurrentDictionary<int, int>`. That's it â   change the declaration and
+Switch to `ConcurrentDictionary<int, int>`. That's it â€” change the declaration and
 the `Add` call to `TryAdd`. Everything else stays the same.
 
 ## Hints

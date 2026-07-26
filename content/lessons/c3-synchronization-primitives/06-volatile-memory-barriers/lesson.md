@@ -2,37 +2,37 @@
 id: c3-l06-volatile-memory-barriers
 category: c3-synchronization-primitives
 order: 6
-title: "volatile and Memory Barriers � ¢â�  ¬ Always Seeing the Latest Value"
+title: "volatile and Memory Barriers  -  Always Seeing the Latest Value"
 difficulty: intermediate
 description: "Understand volatile and memory barriers: when the compiler and CPU reorder your reads and writes, and how to stop them."
 visualization: thread-timeline
 explainer: race-interleaving
 interview:
   - q: "What does the volatile keyword do in C#?"
-    a: "It tells the compiler and the CPU: never cache this field's value � ¢â�  ¬ always read the latest value from main memory, and always write straight through. Without volatile, the compiler may hoist a read out of a loop (register caching), and the CPU may reorder reads/writes around each other. volatile prevents both optimisations for that field. It does NOT make ++ atomic � ¢â�  ¬ Interlocked is still needed for atomic operations."
+    a: "It tells the compiler and the CPU: never cache this field's value  -  always read the latest value from main memory, and always write straight through. Without volatile, the compiler may hoist a read out of a loop (register caching), and the CPU may reorder reads/writes around each other. volatile prevents both optimisations for that field. It does NOT make ++ atomic  -  Interlocked is still needed for atomic operations."
   - q: "Is volatile enough for thread-safe code?"
-    a: "Almost never by itself. It ensures visibility � ¢â�  ¬ other threads see the latest write � ¢â�  ¬ but does not provide atomicity or ordering guarantees for operations involving more than one access. For a simple 'stop' flag (bool _running), volatile is fine. For anything involving two or more fields, use a lock or Interlocked+volatile together. In practice, prefer lock or Volatile.Read/Write which are more explicit."
+    a: "Almost never by itself. It ensures visibility  -  other threads see the latest write  -  but does not provide atomicity or ordering guarantees for operations involving more than one access. For a simple 'stop' flag (bool _running), volatile is fine. For anything involving two or more fields, use a lock or Interlocked+volatile together. In practice, prefer lock or Volatile.Read/Write which are more explicit."
 ---
 
 ## What is it?
 
-CPUs and compilers lie to you � ¢â�  ¬ they reorder reads/writes and cache values in registers to go faster. Most of the time this is invisible and harmless. But in multithreaded code, it means one thread may never see a value another thread just wrote.
+CPUs and compilers lie to you Ã¢â‚¬â€ they reorder reads/writes and cache values in registers to go faster. Most of the time this is invisible and harmless. But in multithreaded code, it means one thread may never see a value another thread just wrote.
 
-`volatile` is the fence that says: "do not optimise this field � ¢â�  ¬ read it from memory every single time, and write it through every single time."
+`volatile` is the fence that says: "do not optimise this field Ã¢â‚¬â€ read it from memory every single time, and write it through every single time."
 
 ## The real-world picture
 
-Two people sharing a whiteboard. Without volatile, each person looks at their own notepad (register cache) and never looks up at the board. The first person erases and rewrites a number � ¢â�  ¬ the second person never sees the change because they are still reading their notepad. `volatile` forces everyone to look at the actual whiteboard.
+Two people sharing a whiteboard. Without volatile, each person looks at their own notepad (register cache) and never looks up at the board. The first person erases and rewrites a number Ã¢â‚¬â€ the second person never sees the change because they are still reading their notepad. `volatile` forces everyone to look at the actual whiteboard.
 
 ## How it works in C#
 
 ```csharp
-// WITHOUT volatile � ¢â�  ¬ the loop may never exit (compiler hoists _running to a register).
+// WITHOUT volatile Ã¢â‚¬â€ the loop may never exit (compiler hoists _running to a register).
 private bool _running = false;
 // Thread 1: while (!_running) { } // may loop forever
 // Thread 2: _running = true;
 
-// WITH volatile � ¢â�  ¬ the read always goes to memory.
+// WITH volatile Ã¢â‚¬â€ the read always goes to memory.
 private volatile bool _running = false;
 // Thread 1: while (!_running) { } // will definitely exit
 // Thread 2: _running = true;
@@ -40,7 +40,7 @@ private volatile bool _running = false;
 
 ## See it move
 
-Press **Run demo** � ¢â�  ¬ one thread spins on a volatile flag, another sets it after 500ms. Watch the spin counter stop exactly at 500ms. Then watch the same code WITHOUT volatile (simulated) � ¢â�  ¬ the spinner never stops.
+Press **Run demo** Ã¢â‚¬â€ one thread spins on a volatile flag, another sets it after 500ms. Watch the spin counter stop exactly at 500ms. Then watch the same code WITHOUT volatile (simulated) Ã¢â‚¬â€ the spinner never stops.
 
 ## Watch out
 
@@ -50,6 +50,6 @@ Press **Run demo** � ¢â�  ¬ one thread spins on a volatile flag, another sets
 
 ## Key takeaways
 
-- `volatile` � ¢â� �  read/write go directly to memory, never cached.
+- `volatile` Ã¢â€ â€™ read/write go directly to memory, never cached.
 - Good for simple status flags; insufficient for compound operations.
 - Prefer `Volatile.Read(ref field)` and `Volatile.Write(ref field, value)` for explicit control.

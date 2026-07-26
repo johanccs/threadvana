@@ -2,7 +2,7 @@
 id: c1-l15-timers
 category: c1-threading-foundations
 order: 15
-title: Timers � ¢â�  ¬ Running Code on a Schedule
+title: Timers  -  Running Code on a Schedule
 difficulty: intermediate
 description: "Explore System.Threading.Timer and PeriodicTimer for scheduling work to run on a timer without blocking threads."
 visualization: thread-pool
@@ -51,8 +51,8 @@ ticks 3 times at 200ms intervals. Watch the pool workers appear.
 - A timer keeps the app alive. If you forget to `Dispose` or stop it, the program
   will not exit.
 - Timer callbacks should be FAST. If one takes 2 seconds, the next scheduled tick
-  may overlap � ¢â�  ¬ use a flag or lock to prevent re-entry.
-- `System.Timers.Timer` (with an `s`) is an older wrapper � ¢â�  ¬ just use
+  may overlap Ã¢â‚¬â€ use a flag or lock to prevent re-entry.
+- `System.Timers.Timer` (with an `s`) is an older wrapper Ã¢â‚¬â€ just use
   `System.Threading.Timer` in new code.
 
 ## Key takeaways

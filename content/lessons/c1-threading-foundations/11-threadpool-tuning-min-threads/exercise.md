@@ -9,7 +9,7 @@ The starter already has the reset line `ThreadPool.SetMinThreads(1, 1)` at the e
 of `Run()` to be polite to other lessons. You don't need to change that.
 
 ## Hints
-1. The exact call is `ThreadPool.SetMinThreads(Workers, Workers)` â   both arguments
+1. The exact call is `ThreadPool.SetMinThreads(Workers, Workers)` â€” both arguments
    need the number of workers.
-2. The reset line is already in the starter â   just leave it.
+2. The reset line is already in the starter â€” just leave it.
 3. Set `Workers = 8` at the top of the class, or right before the `SetMinThreads` call.

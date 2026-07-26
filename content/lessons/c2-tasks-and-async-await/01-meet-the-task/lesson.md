@@ -2,7 +2,7 @@
 id: c2-l01-meet-the-task
 category: c2-tasks-and-async-await
 order: 1
-title: Meet the Task � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  a Promise of a Future Result
+title: Meet the Task  -  a Promise of a Future Result
 difficulty: beginner
 description: "Meet Task<T>: the modern replacement for raw threads. Understand what a Task really represents and why it is the foundation of async C#."
 visualization: thread-timeline
@@ -17,13 +17,13 @@ interview:
 ## What is it?
 
 A **Task** is a receipt for work that will finish later. You start the work now,
-and you get a Task back instantly � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  not the result, a *promise* of the result.
+and you get a Task back instantly ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â not the result, a *promise* of the result.
 When the work is done, the Task delivers the result to you.
 
 ## The real-world picture
 
 You order a flat white. The barista hands you a little buzzer and starts making
-your drink behind the counter. The buzzer is not coffee � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  it is a promise that
+your drink behind the counter. The buzzer is not coffee ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it is a promise that
 coffee is coming. You sit down and do other things. When the buzzer rings, you
 walk up and collect your drink.
 
@@ -53,30 +53,30 @@ int answer = await receipt; // 42
 
 In *What is a Thread?* (Category 1) you made workers by hand with
 `new Thread(...)`. A Task is the modern way: the thread pool lends you a worker,
-and the receipt can carry a result back � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  something a raw `Thread` cannot do.
+and the receipt can carry a result back ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â something a raw `Thread` cannot do.
 
 ## See it move
 
 Press **Run demo**. Watch the pool worker's lane pick up the order while the
-main lane keeps going � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  the receipt came back instantly. Then look at the
+main lane keeps going ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the receipt came back instantly. Then look at the
 `await`: the main lane goes grey (waiting, not blocked) until the worker lane
 ends and the number 42 arrives.
 
 ## Watch out
 
 - You might call `Task.Run(...)` and forget `await`. Then you are holding the
-  receipt, not the coffee � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  a `Task<int>`, not an `int`. The compiler warns
+  receipt, not the coffee ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a `Task<int>`, not an `int`. The compiler warns
   about most of these; listen to it.
 - You might grab the result with `.Result` or `.Wait()`. That parks your thread
-  at the counter until the drink is done � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  the opposite of what Tasks are for,
+  at the counter until the drink is done ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the opposite of what Tasks are for,
   and a classic way to deadlock. Use `await`.
-- You might think `Task.Run` creates a new thread. It does not � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  it borrows one
+- You might think `Task.Run` creates a new thread. It does not ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it borrows one
   from the pool and returns it when the work is done. That is why tasks are cheap.
 
 ## Key takeaways
 
 - A Task is a receipt for work that finishes later; `Task<T>` also carries a result.
-- `Task.Run` puts work on the thread pool � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  the modern replacement for `new Thread`.
+- `Task.Run` puts work on the thread pool ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the modern replacement for `new Thread`.
 - `await` collects the result without blocking a thread.
 - A raw `Thread` cannot hand you back a value; a `Task<T>` can.
-- Avoid `.Result` and `.Wait()` � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  blocking wastes the worker and can deadlock.
+- Avoid `.Result` and `.Wait()` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â blocking wastes the worker and can deadlock.

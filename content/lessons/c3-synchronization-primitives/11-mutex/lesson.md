@@ -2,15 +2,15 @@
 id: c3-l11-mutex
 category: c3-synchronization-primitives
 order: 11
-title: "Mutex � ¢â�  ¬ the Cross-Process Key"
+title: "Mutex  -  the Cross-Process Key"
 difficulty: intermediate
 description: "Use Mutex for system-wide locking: ensure only one instance of your application runs at a time, even across processes."
 explainer: semaphore
 interview:
   - q: "What is a Mutex and how is it different from a lock?"
-    a: "A Mutex is a kernel-level mutual-exclusion primitive that works ACROSS PROCESSES (like a named lock). lock is thread-only, in-process, and fast. Mutex can ensure only one instance of an application runs at a time (the classic `bool createdNew; new Mutex(true, \"MyApp\", out createdNew)` pattern). Mutex is slower (kernel transitions) and must be explicitly Released � ¢â�  ¬ missing a Release leaves the mutex permanently abandoned (the next waiter gets an AbandonedMutexException)."
+    a: "A Mutex is a kernel-level mutual-exclusion primitive that works ACROSS PROCESSES (like a named lock). lock is thread-only, in-process, and fast. Mutex can ensure only one instance of an application runs at a time (the classic `bool createdNew; new Mutex(true, \"MyApp\", out createdNew)` pattern). Mutex is slower (kernel transitions) and must be explicitly Released  -  missing a Release leaves the mutex permanently abandoned (the next waiter gets an AbandonedMutexException)."
   - q: "What is AbandonedMutexException?"
-    a: "When a thread that owns a Mutex exits without calling ReleaseMutex, the OS marks the mutex as abandoned. The next thread that WaitOne succeeds will receive an AbandonedMutexException � ¢â�  ¬ the OS is warning you that the previous owner's work may have been interrupted mid-operation (e.g., a crash), and the guarded resource may be in a corrupted state."
+    a: "When a thread that owns a Mutex exits without calling ReleaseMutex, the OS marks the mutex as abandoned. The next thread that WaitOne succeeds will receive an AbandonedMutexException  -  the OS is warning you that the previous owner's work may have been interrupted mid-operation (e.g., a crash), and the guarded resource may be in a corrupted state."
 ---
 
 ## What is it?
@@ -32,12 +32,12 @@ if (!createdNew)
 
 ## Watch out
 
-> **Always Release the mutex.** Unlike lock (Monitor), the CLR does not auto-release on thread exit � ¢â�  ¬ you must call ReleaseMutex explicitly, ideally in a try/finally block.
+> **Always Release the mutex.** Unlike lock (Monitor), the CLR does not auto-release on thread exit Ã¢â‚¬â€ you must call ReleaseMutex explicitly, ideally in a try/finally block.
 
 > **Named mutex naming rules.** On Windows, prefix with "Global\" to make it accessible across sessions (e.g., services), or "Local\" for the current session only. Names are case-sensitive.
 
 ## Key takeaways
 
-- `Mutex` � ¢â� �  kernel-level, cross-process mutual exclusion.
+- `Mutex` Ã¢â€ â€™ kernel-level, cross-process mutual exclusion.
 - Single-instance guard: `new Mutex(true, "name", out createdNew)`.
 - Must always Release; abandoned mutexes throw `AbandonedMutexException`.

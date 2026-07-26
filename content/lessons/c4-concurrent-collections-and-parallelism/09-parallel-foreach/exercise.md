@@ -1,6 +1,6 @@
 Write `Solution.SumSquaresAsync()`:
 
-1. Given an `int[]` â   call `Solution.Data` (already set to `[1,2,3,4,5]`).
+1. Given an `int[]` â€” call `Solution.Data` (already set to `[1,2,3,4,5]`).
 2. Use `Parallel.ForEach` to compute the sum of squares of each item.
 3. Return the sum as an `int`.
 

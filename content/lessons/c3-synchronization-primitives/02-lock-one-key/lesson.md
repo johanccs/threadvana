@@ -2,7 +2,7 @@
 id: c3-l02-lock-one-key
 category: c3-synchronization-primitives
 order: 2
-title: lock � ¢â�  ¬ One Key to the Bathroom
+title: lock  -  One Key to the Bathroom
 difficulty: beginner
 description: "Master the lock statement: the simplest tool for protecting shared data. Think of it as a single bathroom key - only one thread inside at a time."
 visualization: thread-timeline
@@ -22,12 +22,12 @@ interview:
 run the code between the braces at a time.** Every other thread that reaches
 the same lock WAITS at the door until the first one comes out.
 
-In *The Shared Data Problem � ¢â�  ¬ When Workers Trip Over Each Other* you saw the
+In *The Shared Data Problem Ã¢â‚¬â€ When Workers Trip Over Each Other* you saw the
 race; this lesson is about the key itself.
 
 ## The real-world picture
 
-A small caf� � � © has one bathroom, and its one key hangs at the counter. Whoever
+A small cafÃƒÂ© has one bathroom, and its one key hangs at the counter. Whoever
 wants in takes the key; the next person politely waits. Nobody argues, nobody
 walks in on anyone.
 
@@ -49,33 +49,33 @@ lock (_gate)                    // take the key (or wait for it)
 
 Three rules for the key:
 
-- Make it `private` � ¢â�  ¬ if outsiders can grab your key, they can jam your lock.
-- Make it `readonly` � ¢â�  ¬ never swap the key while threads are flying.
-- Keep the locked part TINY � ¢â�  ¬ remember, everyone else is waiting outside.
+- Make it `private` Ã¢â‚¬â€ if outsiders can grab your key, they can jam your lock.
+- Make it `readonly` Ã¢â‚¬â€ never swap the key while threads are flying.
+- Keep the locked part TINY Ã¢â‚¬â€ remember, everyone else is waiting outside.
 
 And what happens to the threads that wait? Exactly that: they wait. On the
-timeline you will see them as grey spans � ¢â�  ¬ parked at the door until the key
+timeline you will see them as grey spans Ã¢â‚¬â€ parked at the door until the key
 comes back.
 
 ## See it move
 
 Press **Run demo**. Three workers want into the same locked section. Watch them
-take turns: one `lock-acquire`, a work span, a `lock-release` � ¢â�  ¬ while the other
+take turns: one `lock-acquire`, a work span, a `lock-release` Ã¢â‚¬â€ while the other
 two sit in grey wait spans. Inside the section, nobody ever overlaps.
 
 ## Watch out
 
-- You might lock on `this` or a public field. Then anyone can take your key � ¢â�  ¬
+- You might lock on `this` or a public field. Then anyone can take your key Ã¢â‚¬â€
   and hold it hostage. Private readonly key, always.
 - You might give each thread its OWN key object. Then nobody ever waits, and
   the lock quietly does nothing.
-- You might put EVERYTHING inside the lock "to be safe". It is safe � ¢â�  ¬ and slow:
+- You might put EVERYTHING inside the lock "to be safe". It is safe Ã¢â‚¬â€ and slow:
   your threads are back in a queue. Lock only the shared-data lines.
 
 ## Key takeaways
 
 - `lock (key) { ... }` = one thread inside at a time; the rest WAIT.
 - The key is just an object: `private static readonly object _gate = new object();`
-- Waiting threads are not broken � ¢â�  ¬ waiting is the lock doing its job.
+- Waiting threads are not broken Ã¢â‚¬â€ waiting is the lock doing its job.
 - Never lock on `this`, a string, or anything public.
 - Keep the locked section as small as possible.

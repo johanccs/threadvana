@@ -1,4 +1,4 @@
-Fix `Solution.Transfer(int amount)` â   it increments `Solution.Balance` in a racy way. Add a `lock` around the read-modify-write. Return `"fixed"` after a test transfer of 1.
+Fix `Solution.Transfer(int amount)` â€” it increments `Solution.Balance` in a racy way. Add a `lock` around the read-modify-write. Return `"fixed"` after a test transfer of 1.
 
 ## Hints
 1. `private static readonly object _gate = new();`

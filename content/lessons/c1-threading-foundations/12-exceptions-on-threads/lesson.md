@@ -9,7 +9,7 @@ visualization: thread-timeline
 explainer: thread-basics
 interview:
   - q: What happens if an exception is thrown on a worker thread and nobody catches it?
-    a: The worker thread dies and, in modern .NET, the whole process usually ends. Exceptions do not magically appear on the main thread � ¢â�  ¬ you must catch them inside the thread's own code.
+    a: The worker thread dies and, in modern .NET, the whole process usually ends. Exceptions do not magically appear on the main thread  -  you must catch them inside the thread's own code.
   - q: How do you safely handle errors on background work?
     a: Wrap the thread body in try/catch and either store the error and signal the main thread, or (better) use Task with async/await where exceptions automatically travel back through `await`.
 ---
@@ -17,21 +17,21 @@ interview:
 ## What is it?
 
 When a worker thread throws an exception, **the main thread does not see it**. Each
-thread has its own call stack. An error on Thread A does not interrupt Thread B � ¢â�  ¬
+thread has its own call stack. An error on Thread A does not interrupt Thread B Ã¢â‚¬â€
 unless you design a way to pass it over.
 
 If nobody catches the exception, the worker dies. In older .NET the rest of the
-program kept running (which was worse � ¢â�  ¬ it just stopped working). In modern .NET
+program kept running (which was worse Ã¢â‚¬â€ it just stopped working). In modern .NET
 the whole process shuts down.
 
 ## The real-world picture
 
 Two cooks are prepping vegetables. One cuts herself and leaves the kitchen. The
-other cook keeps chopping � ¢â�  ¬ she doesn't automatically know about the accident.
+other cook keeps chopping Ã¢â‚¬â€ she doesn't automatically know about the accident.
 Unless someone goes to tell her, she'll just wonder why the station is empty.
 
 In code: the main cook (thread) needs a way to find out without looking over the
-other cook's shoulder the whole time � ¢â�  ¬ that's try/catch inside the thread.
+other cook's shoulder the whole time Ã¢â‚¬â€ that's try/catch inside the thread.
 
 ## How it works in C#
 
@@ -44,7 +44,7 @@ new Thread(() =>
     }
     catch (Exception ex)
     {
-        // The error stays on THIS thread � ¢â�  ¬ handle it here.
+        // The error stays on THIS thread Ã¢â‚¬â€ handle it here.
         Console.WriteLine($"Worker failed: {ex.Message}");
     }
 }).Start();
@@ -53,17 +53,17 @@ Console.WriteLine("Main thread keeps going.");
 ```
 
 Later (Category 2) you will learn a much cleaner way: async/await. With Tasks, the
-exception travels back to whoever called `await` � ¢â�  ¬ no try/catch in the background
+exception travels back to whoever called `await` Ã¢â‚¬â€ no try/catch in the background
 thread needed!
 
 ## See it move
 
-Press **Run demo**. A background task throws � ¢â�  ¬ watch it die in its swimlane. The
+Press **Run demo**. A background task throws Ã¢â‚¬â€ watch it die in its swimlane. The
 main lane keeps going. Then watch the fixed version catch and report it.
 
 ## Watch out
 
-- You might expect the main thread to crash when a worker throws. It doesn't � ¢â�  ¬ but
+- You might expect the main thread to crash when a worker throws. It doesn't Ã¢â‚¬â€ but
   the whole program might still end depending on your .NET version.
 - You might wrap ONLY the risky call in try/catch. Wrap the entire thread body so
   unexpected errors at the edges are caught too.

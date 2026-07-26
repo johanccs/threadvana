@@ -2,7 +2,7 @@
 id: c1-l04-join-waiting
 category: c1-threading-foundations
 order: 4
-title: Join Ã Â¢Ã¢â  Â¬ Waiting for a Worker to Finish
+title: Join  -  Waiting for a Worker to Finish
 difficulty: beginner
 description: "Master Thread.Join(): the simple way to pause one thread until another thread finishes its work."
 visualization: thread-timeline
