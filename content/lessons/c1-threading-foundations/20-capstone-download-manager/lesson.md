@@ -2,16 +2,16 @@
 id: c1-l20-capstone-download-manager
 category: c1-threading-foundations
 order: 20
-title: Capstone Ã¢â‚¬â€ Mini Download Manager
+title: Capstone ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Mini Download Manager
 difficulty: advanced
 description: "Capstone project: build a multithreaded download manager that downloads multiple files in parallel and reports progress."
 visualization: thread-pool
 explainer: thread-pool
 interview:
   - q: How would you design a system where N worker threads process items from a shared queue?
-    a: "Use a shared queue (ConcurrentQueue or BlockingCollection) and start N dedicated threads. Each worker loops Ã¢â‚¬â€ dequeue, process, repeat. The main thread enqueues work and signals when done. Shut down cooperatively when the queue is empty and the producer is finished."
+    a: "Use a shared queue (ConcurrentQueue or BlockingCollection) and start N dedicated threads. Each worker loops ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â dequeue, process, repeat. The main thread enqueues work and signals when done. Shut down cooperatively when the queue is empty and the producer is finished."
   - q: What happens if a worker thread crashes?
-    a: The other workers keep running Ã¢â‚¬â€ they are independent. But the crashed worker's item may be lost unless you catch exceptions inside the worker loop and re-queue or log the failure. Use try/catch in the worker body.
+    a: The other workers keep running ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â they are independent. But the crashed worker's item may be lost unless you catch exceptions inside the worker loop and re-queue or log the failure. Use try/catch in the worker body.
 ---
 
 ## What is it?
@@ -26,16 +26,16 @@ all work is done and the workers are told to stop.
 ## The design
 
 ```
-Main thread Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Âº enqueue(12 items) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Âº set stop flag Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Âº Join all workers
-                    Ã¢â€â€š
-                    Ã¢â€“Â¼
-[shared queue] Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Âº Worker 1 Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Âº Worker 2 Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Âº Worker 3 Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€“Âº Worker 4
+Main thread ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº enqueue(12 items) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº set stop flag ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Join all workers
+                    ÃƒÂ¢Ã¢â‚¬ÂÃ¢â‚¬Å¡
+                    ÃƒÂ¢Ã¢â‚¬"Ã‚Â¼
+[shared queue] ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 1 ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 2 ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 3 ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 4
 ```
 
 Each worker: `while (items to process OR stop flag not set) { dequeue; process; }`
 
 This uses: `new Thread` (dedicated workers), a shared queue, a `lock` for the
-dequeue, and a cooperative stop flag Ã¢â‚¬â€ almost everything from Category 1.
+dequeue, and a cooperative stop flag ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â almost everything from Category 1.
 
 ## How it works in C#
 
@@ -64,7 +64,7 @@ new Thread(() =>
 ## See it move
 
 Press **Run demo**. Watch 4 workers consuming 12 items from the shared queue.
-Notice how workers overlap Ã¢â‚¬â€ while one processes, another dequeues the next item.
+Notice how workers overlap ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â while one processes, another dequeues the next item.
 
 ## Watch out
 

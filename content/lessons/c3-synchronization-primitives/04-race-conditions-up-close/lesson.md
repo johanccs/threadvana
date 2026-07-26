@@ -2,7 +2,7 @@
 id: c3-l04-race-conditions-up-close
 category: c3-synchronization-primitives
 order: 4
-title: Race Conditions Up Close Ã¢â‚¬â€ Watching a Torn Read Happen
+title: Race Conditions Up Close ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Watching a Torn Read Happen
 difficulty: beginner
 description: "See race conditions up close: watch two threads fight over a counter and understand why the result is unpredictable."
 visualization: thread-timeline
@@ -30,7 +30,7 @@ existed.
 ## The real-world picture
 
 Two cashiers share one paper tally sheet. Both read "41", both add one in
-their head, both write "42". Two customers served Ã¢â‚¬â€ the sheet says 42. One
+their head, both write "42". Two customers served ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â the sheet says 42. One
 sale vanished, and nobody dropped anything. The sheet simply cannot handle
 two writers at once.
 
@@ -52,7 +52,7 @@ counter = temp;       // 3. WRITE
 ```
 
 If thread A reads 41 and thread B reads 41 before A writes, both write 42.
-One increment is gone forever. No exception, no warning Ã¢â‚¬â€ the number is just
+One increment is gone forever. No exception, no warning ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â the number is just
 silently wrong.
 
 ```csharp
@@ -65,13 +65,13 @@ for (int t = 0; t < 6; t++)
             counter++;          // unprotected = race fuel
     }).Start();
 }
-// Expected: 600,000. Actual: less Ã¢â‚¬â€ and different every single run.
+// Expected: 600,000. Actual: less ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â and different every single run.
 ```
 
 ## See it move
 
 Press **Run demo**. Two workers each add 100,000 to one shared counter. Watch
-their work spans overlap on the timeline Ã¢â‚¬â€ that overlap is where increments
+their work spans overlap on the timeline ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â that overlap is where increments
 vanish. The demo then prints expected vs actual: the gap is the race, caught
 on camera. Run it again and the wrong number changes. A *different* wrong
 answer each run is the race's fingerprint.
@@ -79,7 +79,7 @@ answer each run is the race's fingerprint.
 ## Watch out
 
 - You might think "it worked on my machine" means the code is safe. Races hide
-  until timing gets unlucky Ã¢â‚¬â€ usually under real production load.
+  until timing gets unlucky ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â usually under real production load.
 - You might protect only the WRITE. The read must be protected too; it is the
   read-add-write COMBINATION that must not be interrupted.
 - You might expect a big, loud failure. Races rarely crash. They return
@@ -87,8 +87,8 @@ answer each run is the race's fingerprint.
 
 ## Key takeaways
 
-- `counter++` is really read-add-write Ã¢â‚¬â€ three steps another thread can interrupt.
+- `counter++` is really read-add-write ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â three steps another thread can interrupt.
 - A torn read sees a value mid-update: half old, half new.
 - Races need unlucky timing, so they pass tests and fail in production.
-- Reproduce on purpose: many threads Ãƒâ€” many iterations, then compare totals.
+- Reproduce on purpose: many threads ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬" many iterations, then compare totals.
 - A different wrong total every run is the fingerprint of a race.
