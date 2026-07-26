@@ -8,6 +8,6 @@ The harness wraps a counter, then calls your method and checks that all six prog
 values were reported.
 
 ## Hints
-1. `IProgress<int>.Report(value)` is a void method â€” call it, don't await it.
+1. `IProgress<int>.Report(value)` is a void method â   call it, don't await it.
 2. Loop 6 times (0..5), report `i * 20`, await 100ms delay.
-3. Return `"done"` after the loop â€” the harness awaits your Task<string>.
+3. Return `"done"` after the loop â   the harness awaits your Task<string>.

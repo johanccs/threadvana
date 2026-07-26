@@ -13,4 +13,4 @@ Complete the worker loop inside each worker thread so that:
 ## Hints
 1. The lock pattern: `lock (Gate) { if (queue.Count > 0) { item = queue.Dequeue(); hasItem = true; } else if (ShouldStop) break; }`
 2. After the lock: `if (hasItem) ProcessItem(item); else Thread.Sleep(1);`
-3. The starter already creates the threads and starts the producer â€” you just fill in the worker loop body.
+3. The starter already creates the threads and starts the producer â   you just fill in the worker loop body.

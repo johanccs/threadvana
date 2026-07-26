@@ -11,6 +11,6 @@ lambda: `_ => { Solution.Done = true; }`.
 ## Hints
 1. The timer constructor: `new Timer(callback, state, dueTime, period)`. For `state`,
    use `null` since you don't need to pass extra data.
-2. `TimeSpan.Infinite`? No â€” use `Timeout.Infinite` (from `System.Threading`).
+2. `TimeSpan.Infinite`? No â   use `Timeout.Infinite` (from `System.Threading`).
 3. After starting the timer, wait in a loop until `Done` is true, then `Dispose` the
    timer (or use `using var`).

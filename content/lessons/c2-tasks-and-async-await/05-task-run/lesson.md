@@ -2,51 +2,51 @@
 id: c2-l05-task-run
 category: c2-tasks-and-async-await
 order: 5
-title: Task.Run ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Handing Work to the Thread Pool
+title: Task.Run � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  Handing Work to the Thread Pool
 difficulty: beginner
 description: "Understand Task.Run: when to use it to push CPU-bound work to the thread pool, and when it is the wrong tool."
 visualization: thread-pool
 explainer: thread-pool
 interview:
   - q: What is the difference between Task.Run and new Thread?
-    a: Task.Run hands work to the thread-pool ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it reuses idle workers instead of creating a new, expensive thread every time. The pool is faster for short bursts of work; new Thread gives you a long-lived worker you manage yourself. For almost everything in modern C#, Task.Run is the right call.
+    a: Task.Run hands work to the thread-pool � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  it reuses idle workers instead of creating a new, expensive thread every time. The pool is faster for short bursts of work; new Thread gives you a long-lived worker you manage yourself. For almost everything in modern C#, Task.Run is the right call.
   - q: When should you NOT use Task.Run?
-    a: Don't use Task.Run when you are already on an async Task-returning method ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â wrapping sync-over-async with Task.Run hides the problem and exhausts pool threads. Also avoid Task.Run for I/O work (network/disk) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the pool runs CPU work; I/O is better handled by truly async I/O methods.
+    a: Don't use Task.Run when you are already on an async Task-returning method � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  wrapping sync-over-async with Task.Run hides the problem and exhausts pool threads. Also avoid Task.Run for I/O work (network/disk) � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  the pool runs CPU work; I/O is better handled by truly async I/O methods.
 ---
 
 ## What is it?
 
-`Task.Run` is the modern way to say "here is some work ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â give it to a pool worker so the main thread can keep going." It takes a delegate (a chunk of code wrapped in an `Action` or `Func<T>`) and returns a `Task` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a promise that the work will finish.
+`Task.Run` is the modern way to say "here is some work � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  give it to a pool worker so the main thread can keep going." It takes a delegate (a chunk of code wrapped in an `Action` or `Func<T>`) and returns a `Task` � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  a promise that the work will finish.
 
 The old way was `new Thread(Worker).Start()`, which you learned in Category 1. But creating a thread is expensive (about 1 MB of stack, plus setup time), and threads sit idle after their work is done. `Task.Run` skips all that: it hands the work to the **thread pool**, a team of on-call workers .NET keeps ready. Same idea as `ThreadPool.QueueUserWorkItem`, but `Task.Run` gives you a `Task` you can `await`, instead of raw signals like `CountdownEvent`.
 
 ## The real-world picture
 
-Imagine a restaurant kitchen. Creating a new thread is like hiring a brand-new cook for one five-minute task ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â onboarding, uniform, paperwork, all wasted when they finish. `Task.Run` is like posting the task on a whiteboard; any idle cook grabs it, does it, and goes back to waiting for the next one. Same result, zero hiring cost.
+Imagine a restaurant kitchen. Creating a new thread is like hiring a brand-new cook for one five-minute task � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  onboarding, uniform, paperwork, all wasted when they finish. `Task.Run` is like posting the task on a whiteboard; any idle cook grabs it, does it, and goes back to waiting for the next one. Same result, zero hiring cost.
 
 ## How it works in C#
 
 ```csharp
-// The old Category 1 way ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â new thread per task
+// The old Category 1 way � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  new thread per task
 var done = new CountdownEvent(2);
 new Thread(() => { Work(1); done.Signal(); }).Start();
 new Thread(() => { Work(2); done.Signal(); }).Start();
 done.Wait();
 
-// The modern way ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â hand both to the pool with Task.Run
+// The modern way � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  hand both to the pool with Task.Run
 var task1 = Task.Run(() => Work(1));
 var task2 = Task.Run(() => Work(2));
 await Task.WhenAll(task1, task2);
 ```
 
 Three key facts:
-1. `Task.Run` always returns **immediately** ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â you get a `Task` before the work finishes (if the work returns a value, it is `Task<T>`).
-2. The work runs on a **background pool thread** ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â your app won't wait for it at shutdown unless you `await` or `Join` the result.
-3. If the work **throws**, the exception is captured inside the `Task` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â `await` will re-throw it, or you can check `task.Exception` without await.
+1. `Task.Run` always returns **immediately** � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  you get a `Task` before the work finishes (if the work returns a value, it is `Task<T>`).
+2. The work runs on a **background pool thread** � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  your app won't wait for it at shutdown unless you `await` or `Join` the result.
+3. If the work **throws**, the exception is captured inside the `Task` � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  `await` will re-throw it, or you can check `task.Exception` without await.
 
 ## See it move
 
-Press **Run demo** and watch the timeline. We post six tasks to a pool capped at 2 workers. Each task sleeps a bit ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â watch them queue up (`pool-queued`) and get picked up (`pool-dequeued`), two at a time. Six tasks, 2 swimlanes ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â zero new threads created.
+Press **Run demo** and watch the timeline. We post six tasks to a pool capped at 2 workers. Each task sleeps a bit � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  watch them queue up (`pool-queued`) and get picked up (`pool-dequeued`), two at a time. Six tasks, 2 swimlanes � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  zero new threads created.
 
 ## Watch out
 
@@ -58,7 +58,7 @@ Press **Run demo** and watch the timeline. We post six tasks to a pool capped at
 
 ## Key takeaways
 
-- `Task.Run` ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ pool, fast, modern. `new Thread` ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ dedicated worker, slower, only when you really need it.
-- Returns `Task` or `Task<T>` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â `await` to wait, or compose with `WhenAll`/`WhenAny`.
+- `Task.Run` � � � ¢� ¢â�  ¬�  � ¢â�  ¬â�  ¢ pool, fast, modern. `new Thread` � � � ¢� ¢â�  ¬�  � ¢â�  ¬â�  ¢ dedicated worker, slower, only when you really need it.
+- Returns `Task` or `Task<T>` � � � ¢� ¢â� �š� ¬� ¢â�  ¬� �  `await` to wait, or compose with `WhenAll`/`WhenAny`.
 - Exceptions are captured inside the `Task`, not thrown to the caller until `await`ed.
 - Don't Task.Run I/O, don't Task.Run inside async, don't leave pool tasks un-awaited.

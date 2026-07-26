@@ -24,7 +24,7 @@ return, repeat.
 
 ## The real-world picture
 
-Back to the on-call team from "Meet the Thread Pool Ã¢â‚¬â€ Borrow Workers Instead
+Back to the on-call team from "Meet the Thread Pool � ¢â�  ¬ Borrow Workers Instead
 of Hiring". Ten packages arrive at the depot - and you do NOT see ten
 couriers. You see the same two or three faces, over and over, because every
 delivery ends with the courier coming back for the next package.

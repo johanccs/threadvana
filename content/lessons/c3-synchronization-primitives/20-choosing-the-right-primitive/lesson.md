@@ -2,13 +2,13 @@
 id: c3-l20-choosing-the-right-primitive
 category: c3-synchronization-primitives
 order: 20
-title: "Choosing the Right Primitive Ã¢â‚¬â€ the Decision Map"
+title: "Choosing the Right Primitive � ¢â�  ¬ the Decision Map"
 difficulty: advanced
 description: "Decision guide: which synchronization primitive for which scenario? Lock vs semaphore vs event vs barrier - a flowchart."
 explainer: lock-key
 interview:
   - q: "You have a shared counter incremented from many threads. What primitive do you use and why?"
-    a: "Interlocked.Increment Ã¢â‚¬â€ it is lock-free, the fastest option, and semantically exact for a counter. No lock object needed, no kernel transitions. If the counter is part of a larger invariant (e.g., Balance -= amount), fall back to lock or SpinLock for a short critical section."
+    a: "Interlocked.Increment � ¢â�  ¬ it is lock-free, the fastest option, and semantically exact for a counter. No lock object needed, no kernel transitions. If the counter is part of a larger invariant (e.g., Balance -= amount), fall back to lock or SpinLock for a short critical section."
   - q: "You need to limit concurrent I/O calls to 5. What primitive?"
     a: "SemaphoreSlim(5) with WaitAsync. It blocks cooperatively (async-friendly), the count matches the limit naturally, and no kernel transitions for the common case. Semaphore (OS-level) is overkill unless cross-process."
 ---
@@ -26,7 +26,7 @@ You now know 10+ synchronisation primitives. The interview test is choosing the 
 | Limit concurrency to N | `SemaphoreSlim` | Built-in count, async-friendly |
 | Many readers, rare writes | `ReaderWriterLockSlim` | Reads run in parallel |
 | Wait for N signals | `CountdownEvent` | Exactly N countdowns |
-| Sync phases across threads | `Barrier` | All arrive Ã¢â€ â€™ continue |
+| Sync phases across threads | `Barrier` | All arrive � ¢â� �  continue |
 | Simple true/false gate | `ManualResetEventSlim` | Set/Reset, multiple waiters |
 | One-shot per signal | `AutoResetEvent` | Turnstile pattern |
 | Cross-process lock | `Mutex` | Kernel-level, named |
@@ -38,6 +38,6 @@ You now know 10+ synchronisation primitives. The interview test is choosing the 
 
 ## Key takeaways
 
-- Map the PROBLEM to the primitive Ã¢â‚¬â€ don't reach for lock by default.
+- Map the PROBLEM to the primitive � ¢â�  ¬ don't reach for lock by default.
 - Interlocked for counters; SemaphoreSlim for concurrency limits.
-- lock is fine 95% of the time Ã¢â‚¬â€ the map is for the other 5%.
+- lock is fine 95% of the time � ¢â�  ¬ the map is for the other 5%.

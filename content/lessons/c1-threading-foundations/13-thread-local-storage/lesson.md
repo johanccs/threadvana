@@ -2,7 +2,7 @@
 id: c1-l13-thread-local-storage
 category: c1-threading-foundations
 order: 13
-title: Thread-Local Storage Ã¢â‚¬â€ Every Thread Gets Its Own Copy
+title: Thread-Local Storage � ¢â�  ¬ Every Thread Gets Its Own Copy
 difficulty: intermediate
 description: "Discover ThreadLocal<T> and AsyncLocal<T>: give each thread its own private copy of data so they never step on each other."
 visualization: thread-timeline
@@ -11,22 +11,22 @@ interview:
   - q: What does the [ThreadStatic] attribute do?
     a: It turns a static field into thread-local storage. Every thread gets its own separate copy of the value. One thread's write does not affect another thread's read.
   - q: What is the difference between [ThreadStatic] and ThreadLocal&lt;T&gt;?
-    a: "The [ThreadStatic] attribute is simpler but cannot set an automatic default Ã¢â‚¬â€ every thread starts at null/0. ThreadLocal<T> lets you provide a factory so every thread begins with a proper value."
+    a: "The [ThreadStatic] attribute is simpler but cannot set an automatic default � ¢â�  ¬ every thread starts at null/0. ThreadLocal<T> lets you provide a factory so every thread begins with a proper value."
 ---
 
 ## What is it?
 
-Normally a `static` field in C# is **shared** Ã¢â‚¬â€ every thread sees the same value.
+Normally a `static` field in C# is **shared** � ¢â�  ¬ every thread sees the same value.
 With `[ThreadStatic]` you turn it into **thread-local**: each thread gets its own
 separate copy of the field.
 
 Think of it like every worker having their own clipboard. Worker A writes on their
-clipboard Ã¢â‚¬â€ Worker B cannot read it, and vice versa.
+clipboard � ¢â�  ¬ Worker B cannot read it, and vice versa.
 
 ## The real-world picture
 
 A restaurant has one whiteboard for all waiters (static field). Everyone writes
-their own table number on it Ã¢â‚¬â€ chaos!
+their own table number on it � ¢â�  ¬ chaos!
 
 Each waiter now carries their own notepad ([ThreadStatic] field). They write their
 tables without conflict, because nobody else reads their notepad.
@@ -46,7 +46,7 @@ new Thread(() =>
 new Thread(() =>
 {
     _count++;
-    Console.WriteLine(_count); // prints 1 (not 2 Ã¢â‚¬â€ different copy!)
+    Console.WriteLine(_count); // prints 1 (not 2 � ¢â�  ¬ different copy!)
 }).Start();
 ```
 
@@ -73,6 +73,6 @@ each lane with its private counter.
 ## Key takeaways
 
 - `[ThreadStatic]` gives each thread its own private copy of a field.
-- It is perfect for cached objects or per-thread counters Ã¢â‚¬â€ no locks needed.
+- It is perfect for cached objects or per-thread counters � ¢â�  ¬ no locks needed.
 - `ThreadLocal<T>` is the modern, initial-value-friendly alternative.
-- Neither `[ThreadStatic]` nor `ThreadLocal` works with async/await Ã¢â‚¬â€ see Category 2.
+- Neither `[ThreadStatic]` nor `ThreadLocal` works with async/await � ¢â�  ¬ see Category 2.

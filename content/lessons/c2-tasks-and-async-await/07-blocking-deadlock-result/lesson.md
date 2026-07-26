@@ -2,14 +2,14 @@
 id: c2-l07-blocking-deadlock-result
 category: c2-tasks-and-async-await
 order: 7
-title: "Blocking on Async Ã¢â‚¬â€ Why .Result and .Wait() Deadlock"
+title: "Blocking on Async � ¢â�  ¬ Why .Result and .Wait() Deadlock"
 difficulty: intermediate
 description: "Understand why calling .Result or .Wait() on a Task can deadlock your application, and how to avoid it."
 visualization: async-activity
 explainer: deadlock
 interview:
   - q: Why does calling .Result on a task deadlock in some contexts?
-    a: "The async method, when awaited, tries to marshal its continuation back to the captured SynchronizationContext (e.g., the UI thread in WPF, or the request context in ASP.NET Framework). Calling .Result blocks the current thread Ã¢â‚¬â€ if that thread is the same one the continuation needs, the two wait on each other forever. .NET Core / ASP.NET Core (8+) has no SynchronizationContext, so the classic deadlock does NOT happen there, but .Result STILL wastes a thread Ã¢â‚¬â€ a silent pool leak."
+    a: "The async method, when awaited, tries to marshal its continuation back to the captured SynchronizationContext (e.g., the UI thread in WPF, or the request context in ASP.NET Framework). Calling .Result blocks the current thread � ¢â�  ¬ if that thread is the same one the continuation needs, the two wait on each other forever. .NET Core / ASP.NET Core (8+) has no SynchronizationContext, so the classic deadlock does NOT happen there, but .Result STILL wastes a thread � ¢â�  ¬ a silent pool leak."
   - q: In .NET 8, is .Result still dangerous?
     a: "It won't deadlock at the synchronization-context level (there is none), but it burns a thread doing nothing. On a loaded server with limited pool threads, a thousand .Result calls can starve the pool, and new work queues up while threads are blocked. The rule is the same: never block on async."
 ---
@@ -18,31 +18,31 @@ interview:
 
 There are exactly two ways to wait for a Task to finish: **cooperatively** (`await`) or **forcefully** (`.Result` / `.Wait()`). Only one is correct in async code.
 
-When you call `.Result` or `.Wait()`, you are saying: "I refuse to give up this thread. Stop everything until that task finishes." If the task internally is trying to get BACK to this same thread (via a `SynchronizationContext`), you have a **deadlock** Ã¢â‚¬â€ two things each waiting on the other, forever.
+When you call `.Result` or `.Wait()`, you are saying: "I refuse to give up this thread. Stop everything until that task finishes." If the task internally is trying to get BACK to this same thread (via a `SynchronizationContext`), you have a **deadlock** � ¢â�  ¬ two things each waiting on the other, forever.
 
-.NET 8 removed the default SynchronizationContext from ASP.NET Core, so the *classic* deadlock is gone Ã¢â‚¬â€ but `.Result` is still a pool-killer. A blocked thread cannot do other work while it waits, so at scale every `.Result` is one fewer worker for real requests.
+.NET 8 removed the default SynchronizationContext from ASP.NET Core, so the *classic* deadlock is gone � ¢â�  ¬ but `.Result` is still a pool-killer. A blocked thread cannot do other work while it waits, so at scale every `.Result` is one fewer worker for real requests.
 
 ## The real-world picture
 
-Two people approach the same door from opposite sides. Alice pushes, Bob pulls. Neither can move while the other is holding their side. A deadlock is exactly that Ã¢â‚¬â€ but instead of people, it is a thread holding a lock that the other thread needs.
+Two people approach the same door from opposite sides. Alice pushes, Bob pulls. Neither can move while the other is holding their side. A deadlock is exactly that � ¢â�  ¬ but instead of people, it is a thread holding a lock that the other thread needs.
 
 The pool version: a manager assigns tasks to 5 workers. One worker sits still for 3 minutes "waiting for a report." The other 4 handle all incoming calls. At 100 calls/minute, the queue fills up because worker #5 isn't doing anything. `.Result` is worker #5.
 
 ## How it works in C#
 
 ```csharp
-// BAD Ã¢â‚¬â€ blocks the thread (pool starvation at scale)
+// BAD � ¢â�  ¬ blocks the thread (pool starvation at scale)
 int result = SomeAsyncMethod().Result;
 
-// GOOD Ã¢â‚¬â€ yields the thread until the result is ready
+// GOOD � ¢â�  ¬ yields the thread until the result is ready
 int result = await SomeAsyncMethod();
 ```
 
-The key insight: `await` does NOT wait Ã¢â‚¬â€ it **returns** to the caller, tells the runtime "call me back here when this is done," and frees the thread for other work. `.Result` physically holds the thread, doing nothing, until the task finishes.
+The key insight: `await` does NOT wait � ¢â�  ¬ it **returns** to the caller, tells the runtime "call me back here when this is done," and frees the thread for other work. `.Result` physically holds the thread, doing nothing, until the task finishes.
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ we simulate 50 concurrent "requests," half using `await` and half using `.Result`. Watch the pool-swimlane chart: the awaiters finish fast because they share pool threads, while the blockers pile up behind the few threads stuck in `.Result`.
+Press **Run demo** � ¢â�  ¬ we simulate 50 concurrent "requests," half using `await` and half using `.Result`. Watch the pool-swimlane chart: the awaiters finish fast because they share pool threads, while the blockers pile up behind the few threads stuck in `.Result`.
 
 ## Watch out
 
@@ -50,10 +50,10 @@ Press **Run demo** Ã¢â‚¬â€ we simulate 50 concurrent "requests," half
 
 > **Don't wrap async with sync to "make it simpler."** The rule "async all the way down" exists because one blocking call at the bottom can cascade into pool starvation at the top.
 
-> **Task.GetAwaiter().GetResult() has the same problem** Ã¢â‚¬â€ it is just `.Result` without wrapping the exception in AggregateException. Still blocks.
+> **Task.GetAwaiter().GetResult() has the same problem** � ¢â�  ¬ it is just `.Result` without wrapping the exception in AggregateException. Still blocks.
 
 ## Key takeaways
 
-- `await` Ã¢â‚¬â€ frees the thread. `.Result` Ã¢â‚¬â€ holds it.
+- `await` � ¢â�  ¬ frees the thread. `.Result` � ¢â�  ¬ holds it.
 - Classic deadlock = blocked thread waiting on a continuation that needs the same thread. Fixed in .NET 8+ but the pool cost remains.
-- Never block on async. If a synchronous method must call async code, rethink the design Ã¢â‚¬â€ or accept the pool cost with full awareness.
+- Never block on async. If a synchronous method must call async code, rethink the design � ¢â�  ¬ or accept the pool cost with full awareness.

@@ -1,8 +1,8 @@
-Fix the counter â€” without a lock.
+Fix the counter â   without a lock.
 
 `Solution.Count` is a plain `int`. The checker will fire 8 threads at it,
 each calling `Solution.AddOne()` 50,000 times, and expects EXACTLY 400,000
-at the end. No `lock` allowed â€” you will not need one.
+at the end. No `lock` allowed â   you will not need one.
 
 Your job:
 

@@ -1,6 +1,6 @@
 Build a race detector.
 
-Yes, really â€” this exercise wants the BUG on purpose, so you can watch it
+Yes, really â   this exercise wants the BUG on purpose, so you can watch it
 happen and measure it. (The next lessons hand you the fix.)
 
 Inside `Solution.RunRace()`:
@@ -16,5 +16,5 @@ a total BELOW the expected 600,000.
 
 ## Hints
 1. Create the threads in a loop and keep them in a Thread[] so you can Join each one afterwards.
-2. The increment must stay plain and racy: SharedCounter++ â€” no lock, no Interlocked. Breaking it IS the assignment!
-3. Miss a Join and RunRace returns while workers are still running â€” the checker notices the counter moving after your return.
+2. The increment must stay plain and racy: SharedCounter++ â   no lock, no Interlocked. Breaking it IS the assignment!
+3. Miss a Join and RunRace returns while workers are still running â   the checker notices the counter moving after your return.

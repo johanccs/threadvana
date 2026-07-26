@@ -2,7 +2,7 @@
 id: c3-l05-interlocked-atomic-operations
 category: c3-synchronization-primitives
 order: 5
-title: Interlocked Ã¢â‚¬â€ Atomic Operations Without a Lock
+title: Interlocked � ¢â�  ¬ Atomic Operations Without a Lock
 difficulty: beginner
 description: "Go lock-free with Interlocked: atomic Increment, Decrement, Exchange, and CompareExchange - no lock object needed."
 visualization: thread-timeline
@@ -20,17 +20,17 @@ interview:
 
 **Interlocked** is a small set of *atomic* operations for numbers:
 `Increment`, `Decrement`, `Add`, `Exchange`, `CompareExchange`. Atomic means
-indivisible Ã¢â‚¬â€ the read-add-write from *Race Conditions Up Close* becomes ONE
+indivisible � ¢â�  ¬ the read-add-write from *Race Conditions Up Close* becomes ONE
 step that no thread can interrupt.
 
 It lives in `System.Threading` and works on `int` and `long` fields. No lock
-object, no queuing threads Ã¢â‚¬â€ the CPU does the guarding.
+object, no queuing threads � ¢â�  ¬ the CPU does the guarding.
 
 ## The real-world picture
 
 Remember the two cashiers and the paper tally sheet? Interlocked replaces the
 sheet with a mechanical clicker. Click = counted. There is no "read, think,
-write" sequence for anyone to interrupt Ã¢â‚¬â€ the step has no middle.
+write" sequence for anyone to interrupt � ¢â�  ¬ the step has no middle.
 
 That is why it needs no key and no queue: you cannot collide inside a step
 that has no gaps.
@@ -59,7 +59,7 @@ so every method takes the field by reference.
 
 ## See it move
 
-Press **Run demo**. Two pairs of workers do the same hammering as last lesson Ã¢â‚¬â€
+Press **Run demo**. Two pairs of workers do the same hammering as last lesson � ¢â�  ¬
 one pair on a plain counter, one pair on an Interlocked counter. Watch both
 pairs work, then read the totals: the plain counter falls short (and changes
 every run), the Interlocked counter is exact EVERY time.
@@ -67,17 +67,17 @@ every run), the Interlocked counter is exact EVERY time.
 ## Watch out
 
 - You might protect one variable with Interlocked and leave a second one
-  plain. Interlocked guards exactly ONE variable per call Ã¢â‚¬â€ rules spanning
+  plain. Interlocked guards exactly ONE variable per call � ¢â�  ¬ rules spanning
   two variables need a `lock`.
 - You might think Interlocked fixes check-then-act logic. "If balance is
   enough, withdraw" is two steps; Interlocked cannot fuse them.
 - You might read the field plainly while others write it. A plain read can
-  see a stale value Ã¢â‚¬â€ use `Volatile.Read` for a fresh snapshot.
+  see a stale value � ¢â�  ¬ use `Volatile.Read` for a fresh snapshot.
 
 ## Key takeaways
 
-- Interlocked makes read-add-write one indivisible CPU step Ã¢â‚¬â€ no lock needed.
+- Interlocked makes read-add-write one indivisible CPU step � ¢â�  ¬ no lock needed.
 - Use it for single-number updates: `Increment`, `Add`, `Exchange`.
-- `CompareExchange` = "swap only if unchanged" Ã¢â‚¬â€ the lock-free building block.
+- `CompareExchange` = "swap only if unchanged" � ¢â�  ¬ the lock-free building block.
 - Threads never queue for Interlocked, so it beats a lock for tiny counter work.
 - Two or more related variables? That is `lock` territory, not Interlocked.

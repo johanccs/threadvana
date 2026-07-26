@@ -11,4 +11,4 @@ were ever inside the critical section at once.
 ## Hints
 1. `await _semaphore.WaitAsync()` to enter.
 2. `await Task.Delay(200)` is the work.
-3. `_semaphore.Release()` in a try/finally â€” or use a helper pattern.
+3. `_semaphore.Release()` in a try/finally â   or use a helper pattern.

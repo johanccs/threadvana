@@ -6,4 +6,4 @@ Write `Solution.RunUntilCancelledAsync(CancellationToken token)`:
 
 ## Hints
 1. `while (!token.IsCancellationRequested) { Counter++; await Task.Delay(50, token); }`
-2. The `Task.Delay` will throw when cancelled â€” catch or check before the increment.
+2. The `Task.Delay` will throw when cancelled â   catch or check before the increment.

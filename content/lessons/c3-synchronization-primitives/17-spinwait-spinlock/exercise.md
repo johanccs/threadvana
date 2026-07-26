@@ -9,4 +9,4 @@ Write `Solution.IncrementWithSpinLock()`:
 ## Hints
 1. `_spin.Enter(ref lockTaken)` tries to acquire the spin lock.
 2. Always `try/finally { if (lockTaken) _spin.Exit(); }`.
-3. The short critical section makes SpinLock appropriate â€” just a single increment.
+3. The short critical section makes SpinLock appropriate â   just a single increment.

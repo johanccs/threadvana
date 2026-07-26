@@ -8,14 +8,14 @@ description: "Cancel a running parallel loop gracefully with CancellationToken a
 explainer: cancellation
 interview:
   - q: "How do you cancel a Parallel.ForEach mid-execution?"
-    a: "Pass a ParallelOptions with a CancellationToken. When the token is signalled, Parallel.ForEach stops launching new iterations and the loop throws OperationCanceledException. Already-running iterations are NOT forcefully killed Ã¢â‚¬â€ they must poll the token themselves with ThrowIfCancellationRequested() to stop mid-work. Otherwise, they finish, and the loop cancels after they complete."
+    a: "Pass a ParallelOptions with a CancellationToken. When the token is signalled, Parallel.ForEach stops launching new iterations and the loop throws OperationCanceledException. Already-running iterations are NOT forcefully killed � ¢â�  ¬ they must poll the token themselves with ThrowIfCancellationRequested() to stop mid-work. Otherwise, they finish, and the loop cancels after they complete."
   - q: "What happens to already-started iterations when the CancellationToken fires?"
-    a: "They complete unless they have their own cancellation check. Parallel.ForEach does not abort threads Ã¢â‚¬â€ it prevents NEW iterations and throws once all current iterations finish. For long-running per-item work, pass the SAME token into the lambda and periodically check it."
+    a: "They complete unless they have their own cancellation check. Parallel.ForEach does not abort threads � ¢â�  ¬ it prevents NEW iterations and throws once all current iterations finish. For long-running per-item work, pass the SAME token into the lambda and periodically check it."
 ---
 
 ## What is it?
 
-Cancelling a parallel loop is a two-step cooperation: the outer loop stops scheduling new items AND the inner item bodies must check the token to stop what they are doing. Without both, cancellation is incomplete Ã¢â‚¬â€ you get a partial result with some items still running.
+Cancelling a parallel loop is a two-step cooperation: the outer loop stops scheduling new items AND the inner item bodies must check the token to stop what they are doing. Without both, cancellation is incomplete � ¢â�  ¬ you get a partial result with some items still running.
 
 ## Watch out
 
@@ -23,6 +23,6 @@ Cancelling a parallel loop is a two-step cooperation: the outer loop stops sched
 
 ## Key takeaways
 
-- `ParallelOptions { CancellationToken = token }` Ã¢â€ â€™ cancel new iterations.
+- `ParallelOptions { CancellationToken = token }` � ¢â� �  cancel new iterations.
 - Lambda must ALSO check `token.ThrowIfCancellationRequested()` for in-flight items.
-- No thread abort Ã¢â‚¬â€ current iterations finish unless they check.
+- No thread abort � ¢â�  ¬ current iterations finish unless they check.

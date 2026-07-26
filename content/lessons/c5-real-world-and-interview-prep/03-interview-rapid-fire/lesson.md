@@ -2,7 +2,7 @@
 id: c5-l03-interview-rapid-fire
 category: c5-real-world-and-interview-prep
 order: 3
-title: Interview Rapid Fire Ã¢â‚¬â€ 10 Questions in 10 Minutes
+title: Interview Rapid Fire � ¢â�  ¬ 10 Questions in 10 Minutes
 difficulty: advanced
 description: "Practice answering the 20 most common multithreading interview questions with clear, junior-friendly model answers."
 explainer: async-state-machine
@@ -14,4 +14,4 @@ interview:
 ---
 
 A rapid-fire quiz covering the entire course. 10 scenario-based questions.
-No demo Ã¢â‚¬â€ just think and answer.
+No demo � ¢â�  ¬ just think and answer.

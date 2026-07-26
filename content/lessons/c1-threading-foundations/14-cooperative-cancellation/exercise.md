@@ -1,6 +1,6 @@
 Teach a worker to stop when asked.
 
-The starter starts a loop that counts from 1 to 1,000,000,000 â€” it runs forever. Your
+The starter starts a loop that counts from 1 to 1,000,000,000 â   it runs forever. Your
 job is to add a stop flag so it can be told to stop cleanly.
 
 1. Add a `volatile bool` flag at the top of the `Solution` class (call it
@@ -11,7 +11,7 @@ job is to add a stop flag so it can be told to stop cleanly.
 4. From the main thread (after `worker.Start()`): sleep 100 ms, set
    `StopRequested = true`, then `Join`.
 
-The harness checks that the worker stopped EARLY (Count < 200,000,000 â€” way before
+The harness checks that the worker stopped EARLY (Count < 200,000,000 â   way before
 a billion) AND that it stopped cleanly (the thread finished, the test does not
 time out).
 

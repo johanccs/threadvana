@@ -8,10 +8,10 @@ Inside `Solution.Run()`:
 3. Call `Join()` so `Run()` only returns after your thread has finished.
 
 We check two things: that `WorkerThreadId` got set at all, and that it is a
-*different* id than the thread that called `Run()` â€” proof that a new worker really
+*different* id than the thread that called `Run()` â   proof that a new worker really
 did the job.
 
 ## Hints
-1. `new Thread(() => { ... })` takes a lambda â€” the code between the braces is what the new worker runs.
+1. `new Thread(() => { ... })` takes a lambda â   the code between the braces is what the new worker runs.
 2. `Start()` only begins the work; `Join()` is the waiting part.
 3. `Environment.CurrentManagedThreadId` tells you which thread the current line is running on.

@@ -2,31 +2,31 @@
 id: c2-l14-valuetask
 category: c2-tasks-and-async-await
 order: 14
-title: "ValueTask Ã¢â‚¬â€ Avoiding Allocations on Hot Paths"
+title: "ValueTask � ¢â�  ¬ Avoiding Allocations on Hot Paths"
 difficulty: advanced
 description: "Optimize hot paths with ValueTask: avoid heap allocations when the result is often already available synchronously."
 explainer: async-state-machine
 interview:
   - q: "When should you use ValueTask instead of Task?"
-    a: "When the result is often available synchronously (e.g., from a cache or a completed operation), ValueTask avoids heap-allocating a Task object every call. But ValueTask can only be awaited once Ã¢â‚¬â€ it is a struct that may be consumed, and re-awaiting it throws. Prefer Task unless profiling shows allocation pressure and you have measured that ValueTask helps."
+    a: "When the result is often available synchronously (e.g., from a cache or a completed operation), ValueTask avoids heap-allocating a Task object every call. But ValueTask can only be awaited once � ¢â�  ¬ it is a struct that may be consumed, and re-awaiting it throws. Prefer Task unless profiling shows allocation pressure and you have measured that ValueTask helps."
   - q: "What is ValueTask<T>.Preserve()?"
     a: "It wraps the ValueTask in a new Task, allowing multiple awaits. If you need to pass a ValueTask to code that may await it multiple times (like Task.WhenAll), call .Preserve() first. This is the escape hatch when the ValueTask rules are too restrictive."
 ---
 
 ## What is it?
 
-`Task` and `Task<T>` are reference types Ã¢â‚¬â€ every `await` that doesn't return synchronously allocates a Task on the heap. For millions of calls per second, that GC pressure adds up.
+`Task` and `Task<T>` are reference types � ¢â�  ¬ every `await` that doesn't return synchronously allocates a Task on the heap. For millions of calls per second, that GC pressure adds up.
 
-`ValueTask<T>` is a **struct** wrapper that can represent three states: a completed result (zero heap allocation), a real `Task<T>`, or a boxed `IValueTaskSource<T>` Ã¢â‚¬â€ an advanced low-level token. The first case is the key one: when a method has a cached result and returns immediately, `new ValueTask<T>(result)` costs nothing.
+`ValueTask<T>` is a **struct** wrapper that can represent three states: a completed result (zero heap allocation), a real `Task<T>`, or a boxed `IValueTaskSource<T>` � ¢â�  ¬ an advanced low-level token. The first case is the key one: when a method has a cached result and returns immediately, `new ValueTask<T>(result)` costs nothing.
 
 ## The real-world picture
 
-A pizza place that prepackages popular slices. If you order pepperoni (cached), the cashier hands you a slice from the warmer Ã¢â‚¬â€ no box (heap allocation) needed. If you order anchovy-pineapple (fresh), they make it from scratch and put it in a box (real Task).
+A pizza place that prepackages popular slices. If you order pepperoni (cached), the cashier hands you a slice from the warmer � ¢â�  ¬ no box (heap allocation) needed. If you order anchovy-pineapple (fresh), they make it from scratch and put it in a box (real Task).
 
 ## How it works in C#
 
 ```csharp
-// High-frequency API Ã¢â‚¬â€ result is cached 90% of the time.
+// High-frequency API � ¢â�  ¬ result is cached 90% of the time.
 public ValueTask<int> GetConfigValueAsync(string key)
 {
     if (_cache.TryGetValue(key, out var cached))
@@ -35,14 +35,14 @@ public ValueTask<int> GetConfigValueAsync(string key)
     return new ValueTask<int>(FetchFromBackendAsync(key));
 }
 
-// Consumer Ã¢â‚¬â€ await ONCE.
+// Consumer � ¢â�  ¬ await ONCE.
 int value = await GetConfigValueAsync("max-retries");
 ```
 
 The rules:
 - `ValueTask` can only be **awaited once**. Re-awaiting throws `InvalidOperationException`.
-- Use `v.Preserve()` to escape Ã¢â‚¬â€ wraps the value in a `Task` that can be awaited multiple times.
-- Never `.Result` or `.Wait()` a `ValueTask` Ã¢â‚¬â€ it may be already consumed.
+- Use `v.Preserve()` to escape � ¢â�  ¬ wraps the value in a `Task` that can be awaited multiple times.
+- Never `.Result` or `.Wait()` a `ValueTask` � ¢â�  ¬ it may be already consumed.
 
 ## Watch out
 
@@ -52,6 +52,6 @@ The rules:
 
 ## Key takeaways
 
-- `ValueTask<T>` Ã¢â€ â€™ struct, zero-allocation for synchronous results.
+- `ValueTask<T>` � ¢â� �  struct, zero-allocation for synchronous results.
 - Await exactly once; use `.Preserve()` to convert to a reusable Task.
 - Prefer `Task<T>` unless allocation profiling says otherwise.
