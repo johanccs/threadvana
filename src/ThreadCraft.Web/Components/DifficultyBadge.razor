@@ -1,0 +1,18 @@
+@namespace ThreadCraft.Web.Components
+
+@* Small colored pill showing how hard a lesson is:
+   Beginner = green, Intermediate = amber, Advanced = red. *@
+
+<span class="difficulty-badge @CssClass">@Difficulty</span>
+
+@code {
+    [Parameter, EditorRequired] public LessonDifficulty Difficulty { get; set; }
+
+    private string CssClass => Difficulty switch
+    {
+        LessonDifficulty.Beginner => "difficulty-beginner",
+        LessonDifficulty.Intermediate => "difficulty-intermediate",
+        LessonDifficulty.Advanced => "difficulty-advanced",
+        _ => "difficulty-beginner"
+    };
+}

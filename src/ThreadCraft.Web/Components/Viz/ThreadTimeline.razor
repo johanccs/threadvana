@@ -1,0 +1,180 @@
+@namespace ThreadCraft.Web.Components.Viz
+
+@* A Gantt chart of thread activity: one swimlane per thread, blue bars for
+   working, grey bars for waiting, diamonds for notable moments. *@
+
+@if (Events.Count == 0)
+{
+    <div class="viz-empty">Run the demo to see threads move here.</div>
+}
+else
+{
+    <p class="viz-caption">
+        Each row is one thread.
+        <span class="viz-key viz-key-work"></span> working
+        <span class="viz-key viz-key-wait"></span> waiting
+        <span class="viz-key viz-key-dot"></span> something happened
+    </p>
+    <svg viewBox="0 0 @ViewWidth @ViewHeight" class="viz-timeline" role="img"
+         aria-label="Timeline of thread activity">
+        @* lane backgrounds + names (SVG <text> is a reserved Razor tag, so emit it
+           as a markup string) *@
+        @for (var i = 0; i < _lanes.Count; i++)
+        {
+            var y = LaneY(i);
+            @((MarkupString)$"<text x='4' y='{y + LaneHeight / 2 + 4}' class='viz-lane-name'>{Encode(_lanes[i].Name)}</text>")
+            <line x1="@GutterWidth" y1="@(y + LaneHeight / 2)" x2="@(ViewWidth - RightPad)"
+                  y2="@(y + LaneHeight / 2)" class="viz-lane-line" />
+        }
+
+        @* work/wait spans *@
+        @foreach (var span in _spans)
+        {
+            var y = LaneY(span.LaneIndex) + LaneHeight / 2 - BarHeight / 2;
+            <rect x="@X(span.StartMs)" y="@y" width="@Math.Max(WidthOf(span), 2)" height="@BarHeight"
+                  rx="3" class="@(span.IsWait ? "viz-bar-wait" : "viz-bar-work")">
+                <title>@span.Label (@(span.StartMs)–@(span.EndMs) ms)</title>
+            </rect>
+        }
+
+        @* point-in-time markers *@
+        @foreach (var marker in _markers)
+        {
+            var cy = LaneY(marker.LaneIndex) + LaneHeight / 2;
+            if (marker.Kind is "thread-start" or "thread-end")
+            {
+                <circle cx="@X(marker.TimestampMs)" cy="@cy" r="5"
+                        class="@(marker.Kind == "thread-start" ? "viz-dot-start" : "viz-dot-end")">
+                    <title>@marker.Label (@(marker.TimestampMs) ms)</title>
+                </circle>
+            }
+            else
+            {
+                <polygon points="@DiamondPoints(X(marker.TimestampMs), cy, 5)" class="viz-dot-event">
+                    <title>@marker.Label (@(marker.TimestampMs) ms)</title>
+                </polygon>
+            }
+        }
+
+        @* time axis *@
+        @for (var t = 0; t <= TickCount; t++)
+        {
+            var ms = (long)Math.Round(_tMax * t / (double)TickCount);
+            @((MarkupString)$"<text x='{X(ms)}' y='{ViewHeight - 4}' class='viz-axis-label' text-anchor='middle'>{ms} ms</text>")
+        }
+    </svg>
+}
+
+@code {
+    /// <summary>Trace events collected so far (grows live while a demo runs).</summary>
+    [Parameter] public IReadOnlyList<TraceEvent> Events { get; set; } = [];
+
+    private const int ViewWidth = 800;
+    private const int GutterWidth = 120;
+    private const int RightPad = 20;
+    private const int LaneHeight = 44;
+    private const int BarHeight = 22;
+    private const int AxisHeight = 24;
+    private const int TickCount = 4;
+
+    private int ViewHeight => Math.Max(1, _lanes.Count) * LaneHeight + AxisHeight + 6;
+
+    private readonly List<Lane> _lanes = [];
+    private readonly List<Span> _spans = [];
+    private readonly List<Marker> _markers = [];
+    private long _tMax = 1;
+
+    protected override void OnParametersSet() => Rebuild();
+
+    private void Rebuild()
+    {
+        _lanes.Clear();
+        _spans.Clear();
+        _markers.Clear();
+        _tMax = Math.Max(1, Events.Count == 0 ? 1 : Events.Max(e => e.TimestampMs));
+
+        // Per-thread pairing of work-start/work-end and wait-start/wait-end.
+        var openSpans = new Dictionary<(int Lane, string Kind), Span>();
+
+        foreach (var evt in Events)
+        {
+            var laneIndex = LaneIndexOf(evt);
+
+            switch (evt.Kind)
+            {
+                case "work-start":
+                case "wait-start":
+                    var span = new Span(laneIndex, evt.Kind == "wait-start", evt.TimestampMs, evt.Label);
+                    openSpans[(laneIndex, evt.Kind)] = span;
+                    _spans.Add(span);
+                    break;
+                case "work-end":
+                    CloseSpan(openSpans, laneIndex, "work-start", evt);
+                    break;
+                case "wait-end":
+                    CloseSpan(openSpans, laneIndex, "wait-start", evt);
+                    break;
+                default:
+                    _markers.Add(new Marker(laneIndex, evt.Kind, evt.TimestampMs, evt.Label));
+                    break;
+            }
+        }
+
+        // Spans still open stretch to the current end of time (live growth).
+        foreach (var span in _spans.Where(s => s.IsOpen))
+            span.EndMs = _tMax;
+    }
+
+    private static void CloseSpan(
+        Dictionary<(int, string), Span> openSpans, int laneIndex, string openKind, TraceEvent evt)
+    {
+        if (openSpans.TryGetValue((laneIndex, openKind), out var span))
+        {
+            span.EndMs = Math.Max(evt.TimestampMs, span.StartMs);
+            span.IsOpen = false;
+            openSpans.Remove((laneIndex, openKind));
+        }
+    }
+
+    private int LaneIndexOf(TraceEvent evt)
+    {
+        var index = _lanes.FindIndex(l => l.ThreadId == evt.ThreadId);
+        if (index >= 0)
+        {
+            _lanes[index].Name = evt.ThreadName; // a thread can be named after it started
+            return index;
+        }
+        _lanes.Add(new Lane(evt.ThreadId, evt.ThreadName));
+        return _lanes.Count - 1;
+    }
+
+    private static int LaneY(int laneIndex) => 4 + laneIndex * LaneHeight;
+
+    private double X(long ms) =>
+        GutterWidth + (ViewWidth - GutterWidth - RightPad) * (ms / (double)_tMax);
+
+    private double WidthOf(Span span) => X(span.EndMs) - X(span.StartMs);
+
+    private static string DiamondPoints(double cx, double cy, double s) =>
+        $"{cx},{cy - s} {cx + s},{cy} {cx},{cy + s} {cx - s},{cy}";
+
+    private static string Encode(string text) => System.Net.WebUtility.HtmlEncode(text);
+
+    private sealed class Lane(int threadId, string name)
+    {
+        public int ThreadId { get; } = threadId;
+        public string Name { get; set; } = name;
+    }
+
+    private sealed class Span(int laneIndex, bool isWait, long startMs, string label)
+    {
+        public int LaneIndex { get; } = laneIndex;
+        public bool IsWait { get; } = isWait;
+        public long StartMs { get; } = startMs;
+        public long EndMs { get; set; } = startMs;
+        public bool IsOpen { get; set; } = true;
+        public string Label { get; } = label;
+    }
+
+    private sealed record Marker(int LaneIndex, string Kind, long TimestampMs, string Label);
+}

@@ -1,0 +1,11 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1400, height: 950 } });
+await page.goto('http://localhost:5099/viz-smoke', { waitUntil: 'networkidle' });
+await page.waitForTimeout(1200);
+const els = await page.$$('.concept-explainer');
+await els[11].screenshot({ path: 'screenshots/new-tls-a.png' });
+await page.waitForTimeout(7000);
+await els[11].screenshot({ path: 'screenshots/new-tls-b.png' });
+await browser.close();
+console.log('done');

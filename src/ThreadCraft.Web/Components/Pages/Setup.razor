@@ -1,0 +1,131 @@
+@page "/setup"
+@using ThreadCraft.Web.Services
+@using ThreadCraft.Web.Progress
+@inject ICurriculumService Curriculum
+@inject IServiceProvider Services
+@inject IConfiguration Config
+@rendermode InteractiveServer
+
+<PageTitle>Setup — ThreadCraft Academy</PageTitle>
+
+<h1>Setup & Diagnostics</h1>
+<p class="setup-intro">This page checks your ThreadCraft installation. Run it whenever something looks off.</p>
+
+<button class="btn btn-primary" @onclick="RunDiagnostics" disabled="@_running">
+    @(_running ? "Running..." : "Run Diagnostics")
+</button>
+
+@if (_ran)
+{
+    <section class="setup-results">
+        <h2>Results</h2>
+        <div class="setup-grid">
+            @foreach (var check in _checks)
+            {
+                <article class="setup-card @(check.Passed ? "check-pass" : "check-fail")">
+                    <span class="setup-icon">@(check.Passed ? "✓" : "✗")</span>
+                    <div>
+                        <h3>@check.Label</h3>
+                        <p>@check.Detail</p>
+                        @if (!string.IsNullOrWhiteSpace(check.Hint))
+                        {
+                            <p class="setup-hint">@check.Hint</p>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+}
+
+<hr />
+
+<section class="setup-reference">
+    <h2>Manual Setup</h2>
+    <p>If something is wrong, here is how to configure it:</p>
+
+    <h3>.NET SDK</h3>
+    <p>ThreadCraft needs the .NET 8 SDK or newer. Download from <a href="https://dotnet.microsoft.com/en-us/download" target="_blank" rel="noopener">dotnet.microsoft.com</a>.</p>
+    <pre><code>dotnet --version   # should be 8.0.x or higher</code></pre>
+
+    <h3>OpenRouter API Key (AI Coach)</h3>
+    <p>Create a free account at <a href="https://openrouter.ai" target="_blank" rel="noopener">openrouter.ai</a>, generate an API key, then either:</p>
+    <pre><code># Option A — environment variable
+setx OPENROUTER_API_KEY "sk-or-v1-..."
+
+# Option B — edit src/ThreadCraft.Web/appsettings.json:
+"Assistant": { "ApiKey": "sk-or-v1-..." }</code></pre>
+
+    <h3>Content</h3>
+    <p>Make sure the <code>content/lessons</code> folder exists at the repo root. The app finds it automatically.</p>
+
+    <h3>Quick Launch</h3>
+    <p>From the repo root:</p>
+    <pre><code>powershell -ExecutionPolicy Bypass -File setup.ps1</code></pre>
+    <p>Flags: <code>-Clean</code> (rebuild), <code>-NoBrowser</code>, <code>-Publish</code> (production build).</p>
+</section>
+
+
+@code {
+    private bool _running;
+    private bool _ran;
+    private readonly List<CheckItem> _checks = [];
+
+    private sealed record CheckItem(string Label, string Detail, string? Hint, bool Passed);
+
+    private async Task RunDiagnostics()
+    {
+        _running = true;
+        _ran = true;
+        _checks.Clear();
+        StateHasChanged();
+        await Task.Delay(200); // let the UI show "Running..."
+
+        // 1. .NET runtime
+        var framework = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+        _checks.Add(new CheckItem(".NET Runtime", $"Running on {framework}", null, true));
+
+        // 2. Content
+        var categories = Curriculum.GetCategories();
+        var totalLessons = categories.Sum(c => Curriculum.GetLessons(c.Id).Count);
+        _checks.Add(new CheckItem("Course Content",
+            $"Loaded {totalLessons} lessons across {categories.Count} categories.",
+            totalLessons == 0 ? "Check that content/lessons folder exists at the repo root." : null,
+            categories.Count > 0 && totalLessons > 0));
+
+        // 3. AI Coach API key
+        var assistantOpts = Services.GetRequiredService<AssistantOptions>();
+        var hasKey = !string.IsNullOrWhiteSpace(assistantOpts.ApiKey)
+            || !string.IsNullOrWhiteSpace(Config["OPENROUTER_API_KEY"]);
+        _checks.Add(new CheckItem("AI Coach (OpenRouter)",
+            hasKey ? "API key is configured." : "No API key found — coach shows setup instructions.",
+            hasKey ? null : "Get a free key at openrouter.ai, set OPENROUTER_API_KEY env var.",
+            hasKey));
+
+        // 4. Database
+        try
+        {
+            var factory = Services.GetRequiredService<Microsoft.EntityFrameworkCore.IDbContextFactory<Progress.ProgressDbContext>>();
+            await using var db = await factory.CreateDbContextAsync();
+            var ok = await db.Database.CanConnectAsync();
+            _checks.Add(new CheckItem("Progress DB (SQLite)",
+                ok ? "Database is accessible." : "Database file exists but connect failed.",
+                ok ? null : "Delete threadcraft-progress.db and restart the app.", ok));
+        }
+        catch (Exception ex)
+        {
+            _checks.Add(new CheckItem("Progress DB (SQLite)", $"Error: {ex.Message}",
+                "Delete threadcraft-progress.db and restart.", false));
+        }
+
+        // 5. Sandbox
+        var sandboxPath = Path.Combine(AppContext.BaseDirectory, "ThreadCraft.Sandbox.dll");
+        var sandboxExists = File.Exists(sandboxPath);
+        _checks.Add(new CheckItem("Code Sandbox",
+            sandboxExists ? "Sandbox found." : $"Not found at {sandboxPath}.",
+            sandboxExists ? null : "Rebuild: dotnet build ThreadCraft.slnx", sandboxExists));
+
+        _running = false;
+    }
+}
+

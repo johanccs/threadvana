@@ -1,0 +1,187 @@
+@namespace ThreadCraft.Web.Components.Viz
+@using ThreadCraft.Web.Components.Viz.Explainers
+@implements IDisposable
+
+@* Animated flowchart/activity-diagram player: explains the CONCEPT step by step
+   (nodes, arrows, moving tokens, narration). Distinct from the trace replay
+   components, which show the RESULT of a particular demo run. *@
+
+@if (_scene is not null)
+{
+    var state = ComputeState();
+    <div class="concept-explainer">
+        <div class="cx-head">
+            <span class="cx-title">@_scene.Title</span>
+            <span class="cx-controls">
+                <button class="cx-btn" @onclick="Prev" title="Previous step">◀</button>
+                <button class="cx-btn" @onclick="TogglePlay" title="@(_playing ? "Pause" : "Play")">@(_playing ? "⏸" : "▶")</button>
+                <button class="cx-btn" @onclick="Next" title="Next step">▶</button>
+                <button class="cx-btn" @onclick="Replay" title="Replay from the start">↺</button>
+            </span>
+        </div>
+
+        <svg viewBox="0 0 @_scene.ViewWidth @_scene.ViewHeight" class="cx-svg" role="img" aria-label="@_scene.Title">
+            <defs>
+                <marker id="cx-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M 0 1 L 9 5 L 0 9 z" class="cx-arrow-head" />
+                </marker>
+                <marker id="cx-arrow-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M 0 1 L 9 5 L 0 9 z" class="cx-arrow-head-flow" />
+                </marker>
+            </defs>
+
+            @foreach (var edge in _scene.Edges)
+            {
+                if (state.HiddenEdges.Contains(edge.Id)) { continue; }
+                var flow = state.Flow.Contains(edge.Id);
+                <line x1="@edge.X1" y1="@edge.Y1" x2="@edge.X2" y2="@edge.Y2"
+                      class="cx-edge @(edge.Dashed ? "cx-edge-dash" : "") @(flow ? "flow" : "")"
+                      marker-end="url(#@(flow ? "cx-arrow-flow" : "cx-arrow"))" />
+            }
+
+            @foreach (var node in _scene.Nodes)
+            {
+                if (state.HiddenNodes.Contains(node.Id)) { continue; }
+                var rx = node.Shape switch { SceneNodeShape.Round => 16, SceneNodeShape.Pill => 28, SceneNodeShape.Lane => 10, _ => 8 };
+                var cls = $"cx-node cx-shape-{node.Shape.ToString().ToLowerInvariant()} {(state.Active.Contains(node.Id) ? "active" : "")} {(state.Dimmed.Contains(node.Id) ? "dimmed" : "")}";
+                <g class="@cls">
+                    <rect x="@node.X" y="@node.Y" width="@node.W" height="@node.H" rx="@rx" class="cx-node-box" />
+                    @if (node.Shape == SceneNodeShape.Lane)
+                    {
+                        @((MarkupString)$"<text x='{N(node.X + 10)}' y='{N(node.Y + 18)}' class='cx-lane-label'>{Encode(node.Title)}</text>")
+                    }
+                    else
+                    {
+                        var sub = state.Subs.TryGetValue(node.Id, out var s) ? s : node.Sub;
+                        var titleY = sub is null ? node.Y + node.H / 2 + 4 : node.Y + 17;
+                        @((MarkupString)$"<text x='{N(node.X + node.W / 2)}' y='{N(titleY)}' class='cx-node-title' text-anchor='middle'>{Encode(node.Title)}</text>")
+                        if (sub is not null)
+                        {
+                            @((MarkupString)$"<text x='{N(node.X + node.W / 2)}' y='{N(node.Y + 32)}' class='cx-node-sub' text-anchor='middle'>{Encode(sub)}</text>")
+                        }
+                    }
+                </g>
+            }
+
+            @foreach (var token in _scene.Tokens)
+            {
+                var pos = state.TokenPos[token.Id];
+                var w = Math.Max(30, token.Text.Length * 7 + 14);
+                var hidden = state.HiddenTokens.Contains(token.Id);
+                <g class="cx-token @(hidden ? "hidden" : "")" style="transform: translate(@(pos.X)px, @(pos.Y)px)">
+                    <rect x="@(-w / 2)" y="-9" width="@w" height="18" rx="9" class="cx-token-pill" />
+                    @((MarkupString)$"<text x='0' y='4' class='cx-token-text' text-anchor='middle'>{Encode(token.Text)}</text>")
+                </g>
+            }
+
+            @* Edge labels last: always on top of nodes and lines *@
+            @foreach (var edge in _scene.Edges)
+            {
+                if (edge.Label is null || state.HiddenEdges.Contains(edge.Id)) { continue; }
+                var onTop = state.Flow.Contains(edge.Id);
+                @((MarkupString)$"<text x='{N((edge.X1 + edge.X2) / 2)}' y='{N((edge.Y1 + edge.Y2) / 2 - 6)}' class='cx-edge-label {(onTop ? "flow" : "")}' text-anchor='middle'>{Encode(edge.Label)}</text>")
+            }
+        </svg>
+
+        <div class="cx-narration" aria-live="polite">
+            <span class="cx-step-count">@(_step + 1)/@_scene.Steps.Length</span>
+            <span class="cx-step-title">@CurrentStep.Title</span>
+            <span class="cx-step-text">@CurrentStep.Narration</span>
+        </div>
+        <div class="cx-dots">
+            @for (var i = 0; i < _scene.Steps.Length; i++)
+            {
+                var idx = i;
+                <button class="cx-dot @(idx == _step ? "active" : "")" @onclick="() => GoTo(idx)" title="Step @(idx + 1)"></button>
+            }
+        </div>
+    </div>
+}
+@code {
+    /// <summary>Id of a built-in scene from SceneLibrary. Unknown id renders nothing.</summary>
+    [Parameter] public string? SceneId { get; set; }
+
+    private ExplainerScene? _scene;
+    private int _step;
+    private bool _playing = true;
+    private Timer? _timer;
+    private bool _disposed;
+
+    private SceneStep CurrentStep => _scene!.Steps[_step];
+
+    protected override void OnParametersSet() => _scene = SceneLibrary.Get(SceneId);
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _timer = new Timer(_ =>
+            {
+                if (_disposed || !_playing) return;
+                _ = InvokeAsync(() => { Step(1); StateHasChanged(); });
+            }, null, TimeSpan.FromSeconds(3.2), TimeSpan.FromSeconds(3.2));
+        }
+    }
+
+    private void Step(int delta)
+    {
+        if (_scene is null) return;
+        var n = _scene.Steps.Length;
+        _step = ((_step + delta) % n + n) % n;
+    }
+
+    private void Next() { _playing = false; Step(1); }
+    private void Prev() { _playing = false; Step(-1); }
+    private void GoTo(int i) { _playing = false; _step = i; }
+    private void TogglePlay() => _playing = !_playing;
+    private void Replay() { _step = 0; _playing = true; }
+
+    private sealed record VisualState(
+        Dictionary<string, (double X, double Y)> TokenPos,
+        HashSet<string> HiddenTokens, HashSet<string> HiddenNodes, HashSet<string> HiddenEdges,
+        Dictionary<string, string> Subs,
+        HashSet<string> Active, HashSet<string> Dimmed, HashSet<string> Flow);
+
+    private VisualState ComputeState()
+    {
+        var nodesById = _scene!.Nodes.ToDictionary(n => n.Id);
+        (double X, double Y) Resolve(string nodeId, double dx, double dy)
+        {
+            var n = nodesById[nodeId];
+            return (n.X + n.W / 2 + dx, n.Y + n.H / 2 + dy);
+        }
+
+        var tokenPos = _scene.Tokens.ToDictionary(t => t.Id, t => Resolve(t.AtNode, t.Dx, t.Dy));
+        var hiddenTokens = _scene.Tokens.Where(t => t.Hidden).Select(t => t.Id).ToHashSet();
+        var hiddenNodes = new HashSet<string>();
+        var hiddenEdges = new HashSet<string>();
+        if (_scene.Id == "async-state-machine") { hiddenNodes.Add("parked"); hiddenEdges.Add("e-park"); }
+        var subs = new Dictionary<string, string>();
+
+        for (var i = 0; i <= _step; i++)
+        {
+            var s = _scene.Steps[i];
+            foreach (var (id, move) in s.Moves) tokenPos[id] = Resolve(move.NodeId, move.Dx, move.Dy);
+            foreach (var (id, sub) in s.Subs) subs[id] = sub;
+            foreach (var id in s.Hide) { hiddenTokens.Add(id); hiddenNodes.Add(id); hiddenEdges.Add(id); }
+            foreach (var id in s.Show) { hiddenTokens.Remove(id); hiddenNodes.Remove(id); hiddenEdges.Remove(id); }
+        }
+
+        var cur = CurrentStep;
+        return new(tokenPos, hiddenTokens, hiddenNodes, hiddenEdges, subs,
+            cur.Active.ToHashSet(), cur.Dimmed.ToHashSet(), cur.Flow.ToHashSet());
+    }
+
+    private static string Encode(string text) => System.Net.WebUtility.HtmlEncode(text);
+
+    /// <summary>Numbers inside MarkupString are interpolated with the CURRENT culture —
+    /// a comma decimal separator ("217,5") is a coordinate LIST in SVG and splits the
+    /// text. Always format invariant ("217.5").</summary>
+    private static string N(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _timer?.Dispose();
+    }
+}

@@ -1,0 +1,229 @@
+@implements IDisposable
+@inject IAssistantService Assistant
+@inject MarkdownRenderer Markdown
+@inject IJSRuntime JS
+
+<div class="panel workspace-panel assistant-panel">
+    <div class="assistant-header">
+        <h2>Ask the coach</h2>
+        <span class="assistant-model-badge" title="The AI model answering you">@Assistant.ModelName</span>
+    </div>
+    <p class="panel-intro">
+        Stuck or curious? Ask anything about this lesson — the coach can see the lesson text,
+        your code and your latest check results.
+    </p>
+
+    @if (!Assistant.IsConfigured)
+    {
+        <div class="assistant-setup">
+            <h3>One setup step before the coach can answer</h3>
+            <p>The coach runs on OpenRouter. Add your API key, then restart the app:</p>
+            <ol>
+                <li>Create a key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>.</li>
+                <li>Either set an environment variable named <code>OPENROUTER_API_KEY</code>, or put the key in
+                    <code>appsettings.json</code> under <code>"Assistant": { "ApiKey": "sk-or-…" }</code>.</li>
+                <li>Restart the app and this panel wakes up.</li>
+            </ol>
+        </div>
+    }
+    else
+    {
+        <div class="assistant-chips">
+            <button class="chip-btn" @onclick='() => AskAsync("Explain this lesson to me in plain, simple words.")' disabled="@_busy">Explain this lesson simply</button>
+            <button class="chip-btn" @onclick='() => AskAsync("Why did my last check fail, and how do I fix it?")' disabled="@_busy">Why did my check fail?</button>
+            <button class="chip-btn" @onclick='() => AskAsync("Draw me a diagram of the key idea in this lesson and explain it.")' disabled="@_busy">Draw the key idea</button>
+        </div>
+
+        @if (_exchanges.Count > 0)
+        {
+            <div class="assistant-transcript" @ref="_transcript">
+                @foreach (var exchange in _exchanges)
+                {
+                    <div class="chat-msg chat-question">@exchange.Question</div>
+                    if (exchange.Pending)
+                    {
+                        <div class="chat-msg chat-answer chat-pending">
+                            <span class="spinner spinner-inline"></span> <span>The coach is thinking…</span>
+                        </div>
+                    }
+                    else if (exchange.Error is not null)
+                    {
+                        <div class="chat-msg chat-answer chat-error">
+                            <strong>The coach could not answer:</strong> @exchange.Error
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="chat-msg chat-answer">@Markdown.ToMarkup(exchange.AnswerMarkdown)</div>
+                    }
+                }
+            </div>
+        }
+
+        <div class="assistant-input-row">
+            <textarea class="assistant-input" rows="2" @bind="_draft" @bind:event="oninput"
+                      placeholder="Ask about this lesson… (Ctrl+Enter to send)"
+                      disabled="@_busy" @onkeydown="OnKeyDownAsync"></textarea>
+            <button class="btn btn-primary" @onclick="() => AskAsync(_draft)"
+                    disabled="@(_busy || string.IsNullOrWhiteSpace(_draft))">Ask</button>
+        </div>
+        <div class="assistant-footer-row">
+            <span class="assistant-note">Answers are AI-generated — double-check important details.</span>
+            @if (_exchanges.Count > 0)
+            {
+                <button class="btn btn-link btn-small" @onclick="ClearChat" disabled="@_busy">Clear chat</button>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The lesson the learner is on — the coach answers through this lens.</summary>
+    [Parameter, EditorRequired] public LessonDefinition Lesson { get; set; } = default!;
+
+    /// <summary>Course section title, included in the coach's context.</summary>
+    [Parameter] public string CategoryTitle { get; set; } = "Lessons";
+
+    /// <summary>The learner's current editor code, sent so the coach can comment on it.</summary>
+    [Parameter] public string? UserCode { get; set; }
+
+    /// <summary>The latest "Check my code" outcome, summarized into the coach's context.</summary>
+    [Parameter] public ValidationResult? LastResult { get; set; }
+
+    /// <summary>How many times the learner has submitted — the coach escalates hints with struggle.</summary>
+    [Parameter] public int AttemptCount { get; set; }
+
+    /// <summary>One question and its answer (or the error that replaced it).</summary>
+    private sealed class Exchange
+    {
+        public required string Question { get; init; }
+        public string? AnswerMarkdown { get; set; }
+        public string? Error { get; set; }
+        public bool Pending { get; set; } = true;
+    }
+
+    private readonly List<Exchange> _exchanges = [];
+    private string _draft = "";
+    private bool _busy;
+    private bool _scrollPending;
+    private string? _loadedLessonId;
+    private ElementReference _transcript;
+    private readonly CancellationTokenSource _cts = new();
+
+    protected override void OnParametersSet()
+    {
+        // A different lesson means a different conversation.
+        if (Lesson.Id != _loadedLessonId)
+        {
+            _loadedLessonId = Lesson.Id;
+            _exchanges.Clear();
+            _draft = "";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_scrollPending)
+        {
+            _scrollPending = false;
+            await JS.InvokeVoidAsync("ThreadCraftChat.scrollToEnd", _transcript);
+        }
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args is { CtrlKey: true, Key: "Enter" } && !_busy && !string.IsNullOrWhiteSpace(_draft))
+        {
+            await AskAsync(_draft);
+        }
+    }
+
+    private async Task AskAsync(string question)
+    {
+        question = question.Trim();
+        if (_busy || question.Length == 0)
+        {
+            return;
+        }
+
+        _busy = true;
+        _draft = "";
+        var exchange = new Exchange { Question = question };
+        _exchanges.Add(exchange);
+        _scrollPending = true;
+
+        var request = new AssistantRequest
+        {
+            LessonId = Lesson.Id,
+            LessonTitle = Lesson.Title,
+            CategoryTitle = CategoryTitle,
+            TheoryMarkdown = Lesson.TheoryMarkdown,
+            ExercisePromptMarkdown = Lesson.Exercise?.PromptMarkdown,
+            UserCode = UserCode,
+            LastCheckSummary = SummarizeLastCheck(),
+            AttemptCount = AttemptCount,
+            History = _exchanges
+                .Where(e => !ReferenceEquals(e, exchange) && e is { Pending: false, Error: null, AnswerMarkdown: not null })
+                .SelectMany(e => new[]
+                {
+                    new ChatTurn("user", e.Question),
+                    new ChatTurn("assistant", e.AnswerMarkdown!),
+                })
+                .ToList(),
+            Question = question,
+        };
+
+        try
+        {
+            var answer = await Assistant.AskAsync(request, _cts.Token);
+            exchange.AnswerMarkdown = SvgFence.Unwrap(answer);
+        }
+        catch (AssistantException friendly)
+        {
+            exchange.Error = friendly.Message;
+        }
+        catch (OperationCanceledException)
+        {
+            exchange.Error = "That question was cancelled. Ask again whenever you are ready.";
+        }
+        catch (Exception)
+        {
+            exchange.Error = "Something unexpected went wrong while asking the coach. Please try again.";
+        }
+        finally
+        {
+            exchange.Pending = false;
+            _busy = false;
+            _scrollPending = true;
+        }
+    }
+
+    /// <summary>Turns the latest validation result into one plain-English sentence for the coach.</summary>
+    private string SummarizeLastCheck()
+    {
+        if (LastResult is null)
+        {
+            return "They have not pressed \"Check my code\" yet.";
+        }
+
+        return LastResult.Status switch
+        {
+            ValidationStatus.Passed => "Their code passed every check.",
+            ValidationStatus.CompileError => "It did not compile. The compiler said: " +
+                string.Join(" | ", LastResult.CompileIssues.Take(3).Select(i => $"line {i.Line}: {i.FriendlyMessage}")),
+            ValidationStatus.TestsFailed => "It compiled but these checks failed: " +
+                string.Join(" | ", LastResult.Checks.Where(c => !c.Passed).Take(3).Select(c => $"{c.Name} — {c.FriendlyMessage}")),
+            ValidationStatus.RuntimeError => $"It crashed or timed out while running: {LastResult.RuntimeErrorMessage}",
+            _ => $"Check status: {LastResult.Status}.",
+        };
+    }
+
+    private void ClearChat() => _exchanges.Clear();
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+}
+

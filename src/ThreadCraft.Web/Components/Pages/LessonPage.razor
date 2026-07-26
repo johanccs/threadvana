@@ -1,0 +1,588 @@
+@page "/lesson/{LessonId}"
+@implements IDisposable
+@inject ICurriculumService Curriculum
+@inject ICodeRunner CodeRunner
+@inject IExerciseValidator Validator
+@inject IProgressStore Progress
+@inject ProgressSummaryService Summary
+@inject MarkdownRenderer Markdown
+@inject IJSRuntime JS
+
+@if (_lesson is null)
+{
+    <PageTitle>Unknown lesson — ThreadCraft Academy</PageTitle>
+    <div class="panel not-found">
+        <h1>That lesson does not exist</h1>
+        <p>Maybe the link is old. The Dashboard always has the full, up-to-date course map.</p>
+        <a class="btn btn-primary" href="/">Back to the Dashboard</a>
+    </div>
+}
+else
+{
+    <PageTitle>@_lesson.Title — ThreadCraft Academy</PageTitle>
+
+    <div class="lesson-grid">
+        @* LEFT: the theory, scrollable on its own — collapsible to give the
+           workspace full width when you are focused on coding. *@
+        <section class="theory-column panel @(_theoryCollapsed ? "theory-collapsed" : "")">
+            <div class="theory-top-row">
+                <nav class="breadcrumb" aria-label="You are here">
+                    <a href="/">Dashboard</a>
+                    <span class="breadcrumb-separator">›</span>
+                    <a href="@($"/category/{_lesson.CategoryId}")">@CategoryTitle</a>
+                </nav>
+                <button class="btn-collapse-theory"
+                        @onclick="() => _theoryCollapsed = !_theoryCollapsed"
+                        title="@(_theoryCollapsed ? "Show the lesson text" : "Hide the lesson text to make room for the editor")"
+                        aria-label="@(_theoryCollapsed ? "Show theory" : "Hide theory")">
+                    <span class="collapse-arrow @(_theoryCollapsed ? "" : "open")">◀</span>
+                </button>
+            </div>
+
+            <header class="lesson-header">
+                <div class="lesson-header-badges">
+                    <DifficultyBadge Difficulty="_lesson.Difficulty" />
+                    @if (Summary.IsPassed(_lesson.Id))
+                    {
+                        <span class="chip chip-passed">✓ Passed</span>
+                    }
+                </div>
+                <h1>@_lesson.Title</h1>
+            </header>
+
+            <div class="theory-body">
+                @Markdown.ToMarkup(_lesson.TheoryMarkdown)
+            </div>
+
+            <footer class="lesson-nav">
+                @if (_previous is not null)
+                {
+                    <a class="btn btn-secondary lesson-nav-prev" href="@($"/lesson/{_previous.Id}")">← @_previous.Title</a>
+                }
+                else
+                {
+                    <span></span>
+                }
+                @if (_next is not null)
+                {
+                    <a class="btn btn-secondary lesson-nav-next" href="@($"/lesson/{_next.Id}")">@_next.Title →</a>
+                }
+            </footer>
+        </section>
+
+        @* DRAG HANDLE: grab to resize the split *@
+        <div id="lesson-grid-handle" class="lesson-grid-handle"
+             title="Drag to resize the theory and workspace panes">
+            <span class="handle-grip"></span>
+        </div>
+
+        @* RIGHT: the workspace *@
+        <section class="workspace-column">
+
+            @if (ExplainerId is not null || _lesson.VisualizationId is not null || _lesson.DemoCode is not null)
+            {
+                <div class="panel workspace-panel">
+                    <h2>See it move</h2>
+
+                    @if (ExplainerId is not null)
+                    {
+                        <p class="panel-intro">
+                            First — what is happening <strong>under the hood</strong>? Watch the
+                            animated walkthrough (it plays on its own; use the dots to step).
+                        </p>
+                        <ConceptExplainer SceneId="@ExplainerId" />
+                    }
+
+                    @if (_lesson.VisualizationId is not null || _lesson.DemoCode is not null)
+                    {
+                        <p class="panel-intro">
+                            Now press <strong>Run demo</strong> — the picture below shows YOUR run,
+                            thread by thread, moment by moment.
+                        </p>
+
+                        <VizHost VisualizationId="@_lesson.VisualizationId" Events="@_traceEvents" />
+                    }
+
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" @onclick="RunDemoAsync"
+                                disabled="@(_demoRunning || _lesson.DemoCode is null)">
+                            @if (_demoRunning)
+                            {
+                                <span class="spinner spinner-inline"></span>
+                                <span>Running…</span>
+                            }
+                            else
+                            {
+                                <span>Run demo</span>
+                            }
+                        </button>
+                        @if (_lesson.DemoCode is null)
+                        {
+                            <span class="demo-note">This lesson has no runnable demo.</span>
+                        }
+                    </div>
+
+                    @if (_demoError is not null)
+                    {
+                        <div class="result-panel result-error">
+                            <h3>The demo could not run</h3>
+                            <p>@_demoError</p>
+                            <p class="result-hint">Demos are provided by us, so nothing is wrong on your side — try again in a moment.</p>
+                        </div>
+                    }
+
+                    <div class="console-block">
+                        <p class="console-title">Console</p>
+                        <pre class="console-output">@ConsoleText</pre>
+                    </div>
+                </div>
+            }
+
+            @if (_lesson.Exercise is not null)
+            {
+                var exercise = _lesson.Exercise;
+                <div class="panel workspace-panel">
+                    <h2>Your turn</h2>
+                    <div class="exercise-prompt">@Markdown.ToMarkup(exercise.PromptMarkdown)</div>
+
+                    <CodeEditor @ref="_editor" @bind-Value="_code" Markers="_markers" Height="360px" />
+
+                    <div class="exercise-actions">
+                        <button class="btn btn-primary" @onclick="CheckCodeAsync" disabled="@_validating">
+                            @if (_validating)
+                            {
+                                <span class="spinner spinner-inline"></span>
+                                <span>Checking…</span>
+                            }
+                            else
+                            {
+                                <span>Check my code</span>
+                            }
+                        </button>
+                        @if (_attempts > 0)
+                        {
+                            <span class="attempt-count">@_attempts attempt@(_attempts == 1 ? "" : "s") so far</span>
+                        }
+                    </div>
+
+                    @if (_validationError is not null)
+                    {
+                        <div class="result-panel result-error">
+                            <h3>We could not check your code</h3>
+                            <p>@_validationError</p>
+                        </div>
+                    }
+                    else if (_result is not null)
+                    {
+                        @switch (_result.Status)
+                        {
+                            case ValidationStatus.CompileError:
+                                <div class="result-panel result-error">
+                                    <h3>The code does not compile yet</h3>
+                                    <p>Totally normal — everyone hits these. Click a problem to jump to it in the editor.</p>
+                                    <ul class="issue-list">
+                                        @foreach (var issue in _result.CompileIssues)
+                                        {
+                                            <li>
+                                                <button type="button" class="issue-button" @onclick="() => JumpToIssueAsync(issue)">
+                                                    <span class="issue-severity @(issue.Severity == "warning" ? "warning" : "error")">
+                                                        @(issue.Severity == "warning" ? "⚠" : "✗")
+                                                    </span>
+                                                    <span class="issue-text">
+                                                        <span class="issue-friendly">Line @issue.Line: @issue.FriendlyMessage</span>
+                                                        <span class="issue-raw">@issue.Code — @issue.RawMessage</span>
+                                                    </span>
+                                                </button>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                                break;
+
+                            case ValidationStatus.RuntimeError:
+                                <div class="result-panel result-error">
+                                    <h3>Your code ran into a problem</h3>
+                                    <p>@_result.RuntimeErrorMessage</p>
+                                    <p class="result-hint">
+                                        This usually means an exception was thrown, or the code never finished —
+                                        a deadlock or a thread that runs forever. Read the message above; it points
+                                        at the idea to check.
+                                    </p>
+                                </div>
+                                break;
+
+                            case ValidationStatus.TestsFailed:
+                            case ValidationStatus.Passed:
+                                @if (_result.Status == ValidationStatus.Passed)
+                                {
+                                    <div class="result-panel result-success">
+                                        <h3>🎉 You did it — every check passed!</h3>
+                                        <p>That is a real multithreading skill you now own. Keep the streak going.</p>
+                                        @if (_next is not null)
+                                        {
+                                            <a class="btn btn-primary" href="@($"/lesson/{_next.Id}")">Next lesson: @_next.Title →</a>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="result-panel result-info">
+                                        <h3>Not quite yet — and that is completely normal</h3>
+                                        <p>
+                                            Your code compiled and ran. Each check below tells you what we expected,
+                                            what happened, and the most likely thing to try next.
+                                        </p>
+                                    </div>
+                                }
+                                <ul class="check-list">
+                                    @foreach (var check in _result.Checks)
+                                    {
+                                        <li class="check-item @(check.Passed ? "passed" : "failed")">
+                                            <span class="check-icon" aria-hidden="true">@(check.Passed ? "✓" : "✗")</span>
+                                            <div class="check-body">
+                                                <strong class="check-name">@check.Name</strong>
+                                                <dl class="check-details">
+                                                    <dt>We expected</dt>
+                                                    <dd>@check.Expected</dd>
+                                                    <dt>What happened</dt>
+                                                    <dd>@check.Actual</dd>
+                                                </dl>
+                                                @if (!check.Passed && !string.IsNullOrWhiteSpace(check.FriendlyMessage))
+                                                {
+                                                    <p class="check-message">@check.FriendlyMessage</p>
+                                                }
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                                break;
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(_result.ConsoleOutput))
+                        {
+                            <details class="console-details">
+                                <summary>What your code printed</summary>
+                                <pre class="console-output">@_result.ConsoleOutput</pre>
+                            </details>
+                        }
+                    }
+                    @if (exercise.Hints.Count > 0)
+                    {
+                        <div class="hints-block">
+                            @for (var i = 0; i < _hintsShown && i < exercise.Hints.Count; i++)
+                            {
+                                var hintIndex = i;
+                                <div class="hint">
+                                    <span class="hint-label">Hint @(hintIndex + 1)</span>
+                                    @Markdown.ToMarkup(exercise.Hints[hintIndex])
+                                </div>
+                            }
+                            @if (_hintsShown < exercise.Hints.Count)
+                            {
+                                <button class="btn btn-secondary btn-small" @onclick="ShowNextHint">
+                                    Show a hint (@(_hintsShown + 1)/@exercise.Hints.Count)
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    <div class="solution-block">
+                        @if (_solutionVisible)
+                        {
+                            <p class="solution-note">One way to solve it — your code can look different and still be right.</p>
+                            <CodeEditor Value="@exercise.ReferenceSolution" ReadOnly="true" Height="300px" />
+                        }
+                        else if (_solutionConfirmArmed)
+                        {
+                            <div class="solution-confirm">
+                                <p>Trying it yourself first is where the learning happens. Really show the answer?</p>
+                                <div class="solution-confirm-actions">
+                                    <button class="btn btn-secondary btn-small" @onclick="RevealSolution">Yes, show me</button>
+                                    <button class="btn btn-link btn-small" @onclick="() => _solutionConfirmArmed = false">I'll keep trying</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <button class="btn btn-link" @onclick="() => _solutionConfirmArmed = true">Show solution</button>
+                        }
+                    </div>
+                </div>
+            }
+            @if (_lesson.InterviewQuestions.Count > 0)
+            {
+                <div class="panel workspace-panel">
+                    <h2>Interview corner</h2>
+                    <p class="panel-intro">
+                        Questions interviewers love to ask about this topic. Say your answer out loud first — then peek.
+                    </p>
+                    <div class="interview-list">
+                        @for (var i = 0; i < _lesson.InterviewQuestions.Count; i++)
+                        {
+                            var index = i;
+                            var question = _lesson.InterviewQuestions[index];
+                            var revealed = _revealedAnswers.Contains(index);
+                            <div class="interview-item">
+                                <p class="interview-question">"@question.Question"</p>
+                                @if (revealed)
+                                {
+                                    <div class="interview-answer">@Markdown.ToMarkup(question.ModelAnswer)</div>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary btn-small" @onclick="() => _revealedAnswers.Add(index)">
+                                        Reveal a model answer
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* AI coach: answers questions with this lesson, the learner's code and
+               the latest check result as its context. *@
+            <AssistantPanel Lesson="_lesson"
+                            CategoryTitle="@CategoryTitle"
+                            UserCode="@_code"
+                            LastResult="_result"
+                            AttemptCount="_attempts" />
+        </section>
+    </div>
+}
+
+@code {
+    /// <summary>The lesson id from the route.</summary>
+    [Parameter] public string LessonId { get; set; } = "";
+
+    private LessonDefinition? _lesson;
+    private LessonDefinition? _previous;
+    private LessonDefinition? _next;
+    private string? _loadedLessonId;
+
+    private IJSRuntime _js = default!;
+
+    protected override void OnInitialized() => _js = JS;
+
+    // --- "See it move" demo state ---
+    private bool _demoRunning;
+    private bool _theoryCollapsed;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _js.InvokeVoidAsync("ThreadCraft.initResizeHandle", "lesson-grid-handle", ".lesson-grid");
+        }
+        // Re-init inline animations after every render (Blazor re-creates the DOM).
+        await _js.InvokeVoidAsync("ThreadCraftAnim.initAll");
+    }
+    private string? _demoError;
+    private readonly List<string> _consoleLines = [];
+    private IReadOnlyList<TraceEvent> _traceEvents = [];
+    private CancellationTokenSource? _demoCts;
+
+    // --- "Your turn" exercise state ---
+    private string _code = "";
+    private CodeEditor? _editor;
+    private bool _validating;
+    private ValidationResult? _result;
+    private string? _validationError;
+    private IReadOnlyList<CompileIssue> _markers = [];
+    private int _attempts;
+    private int _hintsShown;
+    private bool _solutionConfirmArmed;
+    private bool _solutionVisible;
+    private readonly HashSet<int> _revealedAnswers = [];
+
+    // Canceled when the learner navigates away, so a running demo or check stops.
+    private readonly CancellationTokenSource _lifetimeCts = new();
+
+    private string CategoryTitle => Curriculum.GetCategories()
+        .FirstOrDefault(category => category.Id == _lesson?.CategoryId)?.Title ?? "Lessons";
+
+    /// <summary>The animated explainer for this lesson: explicit front-matter choice,
+    /// otherwise a default matched to the visualization (null = no explainer).</summary>
+    private string? ExplainerId => _lesson is null
+        ? null
+        : _lesson.ExplainerId ?? SceneLibrary.DefaultForVisualization(_lesson.VisualizationId);
+
+    private string ConsoleText => _consoleLines.Count == 0
+        ? "Console output will appear here when you run the demo."
+        : string.Join("\n", _consoleLines);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Summary.RefreshAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _lesson = Curriculum.GetLesson(LessonId);
+        if (_lesson is null || _lesson.Id == _loadedLessonId)
+        {
+            return;
+        }
+
+        // Navigated to a different lesson: reset the whole workspace.
+        _loadedLessonId = _lesson.Id;
+        _previous = Curriculum.GetPreviousLesson(_lesson.Id);
+        _next = Curriculum.GetNextLesson(_lesson.Id);
+
+        CancelDemoRun();
+        _demoError = null;
+        _consoleLines.Clear();
+        _traceEvents = [];
+
+        _code = _lesson.Exercise?.StarterCode ?? "";
+        _result = null;
+        _validationError = null;
+        _markers = [];
+        _hintsShown = 0;
+        _solutionConfirmArmed = false;
+        _solutionVisible = false;
+        _revealedAnswers.Clear();
+        _attempts = Summary.RecordsByLesson.TryGetValue(_lesson.Id, out var record) ? record.Attempts : 0;
+    }
+    private async Task RunDemoAsync()
+    {
+        if (_demoRunning || _lesson?.DemoCode is null)
+        {
+            return;
+        }
+
+        CancelDemoRun();
+        _demoCts = CancellationTokenSource.CreateLinkedTokenSource(_lifetimeCts.Token);
+        _demoRunning = true;
+        _demoError = null;
+        _consoleLines.Clear();
+        _traceEvents = [];
+
+        try
+        {
+            var request = new CodeRunRequest(_lesson.DemoCode, HarnessSource: null);
+            await foreach (var executionEvent in CodeRunner.RunAsync(request, _demoCts.Token))
+            {
+                switch (executionEvent.Kind)
+                {
+                    case ExecutionEventKind.ConsoleLine:
+                        _consoleLines.Add(executionEvent.Text ?? "");
+                        break;
+                    case ExecutionEventKind.Trace:
+                        if (executionEvent.Trace is not null)
+                        {
+                            // A new list each time so VizHost notices the update and re-renders.
+                            _traceEvents = [.. _traceEvents, executionEvent.Trace];
+                        }
+                        break;
+                    case ExecutionEventKind.Faulted:
+                        _demoError = string.IsNullOrWhiteSpace(executionEvent.Text)
+                            ? "The demo could not run. Try again in a moment."
+                            : executionEvent.Text;
+                        break;
+                    case ExecutionEventKind.Completed:
+                        break;
+                }
+                StateHasChanged();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Navigated away or pressed Run again — nothing to report.
+        }
+        catch (Exception)
+        {
+            _demoError = "Something went wrong while running the demo. Your work is safe — try again.";
+        }
+        finally
+        {
+            _demoRunning = false;
+        }
+    }
+
+    private async Task CheckCodeAsync()
+    {
+        if (_validating || _lesson?.Exercise is null)
+        {
+            return;
+        }
+
+        _validating = true;
+        _result = null;
+        _validationError = null;
+        _markers = [];
+
+        try
+        {
+            _result = await Validator.ValidateAsync(_code, _lesson.Exercise, _lifetimeCts.Token);
+            _markers = _result.Status == ValidationStatus.CompileError ? _result.CompileIssues : [];
+
+            ProgressRecord record;
+            if (_result.Status == ValidationStatus.Passed)
+            {
+                record = await Progress.MarkPassedAsync(_lesson.Id, _lifetimeCts.Token);
+            }
+            else
+            {
+                record = await Progress.MarkAttemptAsync(_lesson.Id, _lifetimeCts.Token);
+            }
+            _attempts = record.Attempts;
+
+            // Let the layout (sidebar checkmarks, top bar %) know progress changed.
+            await Summary.RefreshAsync(_lifetimeCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            // Navigated away mid-check — nothing to report.
+        }
+        catch (Exception)
+        {
+            _validationError = "The check itself failed before your code could be looked at. " +
+                "Your code is still in the editor — try again.";
+        }
+        finally
+        {
+            _validating = false;
+        }
+    }
+
+    private async Task JumpToIssueAsync(CompileIssue issue)
+    {
+        if (_editor is not null)
+        {
+            await _editor.SetPositionAsync(issue.Line, issue.Column);
+        }
+    }
+
+    private void ShowNextHint()
+    {
+        if (_lesson?.Exercise is { } exercise && _hintsShown < exercise.Hints.Count)
+        {
+            _hintsShown++;
+        }
+    }
+
+    private void RevealSolution()
+    {
+        _solutionVisible = true;
+        _solutionConfirmArmed = false;
+    }
+
+    private void CancelDemoRun()
+    {
+        if (_demoCts is not null)
+        {
+            _demoCts.Cancel();
+            _demoCts.Dispose();
+            _demoCts = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        CancelDemoRun();
+        _lifetimeCts.Cancel();
+        _lifetimeCts.Dispose();
+    }
+}
+

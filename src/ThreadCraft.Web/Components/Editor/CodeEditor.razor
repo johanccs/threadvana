@@ -1,0 +1,147 @@
+@namespace ThreadCraft.Web.Components.Editor
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div class="code-editor-frame" style="height: @Height;">
+    <div id="@_elementId" class="code-editor-host @(_isReady ? "" : "is-hidden")"></div>
+
+    @if (!_isReady && !_loadFailed)
+    {
+        <div class="code-editor-loading">
+            <div class="spinner" role="status" aria-label="Loading the editor"></div>
+            <p>Loading the editor…</p>
+        </div>
+    }
+
+    @if (_loadFailed)
+    {
+        <div class="code-editor-fallback">
+            <p class="code-editor-fallback-note">
+                The editor could not load (it comes from an online service). You can still read the code
+                below — try reloading the page to get the full editor back.
+            </p>
+            <pre class="code-editor-fallback-pre">@Value</pre>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly string _elementId = "editor-" + Guid.NewGuid().ToString("N");
+    private DotNetObjectReference<CodeEditor>? _dotNetRef;
+    private bool _isReady;
+    private bool _loadFailed;
+    private string _lastEditorValue = "";
+    private IReadOnlyList<CompileIssue> _lastMarkers = [];
+
+    /// <summary>The current code. Use with ValueChanged for two-way binding.</summary>
+    [Parameter] public string Value { get; set; } = "";
+
+    /// <summary>Raised (debounced ~300ms) whenever the learner edits the code.</summary>
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    /// <summary>Compile issues shown as squiggles in the editor.</summary>
+    [Parameter] public IReadOnlyList<CompileIssue> Markers { get; set; } = [];
+
+    /// <summary>CSS height of the editor frame.</summary>
+    [Parameter] public string Height { get; set; } = "320px";
+
+    /// <summary>True to make the editor read-only (e.g. showing the solution).</summary>
+    [Parameter] public bool ReadOnly { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JS.InvokeVoidAsync(
+                    "threadCraftEditor.createAsync", _dotNetRef, _elementId, Value, ReadOnly);
+                _isReady = true;
+                _lastEditorValue = Value;
+            }
+            catch (JSException)
+            {
+                // CDN unreachable or blocked: show the readable fallback instead of failing.
+                _loadFailed = true;
+            }
+            StateHasChanged();
+            return;
+        }
+
+        if (!_isReady)
+        {
+            return;
+        }
+
+        // Parent replaced the code (e.g. reset to the starter): push it into Monaco.
+        if (!string.Equals(Value, _lastEditorValue, StringComparison.Ordinal))
+        {
+            _lastEditorValue = Value;
+            await JS.InvokeVoidAsync("threadCraftEditor.setValue", _elementId, Value);
+        }
+
+        if (!ReferenceEquals(Markers, _lastMarkers))
+        {
+            _lastMarkers = Markers;
+            await PushMarkersAsync();
+        }
+    }
+
+    /// <summary>Monaco calls this (debounced) when the learner types.</summary>
+    [JSInvokable]
+    public async Task OnEditorValueChanged(string value)
+    {
+        _lastEditorValue = value;
+        Value = value;
+        await ValueChanged.InvokeAsync(value);
+    }
+
+    /// <summary>Moves the cursor to a line/column (used when a compile issue is clicked).</summary>
+    public async Task SetPositionAsync(int line, int column)
+    {
+        if (_isReady)
+        {
+            await JS.InvokeVoidAsync("threadCraftEditor.setPosition", _elementId, line, column);
+        }
+    }
+
+    /// <summary>Replaces the squiggles with the current <see cref="Markers"/>.</summary>
+    public async Task SetMarkersAsync(IReadOnlyList<CompileIssue> markers)
+    {
+        _lastMarkers = markers;
+        if (_isReady)
+        {
+            await PushMarkersAsync();
+        }
+    }
+
+    private Task PushMarkersAsync()
+    {
+        var payload = _lastMarkers.Select(issue => new
+        {
+            line = issue.Line,
+            column = issue.Column,
+            message = $"{issue.FriendlyMessage} ({issue.Code})",
+            severity = issue.Severity
+        }).ToArray();
+
+        return JS.InvokeVoidAsync("threadCraftEditor.setMarkers", _elementId, payload).AsTask();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_isReady)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("threadCraftEditor.dispose", _elementId);
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit already gone — nothing to clean up in the browser.
+            }
+        }
+        _dotNetRef?.Dispose();
+    }
+}

@@ -1,0 +1,70 @@
+@namespace ThreadCraft.Web.Components.Layout
+@implements IDisposable
+@inject ICurriculumService Curriculum
+@inject ProgressSummaryService Summary
+
+<aside class="sidebar">
+    <p class="sidebar-heading">Course map</p>
+    @foreach (var category in Curriculum.GetCategories())
+    {
+        var isCollapsed = _collapsedCategoryIds.Contains(category.Id);
+        var lessons = Curriculum.GetLessons(category.Id);
+
+        <section class="sidebar-category">
+            <button type="button" class="sidebar-category-header" aria-expanded="@(!isCollapsed)"
+                    @onclick="() => ToggleCategory(category.Id)">
+                <span class="sidebar-chevron @(isCollapsed ? "" : "open")">▸</span>
+                <span class="sidebar-category-title">@category.Title</span>
+            </button>
+
+            @if (!isCollapsed)
+            {
+                @if (lessons.Count == 0)
+                {
+                    <p class="sidebar-empty">Lessons are on their way.</p>
+                }
+                else
+                {
+                    <ul class="sidebar-lessons">
+                        @foreach (var lesson in lessons)
+                        {
+                            var passed = Summary.IsPassed(lesson.Id);
+                            <li>
+                                <NavLink class="sidebar-lesson-link" href="@($"/lesson/{lesson.Id}")">
+                                    <span class="sidebar-check @(passed ? "passed" : "")" aria-hidden="true">
+                                        @(passed ? "✓" : "")
+                                    </span>
+                                    <span class="sidebar-lesson-title">@lesson.Title</span>
+                                </NavLink>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        </section>
+    }
+</aside>
+
+@code {
+    private readonly HashSet<string> _collapsedCategoryIds = [];
+
+    protected override void OnInitialized()
+    {
+        Summary.Changed += OnSummaryChanged;
+    }
+
+    private Task OnSummaryChanged() => InvokeAsync(StateHasChanged);
+
+    private void ToggleCategory(string categoryId)
+    {
+        if (!_collapsedCategoryIds.Remove(categoryId))
+        {
+            _collapsedCategoryIds.Add(categoryId);
+        }
+    }
+
+    public void Dispose()
+    {
+        Summary.Changed -= OnSummaryChanged;
+    }
+}

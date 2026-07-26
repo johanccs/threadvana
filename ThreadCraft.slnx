@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ThreadCraft.Content/ThreadCraft.Content.csproj" />
+    <Project Path="src/ThreadCraft.Core/ThreadCraft.Core.csproj" />
+    <Project Path="src/ThreadCraft.Execution/ThreadCraft.Execution.csproj" />
+    <Project Path="src/ThreadCraft.Sandbox/ThreadCraft.Sandbox.csproj" />
+    <Project Path="src/ThreadCraft.Web/ThreadCraft.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ThreadCraft.Content.Tests/ThreadCraft.Content.Tests.csproj" />
+    <Project Path="tests/ThreadCraft.Execution.Tests/ThreadCraft.Execution.Tests.csproj" />
+    <Project Path="tests/ThreadCraft.Web.Tests/ThreadCraft.Web.Tests.csproj" />
+  </Folder>
+</Solution>

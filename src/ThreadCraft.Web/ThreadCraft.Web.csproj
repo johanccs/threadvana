@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <RootNamespace>ThreadCraft.Web</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.37.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.22" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ThreadCraft.Core\ThreadCraft.Core.csproj" />
+    <ProjectReference Include="..\ThreadCraft.Content\ThreadCraft.Content.csproj" />
+    <ProjectReference Include="..\ThreadCraft.Execution\ThreadCraft.Execution.csproj" />
+    <!-- Sandbox is spawned as a separate process: dotnet exec ThreadCraft.Sandbox.dll.
+         The project reference copies the dll + Roslyn deps into this app's output. -->
+    <ProjectReference Include="..\ThreadCraft.Sandbox\ThreadCraft.Sandbox.csproj" />
+  </ItemGroup>
+
+  <!-- Copy course content into publish output so the app finds it on Azure. -->
+  <ItemGroup>
+    <Content Include="..\..\content\**\*" CopyToPublishDirectory="PreserveNewest" LinkBase="content\" />
+  </ItemGroup>
+
+</Project>

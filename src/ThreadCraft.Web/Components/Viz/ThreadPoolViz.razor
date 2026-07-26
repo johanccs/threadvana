@@ -1,0 +1,106 @@
+@namespace ThreadCraft.Web.Components.Viz
+
+@* Shows the thread pool as a team of on-call workers: a queue of waiting tasks
+   on the left, busy/idle workers on the right. *@
+
+@if (Events.Count == 0)
+{
+    <div class="viz-empty">Run the demo to see the thread pool work here.</div>
+}
+else
+{
+    <p class="viz-caption">
+        The thread pool is a team of on-call workers. Tasks wait in the queue,
+        workers pick them up one by one.
+    </p>
+    <div class="pool-layout">
+        <div class="pool-queue">
+            <h4>Waiting in queue</h4>
+            <div class="pool-chips">
+                @if (_queued == 0)
+                {
+                    <span class="pool-none">nothing waiting</span>
+                }
+                else
+                {
+                    for (var i = 0; i < _queued; i++)
+                    {
+                        <span class="pool-chip">task</span>
+                    }
+                }
+            </div>
+        </div>
+        <div class="pool-workers">
+            <h4>Workers</h4>
+            <div class="pool-grid">
+                @foreach (var worker in _workers)
+                {
+                    <div class="pool-cell @(worker.Busy ? "busy" : "idle")">
+                        <span class="pool-cell-name">@worker.Name</span>
+                        <span class="pool-cell-state">@(worker.Busy ? "working…" : "idle")</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <p class="viz-counter">@_queued task(s) waiting • @_workers.Count(w => w.Busy) worker(s) busy • @_workers.Count total seen</p>
+}
+
+@code {
+    /// <summary>Trace events collected so far (grows live while a demo runs).</summary>
+    [Parameter] public IReadOnlyList<TraceEvent> Events { get; set; } = [];
+
+    private int _queued;
+    private readonly List<Worker> _workers = [];
+
+    protected override void OnParametersSet()
+    {
+        _queued = 0;
+        _workers.Clear();
+        var busySince = new Dictionary<int, bool>(); // threadId -> busy
+
+        foreach (var evt in Events)
+        {
+            switch (evt.Kind)
+            {
+                case "pool-queued":
+                    _queued++;
+                    break;
+                case "pool-dequeued":
+                    _queued = Math.Max(0, _queued - 1);
+                    SetBusy(evt, busy: true);
+                    break;
+                case "work-start":
+                    EnsureWorker(evt);
+                    SetBusy(evt, busy: true);
+                    break;
+                case "work-end":
+                case "thread-end":
+                    SetBusy(evt, busy: false);
+                    break;
+            }
+        }
+
+        void SetBusy(TraceEvent evt, bool busy)
+        {
+            var worker = EnsureWorker(evt);
+            worker.Busy = busy;
+        }
+
+        Worker EnsureWorker(TraceEvent evt)
+        {
+            var existing = _workers.FirstOrDefault(w => w.ThreadId == evt.ThreadId);
+            if (existing is not null) return existing;
+            var created = new Worker(evt.ThreadId, evt.ThreadName);
+            _workers.Add(created);
+            return created;
+        }
+    }
+
+    private sealed class Worker(int threadId, string name)
+    {
+        public int ThreadId { get; } = threadId;
+        public string Name { get; } = name;
+        public bool Busy { get; set; }
+    }
+}

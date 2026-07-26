@@ -1,0 +1,91 @@
+@page "/category/{CategoryId}"
+@inject ICurriculumService Curriculum
+@inject ProgressSummaryService Summary
+@inject MarkdownRenderer Markdown
+
+@if (_category is null)
+{
+    <PageTitle>Unknown category — ThreadCraft Academy</PageTitle>
+    <div class="panel not-found">
+        <h1>That category does not exist</h1>
+        <p>No worries — the full course map is one click away.</p>
+        <a class="btn btn-primary" href="/">Back to the Dashboard</a>
+    </div>
+}
+else
+{
+    <PageTitle>@_category.Title — ThreadCraft Academy</PageTitle>
+
+    <nav class="breadcrumb" aria-label="You are here">
+        <a href="/">Dashboard</a>
+        <span class="breadcrumb-separator">›</span>
+        <span>@_category.Title</span>
+    </nav>
+
+    <header class="category-header">
+        <h1>@_category.Title</h1>
+        <div class="category-header-description">@Markdown.ToMarkup(_category.Description)</div>
+        <p class="lesson-count">@_passedCount of @_lessons.Count lesson@(_lessons.Count == 1 ? "" : "s") passed</p>
+    </header>
+
+    @if (_lessons.Count == 0)
+    {
+        <div class="panel">
+            <p>Lessons for this category are on their way — check back soon.</p>
+        </div>
+    }
+    else
+    {
+        <ol class="lesson-list">
+            @foreach (var lesson in _lessons)
+            {
+                var passed = Summary.IsPassed(lesson.Id);
+                <li>
+                    <a class="lesson-row" href="@($"/lesson/{lesson.Id}")">
+                        <span class="lesson-row-check @(passed ? "passed" : "")" aria-hidden="true">
+                            @(passed ? "✓" : "")
+                        </span>
+                        <span class="lesson-row-title">
+                            <span class="lesson-row-order">Lesson @lesson.Order</span>
+                            @lesson.Title
+                        </span>
+                        <span class="lesson-row-meta">
+                            @if (lesson.DemoCode is not null || lesson.VisualizationId is not null)
+                            {
+                                <span class="chip chip-demo">Demo</span>
+                            }
+                            @if (lesson.Exercise is not null)
+                            {
+                                <span class="chip chip-exercise">Exercise</span>
+                            }
+                            <DifficultyBadge Difficulty="lesson.Difficulty" />
+                        </span>
+                    </a>
+                </li>
+            }
+        </ol>
+    }
+}
+
+@code {
+    /// <summary>The category id from the route.</summary>
+    [Parameter] public string CategoryId { get; set; } = "";
+
+    private CategoryDefinition? _category;
+    private IReadOnlyList<LessonDefinition> _lessons = [];
+    private int _passedCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Summary.RefreshAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _category = Curriculum.GetCategories()
+            .FirstOrDefault(category => string.Equals(category.Id, CategoryId, StringComparison.OrdinalIgnoreCase));
+
+        _lessons = _category is null ? [] : Curriculum.GetLessons(_category.Id);
+        _passedCount = Summary.PassedCount(_lessons);
+    }
+}

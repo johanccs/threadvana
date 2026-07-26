@@ -1,0 +1,97 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject ICurriculumService Curriculum
+@inject ProgressSummaryService Summary
+@inject IJSRuntime JS
+
+<div class="shell">
+    <header class="topbar">
+        <button class="btn-sidebar-toggle"
+                @onclick="ToggleSidebar"
+                title="@(_sidebarCollapsed ? "Show course map" : "Hide course map")"
+                aria-label="@(_sidebarCollapsed ? "Show sidebar" : "Hide sidebar")">
+            <span class="sidebar-toggle-icon">@(_sidebarCollapsed ? "☰" : "✕")</span>
+        </button>
+        <a class="brand" href="/">🧵 ThreadCraft Academy</a>
+        <nav class="topbar-nav">
+            <NavLink href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
+            <NavLink href="/setup">Setup</NavLink>
+        </nav>
+        <div class="topbar-progress" title="Lessons you have passed so far">
+            <span class="topbar-progress-label">@_passedLessons of @_totalLessons passed</span>
+            <span class="progress-bar progress-bar-small">
+                <span class="progress-bar-fill" style="width: @ProgressPercent%;"></span>
+            </span>
+            <span class="topbar-progress-percent">@ProgressPercent%</span>
+        </div>
+    </header>
+    <div class="shell-body">
+        @if (!_sidebarCollapsed)
+        {
+            <NavSidebar />
+        }
+        <main class="content">
+            @Body
+        </main>
+    </div>
+</div>
+
+@code {
+    private int _passedLessons;
+    private int _totalLessons;
+    private bool _sidebarCollapsed;
+    private bool _sidebarStateLoaded;
+
+    private int ProgressPercent => _totalLessons == 0 ? 0 : (int)Math.Round(100.0 * _passedLessons / _totalLessons);
+
+    protected override async Task OnInitializedAsync()
+    {
+        Summary.Changed += OnSummaryChanged;
+        RecomputeTotals();
+        await Summary.RefreshAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_sidebarStateLoaded)
+        {
+            _sidebarStateLoaded = true;
+            var saved = await JS.InvokeAsync<string?>("sessionStorage.getItem", "threadcraft-sidebar-collapsed");
+            if (saved == "true" && !_sidebarCollapsed)
+            {
+                _sidebarCollapsed = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task ToggleSidebar()
+    {
+        _sidebarCollapsed = !_sidebarCollapsed;
+        await JS.InvokeVoidAsync("sessionStorage.setItem", "threadcraft-sidebar-collapsed", _sidebarCollapsed ? "true" : "false");
+    }
+
+    private Task OnSummaryChanged()
+    {
+        RecomputeTotals();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private void RecomputeTotals()
+    {
+        _totalLessons = 0;
+        _passedLessons = 0;
+        foreach (var category in Curriculum.GetCategories())
+        {
+            var lessons = Curriculum.GetLessons(category.Id);
+            _totalLessons += lessons.Count;
+            _passedLessons += Summary.PassedCount(lessons);
+        }
+    }
+
+    public void Dispose()
+    {
+        Summary.Changed -= OnSummaryChanged;
+    }
+}
+

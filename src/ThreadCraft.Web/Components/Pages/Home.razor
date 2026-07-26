@@ -1,0 +1,118 @@
+@page "/"
+@inject ICurriculumService Curriculum
+@inject ProgressSummaryService Summary
+
+<PageTitle>ThreadCraft Academy — see what your threads really do</PageTitle>
+
+<section class="hero hero-sell">
+    <div class="hero-copy">
+        <p class="hero-eyebrow">A .NET multithreading course that shows its working</p>
+        <h1>Stop guessing what <code>await</code>, <code>lock</code> and the <code>thread pool</code> do.</h1>
+        <p class="hero-lead">
+            Every concept is an <strong>animated walkthrough of what happens under the hood</strong> —
+            threads, schedulers and queues move on screen — followed by a live demo you can run,
+            and an exercise that is graded for you. 100 lessons, beginner to interview-ready.
+        </p>
+        <div class="hero-cta">
+            <a class="btn btn-primary btn-hero" href="@FirstLessonHref">Start learning — free, no sign-up</a>
+            <a class="btn btn-secondary btn-hero" href="#how-it-works">See how it works</a>
+        </div>
+        <ul class="hero-proof">
+            <li>100 lessons</li>
+            <li>13 animated explainers</li>
+            <li>Auto-graded exercises</li>
+            <li>Interview Q&amp;A in every lesson</li>
+        </ul>
+    </div>
+    <div class="hero-demo" aria-label="Live example of an animated explainer">
+        <p class="hero-demo-caption">▶ This is a lesson — watch it play</p>
+        <ConceptExplainer SceneId="race-interleaving" />
+    </div>
+</section>
+
+<section id="how-it-works" class="how-it-works">
+    <h2>How every lesson works</h2>
+    <div class="how-grid">
+        <article class="how-step panel">
+            <span class="how-num">1</span>
+            <h3>Watch it move</h3>
+            <p>An animated flowchart shows the concept as it really works — the CPU switching threads, a semaphore counting down, a lock's single key.</p>
+        </article>
+        <article class="how-step panel">
+            <span class="how-num">2</span>
+            <h3>Run the demo</h3>
+            <p>Real C# executes in a sandbox and streams its timeline back, so you see your threads interleave — not a video, live code.</p>
+        </article>
+        <article class="how-step panel">
+            <span class="how-num">3</span>
+            <h3>Prove it in code</h3>
+            <p>You write the code in the browser. It compiles and runs against a hidden harness — pass, and the lesson is marked done.</p>
+        </article>
+    </div>
+</section>
+
+<div class="category-grid">
+    @foreach (var category in Curriculum.GetCategories())
+    {
+        var lessons = Curriculum.GetLessons(category.Id);
+        var passedCount = Summary.PassedCount(lessons);
+        var percent = lessons.Count == 0 ? 0 : (int)Math.Round(100.0 * passedCount / lessons.Count);
+        var nextLesson = lessons.FirstOrDefault(lesson => !Summary.IsPassed(lesson.Id)) ?? lessons.FirstOrDefault();
+        var accentClass = nextLesson is null ? "accent-beginner" : DifficultyAccent(nextLesson.Difficulty);
+
+        <article class="category-card @accentClass">
+            <div class="category-card-body">
+                <h2>@category.Title</h2>
+                <p class="category-description">@category.Description</p>
+            </div>
+
+            @if (lessons.Count == 0)
+            {
+                <p class="lesson-count">Lessons are on their way — check back soon.</p>
+            }
+            else
+            {
+                <div class="category-progress">
+                    <div class="progress-bar">
+                        <span class="progress-bar-fill" style="width: @percent%;"></span>
+                    </div>
+                    <p class="lesson-count">
+                        @passedCount of @lessons.Count lesson@(lessons.Count == 1 ? "" : "s") passed
+                    </p>
+                </div>
+                <div class="category-card-actions">
+                    <a class="btn btn-secondary" href="@($"/category/{category.Id}")">All lessons</a>
+                    @if (nextLesson is not null)
+                    {
+                        <a class="btn btn-primary" href="@($"/lesson/{nextLesson.Id}")">
+                            @(passedCount == 0 ? "Start here" : passedCount == lessons.Count ? "Review" : "Continue") →
+                        </a>
+                    }
+                </div>
+            }
+        </article>
+    }
+</div>
+
+@code {
+    private string FirstLessonHref { get; set; } = "#";
+
+    protected override async Task OnInitializedAsync()
+    {
+        FirstLessonHref = Curriculum.GetCategories()
+            .SelectMany(cat => Curriculum.GetLessons(cat.Id))
+            .Select(lesson => $"/lesson/{lesson.Id}")
+            .FirstOrDefault() ?? "#";
+
+        await Summary.RefreshAsync();
+    }
+
+    private static string DifficultyAccent(LessonDifficulty difficulty) => difficulty switch
+    {
+        LessonDifficulty.Beginner => "accent-beginner",
+        LessonDifficulty.Intermediate => "accent-intermediate",
+        LessonDifficulty.Advanced => "accent-advanced",
+        _ => "accent-beginner"
+    };
+}
+

@@ -1,0 +1,33 @@
+@namespace ThreadCraft.Web.Components
+@inject GlossaryService Glossary
+
+@* Wraps a technical term with a dotted underline; hovering shows its one-sentence
+   definition from content/glossary.json. Unknown terms render as plain text. *@
+
+@if (_definition is null)
+{
+    @DisplayText
+}
+else
+{
+    <span class="glossary-tip" tabindex="0">
+        @DisplayText<span class="glossary-tip-bubble" role="tooltip">@_definition</span>
+    </span>
+}
+
+@code {
+    /// <summary>The glossary term to look up (also the displayed text when <see cref="Text"/> is not set).</summary>
+    [Parameter, EditorRequired] public required string Term { get; set; }
+
+    /// <summary>Optional display text when it differs from the term (e.g. plural form).</summary>
+    [Parameter] public string? Text { get; set; }
+
+    private string DisplayText => Text ?? Term;
+
+    private string? _definition;
+
+    protected override void OnParametersSet()
+    {
+        _definition = Glossary.GetDefinition(Term);
+    }
+}

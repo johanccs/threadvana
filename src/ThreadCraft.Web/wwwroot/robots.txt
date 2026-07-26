@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /viz-smoke
+
+Sitemap: /sitemap.xml

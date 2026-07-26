@@ -1,0 +1,197 @@
+@namespace ThreadCraft.Web.Components.Viz
+
+@* Shows async method execution as a flowing timeline: thread swimlanes with
+   suspend/resume connectors showing how await releases and reacquires threads.
+   The key insight: the thread is NOT waiting — it goes back to the pool. *@
+
+@if (Events.Count == 0)
+{
+    <div class="viz-empty">
+        <p>Run the demo to watch async/await unfold here.</p>
+        <p class="viz-hint">Watch what happens to the <em>thread</em> at each <code>await</code> — it does NOT wait.</p>
+    </div>
+}
+else
+{
+    <p class="viz-caption">
+        <span class="viz-key viz-key-running"></span> thread working
+        <span class="viz-key viz-key-suspended"></span> awaiting (thread FREE)
+        <span class="viz-key viz-key-blocked"></span> blocked (.Result / .Wait())
+        
+    </p>
+
+    <svg viewBox="0 0 @ViewWidth @ViewHeight" class="viz-timeline async-flow" role="img">
+        @* Thread swimlanes *@
+        @for (var i = 0; i < _lanes.Count; i++)
+        {
+            var y = LaneY(i);
+            @((MarkupString)$"<text x='4' y='{y + LaneHeight / 2 + 4}' class='viz-lane-name'>{Encode(_lanes[i].Name)}</text>")
+            <line x1="70" y1="@(y + LaneHeight / 2)" x2="@(ViewWidth - 20)" y2="@(y + LaneHeight / 2)" class="viz-lane-line" />
+        }
+
+        @* Work/spans *@
+        @foreach (var span in _spans)
+        {
+            var y = LaneY(span.LaneIndex) + LaneHeight / 2 - BarHeight / 2;
+            var cls = span.SpanKind switch
+            {
+                SpanKind.Working => "async-bar-working",
+                SpanKind.Suspended => "async-bar-suspended",
+                SpanKind.Blocked => "async-bar-blocked",
+                _ => "async-bar-working"
+            };
+            <rect x="@X(span.StartMs)" y="@y" width="@Math.Max(WidthOf(span), 2)" height="@BarHeight" rx="3" class="@cls">
+                <title>@span.Label (@(span.StartMs)–@(span.EndMs) ms)</title>
+            </rect>
+        }
+
+        @* Suspend?resume connectors (dotted arcs) *@
+        @foreach (var conn in _connections)
+        {
+            var yFrom = LaneY(conn.FromLane) + LaneHeight / 2;
+            var yTo = LaneY(conn.ToLane) + LaneHeight / 2;
+            var xMid = (conn.FromX + X(conn.ResumeMs)) / 2;
+            <path d="M @conn.FromX,@yFrom C @xMid,@yFrom @xMid,@yTo @X(conn.ResumeMs),@yTo" class="async-connector">
+                <title>@conn.Label</title>
+            </path>
+        }
+
+        @* Point markers *@
+        @foreach (var m in _markers)
+        {
+            var cy = LaneY(m.LaneIndex) + LaneHeight / 2;
+            if (m.Kind == "suspend-point")
+            {
+                <polygon points="@DiamondPoints(X(m.TimestampMs), cy, 6)" class="viz-dot-suspend"><title>@m.Label</title></polygon>
+            }
+            else if (m.Kind == "resume-point")
+            {
+                <circle cx="@X(m.TimestampMs)" cy="@cy" r="5" class="viz-dot-resume"><title>@m.Label</title></circle>
+            }
+            else
+            {
+                <polygon points="@DiamondPoints(X(m.TimestampMs), cy, 5)" class="viz-dot-event"><title>@m.Label</title></polygon>
+            }
+        }
+
+        @* Time axis *@
+        @for (var t = 0; t <= TickCount; t++)
+        {
+            var ms = (long)Math.Round(_tMax * t / (double)TickCount);
+            @((MarkupString)$"<text x='{X(ms)}' y='{ViewHeight - 4}' class='viz-axis-label' text-anchor='middle'>{ms} ms</text>")
+        }
+    </svg>
+
+    @* Narrative annotations *@
+    <div class="async-narrative">
+        @if (_spans.Any(s => s.SpanKind == SpanKind.Suspended && s.IsOpen))
+        {
+            <p class="async-note">Thread was released at <code>await</code> — it is free to do other work.</p>
+        }
+        else if (_spans.Any(s => s.SpanKind == SpanKind.Blocked))
+        {
+            <p class="async-note async-note-warn">Thread is BLOCKED — it sits idle doing nothing. Use <code>await</code> instead!</p>
+        }
+        else if (_connections.Count > 0 && _connections.Any(c => c.FromLane != c.ToLane))
+        {
+            <p class="async-note">Continuation resumed on a DIFFERENT thread — this is ConfigureAwait(false) or pool-thread resumption.</p>
+        }
+        else if (_connections.Count > 0)
+        {
+            <p class="async-note">Continuation resumed — work continues after the <code>await</code>.</p>
+        }
+    </div>
+}
+@code {
+    [Parameter] public IReadOnlyList<TraceEvent> Events { get; set; } = [];
+
+    private const int ViewWidth = 800;
+    private const int LaneHeight = 38;
+    private const int BarHeight = 16;
+    private const int AxisHeight = 24;
+    private const int TickCount = 4;
+    private int ViewHeight => Math.Max(1, _lanes.Count) * LaneHeight + AxisHeight + 8;
+
+    private readonly List<Lane> _lanes = [];
+    private readonly List<FlowSpan> _spans = [];
+    private readonly List<Marker> _markers = [];
+    private readonly List<Connection> _connections = [];
+    private long _tMax = 1;
+
+    protected override void OnParametersSet() => Rebuild();
+
+    private void Rebuild()
+    {
+        _lanes.Clear(); _spans.Clear(); _markers.Clear(); _connections.Clear();
+        _tMax = Events.Count == 0 ? 1 : Math.Max(1, Events.Max(e => e.TimestampMs));
+
+        var openSuspends = new Dictionary<int, (long Ms, string Label)>();
+
+        foreach (var evt in Events)
+        {
+            var lane = LaneIndexOf(evt);
+            switch (evt.Kind)
+            {
+                case "async-suspend":
+                    CloseOpenSpan(lane, SpanKind.Working, evt.TimestampMs);
+                    openSuspends[lane] = (evt.TimestampMs, evt.Label);
+                    _spans.Add(new(lane, SpanKind.Suspended, evt.TimestampMs, evt.TimestampMs, evt.Label, true));
+                    _markers.Add(new(lane, "suspend-point", evt.TimestampMs, evt.Label));
+                    break;
+                case "async-resume":
+                    if (openSuspends.TryGetValue(lane, out var s)) { openSuspends.Remove(lane); CloseOpenSpan(lane, SpanKind.Suspended, evt.TimestampMs);
+                        _connections.Add(new(lane, lane, X(s.Ms), evt.TimestampMs, s.Label)); }
+                    else { var kv = openSuspends.FirstOrDefault(); if (openSuspends.Remove(kv.Key)) {
+                        CloseOpenSpan(LaneById(kv.Key), SpanKind.Suspended, evt.TimestampMs);
+                        _connections.Add(new(LaneById(kv.Key), lane, X(kv.Value.Ms), evt.TimestampMs, kv.Value.Label + " ? " + evt.Label)); }}
+                    _markers.Add(new(lane, "resume-point", evt.TimestampMs, evt.Label));
+                    break;
+                case "result-blocking":
+                    _spans.Add(new(lane, SpanKind.Blocked, evt.TimestampMs, evt.TimestampMs, evt.Label, true));
+                    break;
+                case "result-unblocked":
+                    CloseOpenSpan(lane, SpanKind.Blocked, evt.TimestampMs);
+                    break;
+                case "work-start":
+                    _spans.Add(new(lane, SpanKind.Working, evt.TimestampMs, evt.TimestampMs, evt.Label, true));
+                    break;
+                case "work-end":
+                    CloseOpenSpan(lane, SpanKind.Working, evt.TimestampMs);
+                    break;
+                default:
+                    _markers.Add(new(lane, evt.Kind, evt.TimestampMs, evt.Label));
+                    break;
+            }
+        }
+        foreach (var s in _spans.Where(s => s.IsOpen)) s.EndMs = _tMax;
+    }
+
+    private void CloseOpenSpan(int lane, SpanKind kind, long atMs) {
+        var s = _spans.LastOrDefault(x => x.LaneIndex == lane && x.IsOpen && x.SpanKind == kind);
+        if (s is not null) { s.EndMs = Math.Max(atMs, s.StartMs); s.IsOpen = false; }
+    }
+
+    private int LaneIndexOf(TraceEvent evt) {
+        var idx = _lanes.FindIndex(l => l.ThreadId == evt.ThreadId);
+        if (idx >= 0) { _lanes[idx].Name = evt.ThreadName; return idx; }
+        _lanes.Add(new(evt.ThreadId, evt.ThreadName)); return _lanes.Count - 1;
+    }
+
+    private int LaneById(int id) { var i = _lanes.FindIndex(l => l.ThreadId == id); return i >= 0 ? i : 0; }
+
+    private static int LaneY(int i) => 6 + i * LaneHeight;
+    private double X(long ms) => 70 + (ViewWidth - 90) * (ms / (double)_tMax);
+    private double WidthOf(FlowSpan s) => X(s.EndMs) - X(s.StartMs);
+    private static string DiamondPoints(double cx, double cy, double s) =>
+        $"{cx},{cy - s} {cx + s},{cy} {cx},{cy + s} {cx - s},{cy}";
+    private static string Encode(string t) => System.Net.WebUtility.HtmlEncode(t);
+
+    private enum SpanKind { Working, Suspended, Blocked }
+    private sealed class Lane(int threadId, string name) { public int ThreadId=threadId; public string Name=name;
+        public override string ToString()=>Name; }
+    private sealed class FlowSpan(int laneIndex, SpanKind spanKind, long startMs, long endMs, string label, bool isOpen) {
+        public int LaneIndex= laneIndex; public SpanKind SpanKind=spanKind; public long StartMs=startMs; public long EndMs {get;set;}=endMs;
+        public string Label=label; public bool IsOpen {get;set;}=isOpen; }
+    private sealed record Marker(int LaneIndex, string Kind, long TimestampMs, string Label);
+    private sealed record Connection(int FromLane, int ToLane, double FromX, long ResumeMs, string Label);
+}

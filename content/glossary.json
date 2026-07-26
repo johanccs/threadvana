@@ -1,0 +1,22 @@
+[
+  { "term": "thread", "definition": "A worker that runs one piece of code at a time; your program always starts with one, the main thread." },
+  { "term": "process", "definition": "A running program with its own private memory; threads live inside a process." },
+  { "term": "thread pool", "definition": "A team of on-call workers .NET keeps ready so you can hand in tasks without creating threads yourself." },
+  { "term": "task", "definition": "A promise that some work will finish later; a Task represents it in C#." },
+  { "term": "async", "definition": "A keyword that marks a method as able to pause at an await and resume later." },
+  { "term": "await", "definition": "A keyword that means: pause here until the task is done, without blocking a thread — like sitting down until your coffee buzzer goes off." },
+  { "term": "lock", "definition": "A single bathroom key for a piece of code: only one thread can be inside the locked block at a time." },
+  { "term": "semaphore", "definition": "A parking lot with a fixed number of spaces; when it is full, arriving threads wait for a free spot." },
+  { "term": "race condition", "definition": "A bug where the result depends on which thread happens to run first, so it can change from run to run." },
+  { "term": "deadlock", "definition": "Two or more threads each waiting for something the other holds, so nobody can ever move again." },
+  { "term": "atomic", "definition": "An operation that happens completely or not at all — no other thread can see it half-done." },
+  { "term": "volatile", "definition": "A keyword telling the compiler and CPU to always read the latest value of a field, never a cached copy." },
+  { "term": "cancellation token", "definition": "A polite 'please stop' signal you pass into work so it can shut down cleanly when asked." },
+  { "term": "context switch", "definition": "When the CPU pauses one thread and resumes another — like a chef swapping between dishes." },
+  { "term": "concurrent vs parallel", "definition": "Concurrent means many tasks in progress at once (like one chef juggling dishes); parallel means truly running at the same instant on multiple cores." },
+  { "term": "synchronization context", "definition": "A helper that decides which thread an awaited method resumes on — for example, back on the UI thread in a desktop app." },
+  { "term": "blocking", "definition": "Making a thread sit and wait doing nothing, like standing at the door until a delivery arrives." },
+  { "term": "starvation", "definition": "When a thread never gets a turn to run because other threads always win the competition." },
+  { "term": "livelock", "definition": "Threads that keep reacting to each other and stay busy but make no progress — like two people sidestepping in a corridor forever." },
+  { "term": "barrier", "definition": "A meeting point where several threads wait until everyone has arrived, then all continue together." }
+]

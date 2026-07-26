@@ -1,0 +1,80 @@
+@page "/viz-smoke"
+@namespace ThreadCraft.Web.Components.Viz
+
+@* Manual check page for the visualization components with canned trace events. *@
+
+<h1>Visualization smoke test</h1>
+
+<h2>Explainer: thread-basics</h2>
+<ConceptExplainer SceneId="thread-basics" />
+<h2>Explainer: thread-join</h2>
+<ConceptExplainer SceneId="thread-join" />
+<h2>Explainer: thread-pool</h2>
+<ConceptExplainer SceneId="thread-pool" />
+<h2>Explainer: semaphore</h2>
+<ConceptExplainer SceneId="semaphore" />
+<h2>Explainer: async-state-machine</h2>
+<ConceptExplainer SceneId="async-state-machine" />
+<h2>Explainer: race-interleaving</h2>
+<ConceptExplainer SceneId="race-interleaving" />
+<h2>Explainer: foreground-background</h2>
+<ConceptExplainer SceneId="foreground-background" />
+<h2>Explainer: cancellation</h2>
+<ConceptExplainer SceneId="cancellation" />
+<h2>Explainer: deadlock</h2>
+<ConceptExplainer SceneId="deadlock" />
+<h2>Explainer: lock-key</h2>
+<ConceptExplainer SceneId="lock-key" />
+<h2>Explainer: channel</h2>
+<ConceptExplainer SceneId="channel" />
+<h2>Explainer: thread-local</h2>
+<ConceptExplainer SceneId="thread-local" />
+<h2>Explainer: event-gate</h2>
+<ConceptExplainer SceneId="event-gate" />
+
+<h2>Thread timeline</h2>
+<VizHost VisualizationId="thread-timeline" Events="_timeline" />
+
+<h2>Thread pool</h2>
+<VizHost VisualizationId="thread-pool" Events="_pool" />
+
+<h2>Semaphore</h2>
+<VizHost VisualizationId="semaphore" Events="_semaphore" />
+
+@code {
+    private static readonly TraceEvent[] _timeline =
+    [
+        new(0, 1, "Main", "thread-start", "Main thread starts"),
+        new(10, 1, "Main", "work-start", "Main works"),
+        new(50, 2, "worker", "thread-start", "Worker starts"),
+        new(60, 2, "worker", "work-start", "Worker works"),
+        new(400, 1, "Main", "work-end", "Main done"),
+        new(420, 1, "Main", "wait-start", "Main waits (Join)"),
+        new(900, 2, "worker", "work-end", "Worker done"),
+        new(910, 2, "worker", "thread-end", "Worker ends"),
+        new(920, 1, "Main", "wait-end", "Main continues"),
+        new(950, 1, "Main", "thread-end", "Main ends"),
+    ];
+
+    private static readonly TraceEvent[] _pool =
+    [
+        new(0, 1, "Main", "pool-queued", "task 1 queued"),
+        new(5, 1, "Main", "pool-queued", "task 2 queued"),
+        new(10, 1, "Main", "pool-queued", "task 3 queued"),
+        new(20, 3, ".NET TP Worker", "pool-dequeued", "worker picks task 1"),
+        new(25, 3, ".NET TP Worker", "work-start", "task 1 running"),
+        new(30, 4, ".NET TP Worker", "pool-dequeued", "worker picks task 2"),
+        new(35, 4, ".NET TP Worker", "work-start", "task 2 running"),
+        new(500, 3, ".NET TP Worker", "work-end", "task 1 done"),
+    ];
+
+    private static readonly TraceEvent[] _semaphore =
+    [
+        new(0, 1, "A", "semaphore-enter", "A takes a space"),
+        new(10, 2, "B", "semaphore-enter", "B takes a space"),
+        new(20, 3, "C", "semaphore-enter", "C takes the last space"),
+        new(30, 4, "D", "wait-start", "D waits for a space"),
+        new(40, 5, "E", "wait-start", "E waits for a space"),
+        new(700, 1, "A", "semaphore-exit", "A leaves"),
+    ];
+}

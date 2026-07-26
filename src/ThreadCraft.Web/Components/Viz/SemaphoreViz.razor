@@ -1,0 +1,102 @@
+@namespace ThreadCraft.Web.Components.Viz
+
+@* Shows a semaphore as a parking lot: a row of spaces (slots), the threads
+   parked in them, and the line of cars (threads) waiting to get in. *@
+
+@if (Events.Count == 0)
+{
+    <div class="viz-empty">Run the demo to see the semaphore work here.</div>
+}
+else
+{
+    <p class="viz-caption">
+        A semaphore is a parking lot with a fixed number of spaces.
+        When it is full, newcomers wait in line.
+    </p>
+    <div class="sem-slots">
+        @for (var i = 0; i < _slotCount; i++)
+        {
+            var holder = i < _holders.Count ? _holders[i] : null;
+            <div class="sem-slot @(holder is null ? "free" : "taken")">
+                @if (holder is null)
+                {
+                    <span class="sem-free-label">free</span>
+                }
+                else
+                {
+                    <span class="sem-holder-name">@holder</span>
+                }
+            </div>
+        }
+    </div>
+    <div class="sem-waiters">
+        <h4>Waiting in line</h4>
+        @if (_waiters.Count == 0)
+        {
+            <span class="pool-none">nobody waiting</span>
+        }
+        else
+        {
+            foreach (var waiter in _waiters)
+            {
+                <span class="pool-chip sem-waiter-chip">@waiter</span>
+            }
+        }
+    </div>
+    <p class="viz-counter">@_holders.Count inside • @_waiters.Count waiting • @_slotCount spaces</p>
+}
+
+@code {
+    /// <summary>Trace events collected so far (grows live while a demo runs).</summary>
+    [Parameter] public IReadOnlyList<TraceEvent> Events { get; set; } = [];
+
+    /// <summary>How many spaces the lot has (grows automatically if a demo shows more).</summary>
+    [Parameter] public int TotalSlots { get; set; } = 3;
+
+    private readonly List<string> _holders = [];
+    private readonly List<string> _waiters = [];
+    private int _slotCount = 3;
+
+    protected override void OnParametersSet()
+    {
+        _holders.Clear();
+        _waiters.Clear();
+
+        var state = new Dictionary<int, string>(); // threadId -> "waiting" | "inside"
+        var maxConcurrent = 0;
+
+        foreach (var evt in Events)
+        {
+            switch (evt.Kind)
+            {
+                case "wait-start":
+                    state[evt.ThreadId] = "waiting";
+                    break;
+                case "semaphore-enter":
+                    state[evt.ThreadId] = "inside";
+                    maxConcurrent = Math.Max(maxConcurrent, state.Values.Count(s => s == "inside"));
+                    break;
+                case "semaphore-exit":
+                case "thread-end":
+                    state.Remove(evt.ThreadId);
+                    break;
+                case "wait-end":
+                    // A wait that ends without entering (rare) just leaves the line.
+                    if (state.TryGetValue(evt.ThreadId, out var s) && s == "waiting")
+                        state.Remove(evt.ThreadId);
+                    break;
+            }
+        }
+
+        _slotCount = Math.Max(TotalSlots, Math.Max(1, maxConcurrent));
+
+        // Deterministic order for display: by first appearance in the event stream.
+        foreach (var evt in Events)
+        {
+            if (!state.TryGetValue(evt.ThreadId, out var s)) continue;
+            var name = evt.ThreadName;
+            if (s == "inside" && !_holders.Contains(name)) _holders.Add(name);
+            if (s == "waiting" && !_waiters.Contains(name)) _waiters.Add(name);
+        }
+    }
+}

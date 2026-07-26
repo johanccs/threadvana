@@ -1,0 +1,36 @@
+@namespace ThreadCraft.Web.Components.Viz
+
+@* Routes a lesson's visualization id to the right component.
+   The public surface is FROZEN (the lesson page uses exactly these parameters). *@
+
+@if (!string.IsNullOrEmpty(VisualizationId))
+{
+    <div class="viz-host">
+        @switch (VisualizationId)
+        {
+            case "thread-timeline":
+                <ThreadTimeline Events="Events" />
+                break;
+            case "thread-pool":
+                <ThreadPoolViz Events="Events" />
+                break;
+            case "semaphore":
+                <SemaphoreViz Events="Events" />
+                break;
+            case "async-activity":
+                <AsyncActivityViz Events="Events" />
+                break;
+            @* Unknown ids render nothing on purpose: a lesson with a typo in its
+               visualization id should not break the page. *@
+        }
+    </div>
+}
+
+@code {
+    /// <summary>Which visualization to show: "thread-timeline" | "thread-pool" | "semaphore".</summary>
+    [Parameter] public string? VisualizationId { get; set; }
+
+    /// <summary>Trace events collected so far (grows live while a demo runs).</summary>
+    [Parameter] public IReadOnlyList<TraceEvent> Events { get; set; } = [];
+}
+
