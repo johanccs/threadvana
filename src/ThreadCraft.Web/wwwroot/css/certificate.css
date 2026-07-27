@@ -1,0 +1,132 @@
+/* Certificate page: the card is deliberately light/ink-on-paper, unlike the rest
+   of the dark-themed app, since it is meant to be printed or saved as a PDF. */
+
+.certificate-locked {
+    max-width: 32rem;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.certificate-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    max-width: 50rem;
+    margin: 1.5rem auto 1rem;
+}
+
+.certificate-name-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    flex: 1 1 16rem;
+}
+
+.certificate-name-field input {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.certificate-card {
+    max-width: 50rem;
+    margin: 0 auto 2rem;
+    padding: 3rem 2.5rem;
+    background: #fbf8f1;
+    color: #22242b;
+    border: 1px solid #d9cfae;
+    border-radius: 4px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    position: relative;
+}
+
+.certificate-card::before {
+    content: "";
+    position: absolute;
+    inset: 0.6rem;
+    border: 1px solid #d9cfae;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.certificate-seal {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.certificate-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.8rem;
+    color: #6b5f3e;
+    margin: 0 0 1rem;
+}
+
+.certificate-name {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 2.25rem;
+    margin: 0 0 1rem;
+    color: #22242b;
+}
+
+.certificate-body {
+    max-width: 34rem;
+    margin: 0 auto 1.5rem;
+    line-height: 1.6;
+}
+
+.certificate-modules {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    font-size: 0.85rem;
+    color: #6b5f3e;
+}
+
+.certificate-modules li::before {
+    content: "•";
+    margin-right: 0.4rem;
+}
+
+.certificate-modules li:first-child::before {
+    content: "";
+    margin-right: 0;
+}
+
+.certificate-date {
+    font-size: 0.9rem;
+    color: #6b5f3e;
+    margin: 0;
+}
+
+@media print {
+    .topbar, .sidebar, .no-print {
+        display: none !important;
+    }
+
+    body, .shell, .shell-body, .content {
+        background: #fff !important;
+    }
+
+    .certificate-card {
+        box-shadow: none;
+        border: none;
+        margin: 0;
+    }
+
+    @page {
+        margin: 1.5cm;
+    }
+}

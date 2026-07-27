@@ -1,0 +1,114 @@
+@page "/certificate"
+@inject ICurriculumService Curriculum
+@inject ProgressSummaryService Summary
+@inject IJSRuntime JS
+
+<PageTitle>Certificate — ThreadCraft Academy</PageTitle>
+
+@if (!_loaded)
+{
+    <p>Loading your progress…</p>
+}
+else if (!_complete)
+{
+    <section class="panel certificate-locked">
+        <h1>Your certificate</h1>
+        <p>Finish all @_totalLessons lessons to unlock your ThreadCraft Academy completion certificate.</p>
+        <div class="category-progress">
+            <div class="progress-bar">
+                <span class="progress-bar-fill" style="width: @_percent%;"></span>
+            </div>
+            <p class="lesson-count">@_passedLessons of @_totalLessons lessons passed (@_percent%)</p>
+        </div>
+        <a class="btn btn-primary" href="/">Back to lessons</a>
+    </section>
+}
+else
+{
+    <div class="certificate-toolbar no-print">
+        <label class="certificate-name-field">
+            Name on certificate
+            <input @bind="_learnerName" @bind:event="oninput" @bind:after="SaveLearnerNameAsync"
+                   placeholder="Your name" maxlength="80" />
+        </label>
+        <button class="btn btn-primary" @onclick="PrintAsync">Print / Save as PDF</button>
+        <a class="btn btn-secondary" href="/">Back to lessons</a>
+    </div>
+
+    <div class="certificate-card">
+        <div class="certificate-seal" aria-hidden="true">🧵</div>
+        <p class="certificate-eyebrow">Certificate of Completion</p>
+        <h1 class="certificate-name">@(string.IsNullOrWhiteSpace(_learnerName) ? "This certifies that" : _learnerName)</h1>
+        <p class="certificate-body">
+            has completed <strong>ThreadCraft Academy</strong> — @_totalLessons lessons across
+            @_categoryCount modules of .NET multithreading, from thread foundations to
+            interview-ready concurrency.
+        </p>
+        <ul class="certificate-modules">
+            @foreach (var category in Curriculum.GetCategories())
+            {
+                <li>@category.Title</li>
+            }
+        </ul>
+        <p class="certificate-date">Completed @_completedOn.ToString("d MMMM yyyy")</p>
+    </div>
+}
+
+@code {
+    private bool _loaded;
+    private bool _complete;
+    private int _passedLessons;
+    private int _totalLessons;
+    private int _percent;
+    private int _categoryCount;
+    private string _learnerName = "";
+    private DateTimeOffset _completedOn = DateTimeOffset.UtcNow;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Summary.RefreshAsync();
+
+        var categories = Curriculum.GetCategories();
+        _categoryCount = categories.Count;
+
+        DateTimeOffset? latestPass = null;
+        foreach (var category in categories)
+        {
+            var lessons = Curriculum.GetLessons(category.Id);
+            _totalLessons += lessons.Count;
+            _passedLessons += Summary.PassedCount(lessons);
+
+            foreach (var lesson in lessons)
+            {
+                if (Summary.RecordsByLesson.TryGetValue(lesson.Id, out var record) && record.PassedAt is { } passedAt
+                    && (latestPass is null || passedAt > latestPass))
+                {
+                    latestPass = passedAt;
+                }
+            }
+        }
+
+        _percent = _totalLessons == 0 ? 0 : (int)Math.Round(100.0 * _passedLessons / _totalLessons);
+        _complete = _totalLessons > 0 && _passedLessons == _totalLessons;
+        _completedOn = latestPass ?? DateTimeOffset.UtcNow;
+        _loaded = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _complete)
+        {
+            var saved = await JS.InvokeAsync<string?>("localStorage.getItem", "threadcraft-learner-name");
+            if (!string.IsNullOrWhiteSpace(saved))
+            {
+                _learnerName = saved;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private Task SaveLearnerNameAsync()
+        => JS.InvokeVoidAsync("localStorage.setItem", "threadcraft-learner-name", _learnerName).AsTask();
+
+    private Task PrintAsync() => JS.InvokeVoidAsync("print").AsTask();
+}
