@@ -21,7 +21,7 @@ Think of it like this: normal LINQ is one chef cooking one dish at a time. PLINQ
 
 ## The real-world picture
 
-You have a folder with 10,000 images. You need to resize every one of them. A normal oreach loop resizes image 1, then image 2, then image 3 - one at a time, one CPU core doing all the work while the other seven cores sit idle. With PLINQ, the 10,000 images are split into chunks - maybe 2,500 per core on a 4-core machine. All four cores resize images at the same time. The work finishes in roughly a quarter of the time.
+You have a folder with 10,000 images. You need to resize every one of them. A normal foreach loop resizes image 1, then image 2, then image 3 - one at a time, one CPU core doing all the work while the other seven cores sit idle. With PLINQ, the 10,000 images are split into chunks - maybe 2,500 per core on a 4-core machine. All four cores resize images at the same time. The work finishes in roughly a quarter of the time.
 
 But there is a catch: if you only have 10 images, the time spent splitting the list and merging results might be longer than just doing it one at a time. PLINQ is for **big, CPU-heavy work**, not tiny collections.
 
