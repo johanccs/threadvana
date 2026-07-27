@@ -31,7 +31,7 @@ public sealed class OpenRouterAssistantServiceTests
         Assert.Equal("A thread is a worker.", answer);
 
         var sent = JsonDocument.Parse(handler.LastRequestBody!).RootElement;
-        Assert.Equal("deepseek/deepseek-v4-pro", sent.GetProperty("model").GetString());
+        Assert.Equal("openai/gpt-oss-20b:free", sent.GetProperty("model").GetString());
 
         var messages = sent.GetProperty("messages");
         Assert.Equal("system", messages[0].GetProperty("role").GetString());

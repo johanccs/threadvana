@@ -63,7 +63,7 @@ Or add it to `src/ThreadCraft.Web/appsettings.json`:
 ```json
 "Assistant": {
     "ApiKey": "sk-or-v1-...",
-    "Model": "deepseek/deepseek-v4-pro"
+    "Model": "openai/gpt-oss-20b:free"
 }
 ```
 

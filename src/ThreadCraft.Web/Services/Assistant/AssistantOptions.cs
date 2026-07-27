@@ -11,8 +11,8 @@ public sealed class AssistantOptions
     /// <summary>OpenRouter API key. Empty means the coach is not configured yet.</summary>
     public string ApiKey { get; set; } = "";
 
-    /// <summary>OpenRouter model id, e.g. "deepseek/deepseek-v4-pro".</summary>
-    public string Model { get; set; } = "deepseek/deepseek-v4-pro";
+    /// <summary>OpenRouter model id, e.g. "openai/gpt-oss-20b:free".</summary>
+    public string Model { get; set; } = "openai/gpt-oss-20b:free";
 
     /// <summary>OpenRouter API root — the OpenAI-compatible endpoint.</summary>
     public string BaseUrl { get; set; } = "https://openrouter.ai/api/v1";
