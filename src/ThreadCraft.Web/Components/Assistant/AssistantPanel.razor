@@ -54,7 +54,7 @@
                     }
                     else
                     {
-                        <div class="chat-msg chat-answer">@Markdown.ToMarkup(exchange.AnswerMarkdown)</div>
+                        <div class="chat-msg chat-answer">@Markdown.ToSanitizedMarkup(exchange.AnswerMarkdown)</div>
                     }
                 }
             </div>
