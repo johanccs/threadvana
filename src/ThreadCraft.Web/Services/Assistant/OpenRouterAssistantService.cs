@@ -15,11 +15,13 @@ public sealed class OpenRouterAssistantService : IAssistantService
 
     private readonly HttpClient _http;
     private readonly AssistantOptions _options;
+    private readonly AssistantRateLimiter _rateLimiter;
 
-    public OpenRouterAssistantService(HttpClient http, AssistantOptions options)
+    public OpenRouterAssistantService(HttpClient http, AssistantOptions options, AssistantRateLimiter rateLimiter)
     {
         _http = http;
         _options = options;
+        _rateLimiter = rateLimiter;
     }
 
     public bool IsConfigured => _options.IsConfigured;
@@ -33,6 +35,8 @@ public sealed class OpenRouterAssistantService : IAssistantService
             throw new AssistantException(
                 "The coach is not set up yet. Add your OpenRouter API key first (see the setup note above the chat).");
         }
+
+        _rateLimiter.EnsureNotRateLimited();
 
         var messages = new List<ChatMessageDto>
         {

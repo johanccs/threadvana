@@ -63,9 +63,11 @@ public sealed class OpenRouterAssistantServiceTests
     public async Task Missing_key_fails_fast_without_any_http_call()
     {
         var handler = new StubHandler(HttpStatusCode.OK, "{}");
+        var options = new AssistantOptions { ApiKey = "" };
         var service = new OpenRouterAssistantService(
             new HttpClient(handler) { BaseAddress = new Uri("https://openrouter.ai/api/v1/") },
-            new AssistantOptions { ApiKey = "" });
+            options,
+            new AssistantRateLimiter(options, new GlobalAssistantRateLimiter(options)));
 
         Assert.False(service.IsConfigured);
         await Assert.ThrowsAsync<AssistantException>(() => service.AskAsync(Request()));
@@ -75,9 +77,11 @@ public sealed class OpenRouterAssistantServiceTests
     private static (OpenRouterAssistantService, StubHandler) CreateService(HttpStatusCode status, string body)
     {
         var handler = new StubHandler(status, body);
+        var options = new AssistantOptions { ApiKey = "sk-or-test" };
         var service = new OpenRouterAssistantService(
             new HttpClient(handler) { BaseAddress = new Uri("https://openrouter.ai/api/v1/") },
-            new AssistantOptions { ApiKey = "sk-or-test" });
+            options,
+            new AssistantRateLimiter(options, new GlobalAssistantRateLimiter(options)));
         return (service, handler);
     }
 

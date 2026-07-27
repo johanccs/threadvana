@@ -46,6 +46,8 @@ if (string.IsNullOrWhiteSpace(assistantOptions.ApiKey))
     assistantOptions.ApiKey = builder.Configuration["OPENROUTER_API_KEY"] ?? "";
 }
 builder.Services.AddSingleton(assistantOptions);
+builder.Services.AddSingleton<GlobalAssistantRateLimiter>();
+builder.Services.AddScoped<AssistantRateLimiter>();
 builder.Services.AddHttpClient<IAssistantService, OpenRouterAssistantService>(client =>
 {
     client.BaseAddress = new Uri(assistantOptions.BaseUrl.TrimEnd('/') + "/");

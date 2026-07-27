@@ -26,6 +26,12 @@ public sealed class AssistantOptions
     /// <summary>Upper bound on the answer length the model may produce.</summary>
     public int MaxAnswerTokens { get; set; } = 2048;
 
+    /// <summary>App-wide ceiling on coach questions per minute, across every learner.</summary>
+    public int GlobalRequestsPerMinute { get; set; } = 30;
+
+    /// <summary>Per-learner (per browser tab) ceiling on coach questions per minute.</summary>
+    public int PerLearnerRequestsPerMinute { get; set; } = 6;
+
     /// <summary>True once an API key is available — until then the UI shows setup help.</summary>
     public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey);
 }
