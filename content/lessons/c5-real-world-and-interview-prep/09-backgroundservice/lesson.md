@@ -19,6 +19,6 @@ A `BackgroundService` is how you run a perpetual loop in ASP.NET Core: a queue p
 
 ## Key takeaways
 
-- `public class MyWorker : BackgroundService` Ã¢â‚¬â€ override `ExecuteAsync`.
-- `while (!stoppingToken.IsCancellationRequested) { ... }` Ã¢â‚¬â€ the standard loop.
+- `public class MyWorker : BackgroundService` — override `ExecuteAsync`.
+- `while (!stoppingToken.IsCancellationRequested) { ... }` — the standard loop.
 - Register: `builder.Services.AddHostedService<MyWorker>();`

@@ -15,13 +15,13 @@ interview:
 
 ## What is it?
 
-`lock` is a single bathroom Ã¢â‚¬â€ one person at a time, period. `ReaderWriterLockSlim` is a library reading room: as many people as you want can read quietly, but only one person can write (and they kick everyone else out first).
+`lock` is a single bathroom — one person at a time, period. `ReaderWriterLockSlim` is a library reading room: as many people as you want can read quietly, but only one person can write (and they kick everyone else out first).
 
-The three lock modes: `EnterReadLock` (any number, concurrent), `EnterWriteLock` (exclusive), `EnterUpgradeableReadLock` (read now, may upgrade to write later Ã¢â‚¬â€ only one holder at a time).
+The three lock modes: `EnterReadLock` (any number, concurrent), `EnterWriteLock` (exclusive), `EnterUpgradeableReadLock` (read now, may upgrade to write later — only one holder at a time).
 
 ## Watch out
 
-> **ReaderWriterLockSlim is NOT async-friendly.** All Enter methods block Ã¢â‚¬â€ there is no WaitAsync. For async scenarios, use SemaphoreSlim or standard lock (brief, then offload to async).
+> **ReaderWriterLockSlim is NOT async-friendly.** All Enter methods block — there is no WaitAsync. For async scenarios, use SemaphoreSlim or standard lock (brief, then offload to async).
 
 > **Writer starvation.** If readers keep arriving, the writer may wait forever. ReaderWriterLockSlim prefers fairness on .NET Core, but on .NET Framework it prefers readers.
 
@@ -29,4 +29,4 @@ The three lock modes: `EnterReadLock` (any number, concurrent), `EnterWriteLock`
 
 - Many concurrent readers, one writer at a time.
 - Three modes: Read, Write, UpgradeableRead.
-- Always `try/finally { ExitReadLock() }` Ã¢â‚¬â€ these locks are not auto-released.
+- Always `try/finally { ExitReadLock() }` — these locks are not auto-released.

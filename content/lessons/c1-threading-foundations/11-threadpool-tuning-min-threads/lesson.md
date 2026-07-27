@@ -16,20 +16,20 @@ interview:
 ## What is it?
 
 The thread pool does not create all its workers at once. When many tasks arrive at the
-same time, the pool adds workers *slowly* Ã¢â‚¬â€ roughly one every half-second. This is
+same time, the pool adds workers *slowly* — roughly one every half-second. This is
 called the **slow ramp-up**.
 
 If your app handles a sudden burst (a spike of requests), you can **pre-hire workers**
 with `ThreadPool.SetMinThreads`. This tells the pool "keep at least N workers warm
-and ready Ã¢â‚¬â€ don't wait for the burst to ramp you up."
+and ready — don't wait for the burst to ramp you up."
 
 ## The real-world picture
 
 A restaurant with one waiter can handle a steady stream of two tables. But a bus of
-tourists just pulled up outside Ã¢â‚¬â€ 40 people need to order NOW. The restaurant
+tourists just pulled up outside — 40 people need to order NOW. The restaurant
 very slowly sends in one extra waiter every 30 seconds while the tourists grumble.
 
-`SetMinThreads` is the manager saying "I knew the bus was coming Ã¢â‚¬â€ I kept 10 waiters
+`SetMinThreads` is the manager saying "I knew the bus was coming — I kept 10 waiters
 on shift."
 
 ## How it works in C#
@@ -45,19 +45,19 @@ ThreadPool.SetMinThreads(1, 1);
 ```
 
 Two things never to forget:
-- `SetMinThreads` does **not** reserve actual threads Ã¢â‚¬â€ it only means "grow quickly
+- `SetMinThreads` does **not** reserve actual threads — it only means "grow quickly
   UP TO this many". If no tasks arrive, no threads are created.
 - Setting the min too high wastes memory. Set it for the burst, then dial it back.
 
 ## See it move
 
 Press **Run demo**. The demo queues 12 blocking tasks. Phase 1 runs with default
-min threads Ã¢â‚¬â€ watch the queue drain slowly. Phase 2 runs with `SetMinThreads(12,12)`
-Ã¢â‚¬â€ the queue empties fast.
+min threads — watch the queue drain slowly. Phase 2 runs with `SetMinThreads(12,12)`
+— the queue empties fast.
 
 ## Watch out
 
-- You might think `SetMinThreads` instantly creates threads. It doesn't Ã¢â‚¬â€ it just
+- You might think `SetMinThreads` instantly creates threads. It doesn't — it just
   removes the *throttle* on creating them. First task arrivals still trigger creation.
 - You might set the min and forget. You should reset it after the burst, or set it
   once at startup for the whole app.
@@ -67,6 +67,6 @@ min threads Ã¢â‚¬â€ watch the queue drain slowly. Phase 2 runs with `
 ## Key takeaways
 
 - The thread pool grows slowly (one worker ~every 500 ms).
-- `SetMinThreads` removes the throttle Ã¢â‚¬â€ tell it how many workers you will need.
+- `SetMinThreads` removes the throttle — tell it how many workers you will need.
 - Use it for bursts; reset afterward (or set once at app startup if you know your load).
 - Never touch `SetMaxThreads` unless you are fixing a very specific, measured bottleneck.

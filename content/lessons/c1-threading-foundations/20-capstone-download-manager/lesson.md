@@ -26,16 +26,16 @@ all work is done and the workers are told to stop.
 ## The design
 
 ```
-Main thread ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº enqueue(12 items) ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº set stop flag ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Join all workers
-                    ÃƒÂ¢Ã¢â‚¬ÂÃ¢â‚¬Å¡
-                    ÃƒÂ¢Ã¢â‚¬"Ã‚Â¼
-[shared queue] ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 1 ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 2 ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 3 ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬"Ã‚Âº Worker 4
+Main thread ──▶ enqueue(12 items) ──▶ set stop flag ──▶ Join all workers
+                    │
+                    ▼
+[shared queue] ──▶ Worker 1 ──▶ Worker 2 ──▶ Worker 3 ──▶ Worker 4
 ```
 
 Each worker: `while (items to process OR stop flag not set) { dequeue; process; }`
 
 This uses: `new Thread` (dedicated workers), a shared queue, a `lock` for the
-dequeue, and a cooperative stop flag ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â almost everything from Category 1.
+dequeue, and a cooperative stop flag — almost everything from Category 1.
 
 ## How it works in C#
 
@@ -64,7 +64,7 @@ new Thread(() =>
 ## See it move
 
 Press **Run demo**. Watch 4 workers consuming 12 items from the shared queue.
-Notice how workers overlap ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â while one processes, another dequeues the next item.
+Notice how workers overlap — while one processes, another dequeues the next item.
 
 ## Watch out
 

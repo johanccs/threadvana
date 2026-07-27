@@ -15,7 +15,7 @@ interview:
 
 ## What is it?
 
-Cancelling a parallel loop is a two-step cooperation: the outer loop stops scheduling new items AND the inner item bodies must check the token to stop what they are doing. Without both, cancellation is incomplete Ã¢â‚¬â€ you get a partial result with some items still running.
+Cancelling a parallel loop is a two-step cooperation: the outer loop stops scheduling new items AND the inner item bodies must check the token to stop what they are doing. Without both, cancellation is incomplete — you get a partial result with some items still running.
 
 ## Watch out
 
@@ -23,6 +23,6 @@ Cancelling a parallel loop is a two-step cooperation: the outer loop stops sched
 
 ## Key takeaways
 
-- `ParallelOptions { CancellationToken = token }` Ã¢â€ â€™ cancel new iterations.
+- `ParallelOptions { CancellationToken = token }` → cancel new iterations.
 - Lambda must ALSO check `token.ThrowIfCancellationRequested()` for in-flight items.
-- No thread abort Ã¢â‚¬â€ current iterations finish unless they check.
+- No thread abort — current iterations finish unless they check.

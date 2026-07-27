@@ -9,15 +9,15 @@ public static class Demo
 
     public static async Task RunAsync()
     {
-        Trace.Log("work-start", "? 5 callers hit the cache at once — all cache-miss");
+        Trace.Log("work-start", "? 5 callers hit the cache at once â€” all cache-miss");
 
         var tasks = new Task<string>[5];
         for (var i = 0; i < 5; i++) tasks[i] = Task.Run(() => GetOrFetchAsync("key"));
 
-        Trace.Log("async-suspend", "? all 5 callers wait on the SAME Lazy<Task> — only ONE fetch runs");
+        Trace.Log("async-suspend", "? all 5 callers wait on the SAME Lazy<Task> â€” only ONE fetch runs");
         await Task.WhenAll(tasks);
 
-        Trace.Log("async-resume", "? Lazy.Value delivered to all 5 — single-flight complete");
+        Trace.Log("async-resume", "? Lazy.Value delivered to all 5 â€” single-flight complete");
         Trace.Log("message", "Single-flight pattern: Lazy<Task<T>> ensures exactly one fetch, N awaiters.");
     }
 

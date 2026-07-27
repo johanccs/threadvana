@@ -16,13 +16,13 @@ interview:
 
 ## What is it?
 
-A `CancellationToken` is a polite tap on the shoulder Ã¢â‚¬â€ it says "please stop what you are doing." It does NOT kill threads; it is a cooperative flag that methods check. If you ignore it, nothing happens (unlike `Thread.Abort`, which is deprecated for good reason).
+A `CancellationToken` is a polite tap on the shoulder — it says "please stop what you are doing." It does NOT kill threads; it is a cooperative flag that methods check. If you ignore it, nothing happens (unlike `Thread.Abort`, which is deprecated for good reason).
 
 Every async BCL method that waits accepts a `CancellationToken`: `Task.Delay(ms, token)`, `SemaphoreSlim.WaitAsync(token)`, `HttpClient.GetAsync(url, token)`. When the token is signalled, those methods throw `OperationCanceledException` immediately instead of waiting.
 
 ## The real-world picture
 
-A chef has a buzzer that the manager can press to say "stop this order." The chef finishes the current sautÃƒÂ© toss (they don't drop the pan mid-air), then stops. A `CancellationToken` is that buzzer Ã¢â‚¬â€ cooperative, not violent.
+A chef has a buzzer that the manager can press to say "stop this order." The chef finishes the current sauté toss (they don't drop the pan mid-air), then stops. A `CancellationToken` is that buzzer — cooperative, not violent.
 
 ## How it works in C#
 
@@ -55,7 +55,7 @@ token.Register(() => Cleanup());
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ we start a long operation with a 3-second CancellationToken. The timeline shows the work starting, the token being signalled at 3s, and the task catching the exception and finishing clean. No thread is aborted Ã¢â‚¬â€ the task simply stops when it checks the token.
+Press **Run demo** — we start a long operation with a 3-second CancellationToken. The timeline shows the work starting, the token being signalled at 3s, and the task catching the exception and finishing clean. No thread is aborted — the task simply stops when it checks the token.
 
 ## Watch out
 
@@ -63,7 +63,7 @@ Press **Run demo** Ã¢â‚¬â€ we start a long operation with a 3-second 
 
 > **Pass the token to EVERY async BCL call in the chain.** One call that ignores the token keeps the whole operation alive.
 
-> **Don't catch OperationCanceledException unless you mean to.** If you swallow it, the caller won't know the operation was cancelled Ã¢â‚¬â€ they will think it finished successfully.
+> **Don't catch OperationCanceledException unless you mean to.** If you swallow it, the caller won't know the operation was cancelled — they will think it finished successfully.
 
 > **Cancelled tasks show as 'Canceled', not 'Faulted'.** `task.IsCanceled` returns true; `task.Exception` is null.
 
@@ -71,5 +71,5 @@ Press **Run demo** Ã¢â‚¬â€ we start a long operation with a 3-second 
 
 - `CancellationToken` = cooperative stop signal. Not a kill switch.
 - `CancellationTokenSource` creates the token and triggers it.
-- BCL methods throw `OperationCanceledException` when the token is signalled Ã¢â‚¬â€ catch it to perform cleanup, then re-throw.
+- BCL methods throw `OperationCanceledException` when the token is signalled — catch it to perform cleanup, then re-throw.
 - Always pass the token as the last parameter, and dispose the source.

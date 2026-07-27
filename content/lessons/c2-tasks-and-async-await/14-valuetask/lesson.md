@@ -15,18 +15,18 @@ interview:
 
 ## What is it?
 
-`Task` and `Task<T>` are reference types Ã¢â‚¬â€ every `await` that doesn't return synchronously allocates a Task on the heap. For millions of calls per second, that GC pressure adds up.
+`Task` and `Task<T>` are reference types — every `await` that doesn't return synchronously allocates a Task on the heap. For millions of calls per second, that GC pressure adds up.
 
-`ValueTask<T>` is a **struct** wrapper that can represent three states: a completed result (zero heap allocation), a real `Task<T>`, or a boxed `IValueTaskSource<T>` Ã¢â‚¬â€ an advanced low-level token. The first case is the key one: when a method has a cached result and returns immediately, `new ValueTask<T>(result)` costs nothing.
+`ValueTask<T>` is a **struct** wrapper that can represent three states: a completed result (zero heap allocation), a real `Task<T>`, or a boxed `IValueTaskSource<T>` — an advanced low-level token. The first case is the key one: when a method has a cached result and returns immediately, `new ValueTask<T>(result)` costs nothing.
 
 ## The real-world picture
 
-A pizza place that prepackages popular slices. If you order pepperoni (cached), the cashier hands you a slice from the warmer Ã¢â‚¬â€ no box (heap allocation) needed. If you order anchovy-pineapple (fresh), they make it from scratch and put it in a box (real Task).
+A pizza place that prepackages popular slices. If you order pepperoni (cached), the cashier hands you a slice from the warmer — no box (heap allocation) needed. If you order anchovy-pineapple (fresh), they make it from scratch and put it in a box (real Task).
 
 ## How it works in C#
 
 ```csharp
-// High-frequency API Ã¢â‚¬â€ result is cached 90% of the time.
+// High-frequency API — result is cached 90% of the time.
 public ValueTask<int> GetConfigValueAsync(string key)
 {
     if (_cache.TryGetValue(key, out var cached))
@@ -35,14 +35,14 @@ public ValueTask<int> GetConfigValueAsync(string key)
     return new ValueTask<int>(FetchFromBackendAsync(key));
 }
 
-// Consumer Ã¢â‚¬â€ await ONCE.
+// Consumer — await ONCE.
 int value = await GetConfigValueAsync("max-retries");
 ```
 
 The rules:
 - `ValueTask` can only be **awaited once**. Re-awaiting throws `InvalidOperationException`.
-- Use `v.Preserve()` to escape Ã¢â‚¬â€ wraps the value in a `Task` that can be awaited multiple times.
-- Never `.Result` or `.Wait()` a `ValueTask` Ã¢â‚¬â€ it may be already consumed.
+- Use `v.Preserve()` to escape — wraps the value in a `Task` that can be awaited multiple times.
+- Never `.Result` or `.Wait()` a `ValueTask` — it may be already consumed.
 
 ## Watch out
 
@@ -52,6 +52,6 @@ The rules:
 
 ## Key takeaways
 
-- `ValueTask<T>` Ã¢â€ â€™ struct, zero-allocation for synchronous results.
+- `ValueTask<T>` → struct, zero-allocation for synchronous results.
 - Await exactly once; use `.Preserve()` to convert to a reusable Task.
 - Prefer `Task<T>` unless allocation profiling says otherwise.

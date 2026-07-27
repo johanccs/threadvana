@@ -21,7 +21,7 @@ one worker, called the **main thread**. When you want two things to happen at th
 same time, you hire an extra worker: you start a new thread.
 
 Each thread runs your code line by line, top to bottom, on its own. Two threads can
-be inside your program *at the same moment* Ã¢â‚¬â€ that is the whole point, and also the
+be inside your program *at the same moment* — that is the whole point, and also the
 source of every bug you will learn to fix in this course.
 
 ## The real-world picture
@@ -55,13 +55,13 @@ worker.Join();
 Three ideas to remember:
 - `new Thread(...)` creates the worker but does **not** start it.
 - `Start()` sets it running. The order in which the two threads' lines run is
-  **not guaranteed** Ã¢â‚¬â€ run the demo twice and compare!
+  **not guaranteed** — run the demo twice and compare!
 - `Join()` means "pause my thread until that thread is done".
 
 ## See it move
 
 Press **Run demo**. The timeline shows one swimlane per thread. Watch how the main
-thread and the worker thread overlap in time Ã¢â‚¬â€ both are running at once. Then look at
+thread and the worker thread overlap in time — both are running at once. Then look at
 the `Join` point: the main lane goes grey (waiting) until the worker lane ends.
 
 ## Watch out
@@ -79,4 +79,4 @@ the `Join` point: the main lane goes grey (waiting) until the worker lane ends.
 - Every program starts with one main thread; `new Thread(...)` + `Start()` adds more.
 - Threads run **at the same time**, in an order you cannot predict.
 - `Join()` waits for a thread to finish.
-- Threads share the same memory Ã¢â‚¬â€ great for teamwork, dangerous for shared data.
+- Threads share the same memory — great for teamwork, dangerous for shared data.

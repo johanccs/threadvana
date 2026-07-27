@@ -17,13 +17,13 @@ interview:
 
 The single most important decision in parallel .NET code: is this CPU-bound or I/O-bound?
 
-- **CPU-bound**: the work hammers the CPU (math, sorting, compression) Ã¢â€ â€™ use `Parallel.For`/`ForEach`, PLINQ, or `Task.WhenAll` with truly CPU-bound `Task.Run` calls.
-- **I/O-bound**: the work waits on disk, network, or a database Ã¢â€ â€™ use `async`/`await` with `Task.WhenAll` or `Parallel.ForEachAsync`.
+- **CPU-bound**: the work hammers the CPU (math, sorting, compression) → use `Parallel.For`/`ForEach`, PLINQ, or `Task.WhenAll` with truly CPU-bound `Task.Run` calls.
+- **I/O-bound**: the work waits on disk, network, or a database → use `async`/`await` with `Task.WhenAll` or `Parallel.ForEachAsync`.
 
 Getting this wrong is the #1 cause of thread-pool starvation in production.
 
 ## Key takeaways
 
-- CPU Ã¢â€ â€™ synchronous parallelism (`Parallel.ForEach`, PLINQ).
-- I/O Ã¢â€ â€™ async concurrency (`Task.WhenAll`, `Parallel.ForEachAsync`).
+- CPU → synchronous parallelism (`Parallel.ForEach`, PLINQ).
+- I/O → async concurrency (`Task.WhenAll`, `Parallel.ForEachAsync`).
 - Never mix: `Parallel.ForEach` + `async`. The loop ignores the returned Task.

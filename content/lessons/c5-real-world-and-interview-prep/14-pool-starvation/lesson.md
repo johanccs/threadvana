@@ -13,4 +13,4 @@ interview:
     a: "dotnet-counters monitor  - refresh-interval 1 System.Runtime: ThreadPool Thread Count vs ThreadPool Completed Work Item Count. If Thread Count hits max but Completed Work Item Count flatlines, the pool is starved. Also check dotnet-stack for all thread stacks  -  many threads will be in Monitor.Enter, WaitOne, or synchronous Sleep/Wait calls."
 ---
 
-Write `Solution.StarveThePoolAsync()` Ã¢â‚¬â€ fire 50 `Task.Run` calls that each do a synchronous `Thread.Sleep(500)`, then return `"starved"`.
+Write `Solution.StarveThePoolAsync()` — fire 50 `Task.Run` calls that each do a synchronous `Thread.Sleep(500)`, then return `"starved"`.

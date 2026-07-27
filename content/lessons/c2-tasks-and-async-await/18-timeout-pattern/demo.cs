@@ -12,13 +12,13 @@ public static class Demo
         var work = SlowTaskAsync(cts.Token);
         var delay = Task.Delay(2000);
 
-        Trace.Log("async-suspend", "? Task.WhenAny — racing work vs timeout");
+        Trace.Log("async-suspend", "? Task.WhenAny â€” racing work vs timeout");
         var winner = await Task.WhenAny(work, delay);
 
         if (winner == delay)
         {
             cts.Cancel();
-            Trace.Log("async-resume", "? timeout WON — CancellationToken fires");
+            Trace.Log("async-resume", "? timeout WON â€” CancellationToken fires");
             Trace.Log("message", "Timeout pattern: race work against Task.Delay + cancel on timeout. Work stops cooperatively.");
         }
     }

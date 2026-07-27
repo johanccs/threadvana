@@ -26,7 +26,7 @@ You now know 10+ synchronisation primitives. The interview test is choosing the 
 | Limit concurrency to N | `SemaphoreSlim` | Built-in count, async-friendly |
 | Many readers, rare writes | `ReaderWriterLockSlim` | Reads run in parallel |
 | Wait for N signals | `CountdownEvent` | Exactly N countdowns |
-| Sync phases across threads | `Barrier` | All arrive Ã¢â€ â€™ continue |
+| Sync phases across threads | `Barrier` | All arrive → continue |
 | Simple true/false gate | `ManualResetEventSlim` | Set/Reset, multiple waiters |
 | One-shot per signal | `AutoResetEvent` | Turnstile pattern |
 | Cross-process lock | `Mutex` | Kernel-level, named |
@@ -38,6 +38,6 @@ You now know 10+ synchronisation primitives. The interview test is choosing the 
 
 ## Key takeaways
 
-- Map the PROBLEM to the primitive Ã¢â‚¬â€ don't reach for lock by default.
+- Map the PROBLEM to the primitive — don't reach for lock by default.
 - Interlocked for counters; SemaphoreSlim for concurrency limits.
-- lock is fine 95% of the time Ã¢â‚¬â€ the map is for the other 5%.
+- lock is fine 95% of the time — the map is for the other 5%.

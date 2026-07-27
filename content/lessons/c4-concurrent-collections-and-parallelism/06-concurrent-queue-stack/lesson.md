@@ -19,10 +19,10 @@ interview:
 
 ## Watch out
 
-> **TryDequeue/TryPop return false when empty Ã¢â‚¬â€ never throw.** Always check the return value. A `while (q.TryDequeue(out var item))` loop is the standard consume pattern.
+> **TryDequeue/TryPop return false when empty — never throw.** Always check the return value. A `while (q.TryDequeue(out var item))` loop is the standard consume pattern.
 
 ## Key takeaways
 
-- `ConcurrentQueue` Ã¢â€ â€™ FIFO, lock-free, safe for multiple producers and consumers.
-- `ConcurrentStack` Ã¢â€ â€™ LIFO, lock-free, slightly faster.
-- Always use `TryDequeue`/`TryPop`/`TryPeek` Ã¢â‚¬â€ never index or enumerate while mutating.
+- `ConcurrentQueue` → FIFO, lock-free, safe for multiple producers and consumers.
+- `ConcurrentStack` → LIFO, lock-free, slightly faster.
+- Always use `TryDequeue`/`TryPop`/`TryPeek` — never index or enumerate while mutating.

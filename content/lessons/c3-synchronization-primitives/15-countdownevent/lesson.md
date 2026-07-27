@@ -15,14 +15,14 @@ interview:
 
 ## What is it?
 
-`CountdownEvent` counts DOWN from N to 0. Workers call `Signal()` as they finish. The coordinator calls `Wait()` Ã¢â‚¬â€ which blocks until the count reaches zero. It's the barrier you lower behind the last runner.
+`CountdownEvent` counts DOWN from N to 0. Workers call `Signal()` as they finish. The coordinator calls `Wait()` — which blocks until the count reaches zero. It's the barrier you lower behind the last runner.
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ 5 workers each do some work, then Signal. The coordinator Waits and prints "All done!" after the fifth Signal.
+Press **Run demo** — 5 workers each do some work, then Signal. The coordinator Waits and prints "All done!" after the fifth Signal.
 
 ## Key takeaways
 
-- `new CountdownEvent(N)` Ã¢â€ â€™ Signal N times to release Wait().
+- `new CountdownEvent(N)` → Signal N times to release Wait().
 - Wait() blocks the calling thread; no async version.
-- Single-use Ã¢â‚¬â€ once zero, it stays zero.
+- Single-use — once zero, it stays zero.

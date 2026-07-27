@@ -16,7 +16,7 @@ interview:
 
 ## What is it?
 
-A deadlock is the ultimate circular dependency: thread A holds lock #1 and wants lock #2; thread B holds lock #2 and wants lock #1. Neither can progress. The process freezes Ã¢â‚¬â€ no exceptions, no crashes, just a silent hang.
+A deadlock is the ultimate circular dependency: thread A holds lock #1 and wants lock #2; thread B holds lock #2 and wants lock #1. Neither can progress. The process freezes — no exceptions, no crashes, just a silent hang.
 
 ## The classic deadlock scenario
 
@@ -24,7 +24,7 @@ A deadlock is the ultimate circular dependency: thread A holds lock #1 and wants
 // Thread A
 lock (lockA) { lock (lockB) { Transfer(); } }
 
-// Thread B Ã¢â‚¬â€ opposite order!
+// Thread B — opposite order!
 lock (lockB) { lock (lockA) { Transfer(); } }
 
 // If both start at the same moment:
@@ -38,7 +38,7 @@ The fix: **consistent ordering**. Decide a rule (e.g., "always lock `lockA` befo
 ## How to defend
 
 ```
-Rule 1: Keep lock count small Ã¢â‚¬â€ every extra lock multiplies deadlock risk.
+Rule 1: Keep lock count small — every extra lock multiplies deadlock risk.
 Rule 2: Always acquire locks in the same order across all code paths.
 Rule 3: If order CANNOT be fixed, use Monitor.TryEnter with a timeout:
          if (!Monitor.TryEnter(lockB, 100)) { Monitor.Exit(lockA); retry; }
@@ -47,13 +47,13 @@ Rule 4: Never call external/unknown code while holding a lock (it might lock bac
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ two threads lock in opposite orders. The timeline shows both entering their first lock, then both stuck forever waiting for the second. After 2 seconds the sandbox timeouts and reports the hang.
+Press **Run demo** — two threads lock in opposite orders. The timeline shows both entering their first lock, then both stuck forever waiting for the second. After 2 seconds the sandbox timeouts and reports the hang.
 
 ## Watch out
 
-> **The Thread.Join deadlock.** If thread A calls threadB.Join() while threadB calls threadA.Join(), same deadlock Ã¢â‚¬â€ just using threads instead of locks. Always Join in a known, consistent order.
+> **The Thread.Join deadlock.** If thread A calls threadB.Join() while threadB calls threadA.Join(), same deadlock — just using threads instead of locks. Always Join in a known, consistent order.
 
-> **SemaphoreSlim can deadlock too.** If thread A holds a semaphore slot and then awaits another semaphore that thread B holds Ã¢â‚¬â€ while B is waiting on A's semaphore Ã¢â‚¬â€ same circular wait. Same prevention: consistent ordering.
+> **SemaphoreSlim can deadlock too.** If thread A holds a semaphore slot and then awaits another semaphore that thread B holds — while B is waiting on A's semaphore — same circular wait. Same prevention: consistent ordering.
 
 ## Key takeaways
 

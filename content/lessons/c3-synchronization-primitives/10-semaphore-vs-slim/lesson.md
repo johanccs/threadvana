@@ -15,20 +15,20 @@ interview:
 
 ## What is it?
 
-You already used `SemaphoreSlim` in c3-l03. But .NET has TWO semaphores Ã¢â‚¬â€ `Semaphore` (the kernel-backed original) and `SemaphoreSlim` (the lightweight, modern one). The `Slim` suffix tells you everything: same API surface, zero kernel trips.
+You already used `SemaphoreSlim` in c3-l03. But .NET has TWO semaphores — `Semaphore` (the kernel-backed original) and `SemaphoreSlim` (the lightweight, modern one). The `Slim` suffix tells you everything: same API surface, zero kernel trips.
 
-`Semaphore` wraps a Windows kernel semaphore object (or a POSIX semaphore on Linux). Every call goes through the OS Ã¢â‚¬â€ fast enough for occasional use, but for a tight loop it burns a kernel transition. `SemaphoreSlim` lives entirely in the CLR, using atomic operations and managed wait queues.
+`Semaphore` wraps a Windows kernel semaphore object (or a POSIX semaphore on Linux). Every call goes through the OS — fast enough for occasional use, but for a tight loop it burns a kernel transition. `SemaphoreSlim` lives entirely in the CLR, using atomic operations and managed wait queues.
 
 ## How it works
 
 ```csharp
-// Heavyweight Ã¢â‚¬â€ OS kernel object, cross-process, named.
+// Heavyweight — OS kernel object, cross-process, named.
 using var osSem = new Semaphore(3, 3, "Global\\MyAppLimit");
 osSem.WaitOne(); // kernel transition
 // ... work ...
 osSem.Release();
 
-// Lightweight Ã¢â‚¬â€ pure CLR, async, fast.
+// Lightweight — pure CLR, async, fast.
 using var slim = new SemaphoreSlim(3, 3);
 await slim.WaitAsync(); // no kernel transition
 // ... work ...
@@ -39,10 +39,10 @@ slim.Release();
 
 > **Named semaphores can leak.** The OS persists them until the last handle is closed. If your app crashes, the named semaphore may exist forever with a count of 0, preventing new instances from starting. Always pass a timeout to WaitOne for named semaphores.
 
-> **SemaphoreSlim is disposable.** It allocates a small internal wait-handle on first contention Ã¢â‚¬â€ dispose it when you are done.
+> **SemaphoreSlim is disposable.** It allocates a small internal wait-handle on first contention — dispose it when you are done.
 
 ## Key takeaways
 
-- `SemaphoreSlim` Ã¢â€ â€™ fast, in-process, supports `WaitAsync`. Use this.
-- `Semaphore` Ã¢â€ â€™ kernel-backed, cross-process, supports named instances. Niche.
+- `SemaphoreSlim` → fast, in-process, supports `WaitAsync`. Use this.
+- `Semaphore` → kernel-backed, cross-process, supports named instances. Niche.
 - Both limit concurrency to N simultaneous entries.

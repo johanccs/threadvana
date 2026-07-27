@@ -7,7 +7,7 @@ public static class Demo
 {
     public static async Task RunAsync()
     {
-        Trace.Log("work-start", "? IAsyncEnumerable — producer yields items one at a time");
+        Trace.Log("work-start", "? IAsyncEnumerable â€” producer yields items one at a time");
 
         await foreach (var reading in ReadSensorsAsync())
         {

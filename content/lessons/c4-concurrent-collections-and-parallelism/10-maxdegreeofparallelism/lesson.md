@@ -15,14 +15,14 @@ interview:
 
 ## What is it?
 
-`ParallelOptions.MaxDegreeOfParallelism` is the concurrency cap for `Parallel.For`, `Parallel.ForEach`, and PLINQ. It's not the number of threads created Ã¢â‚¬â€ it's the maximum number of concurrent operations. The partitioner may still use fewer if the input is smaller than the cap.
+`ParallelOptions.MaxDegreeOfParallelism` is the concurrency cap for `Parallel.For`, `Parallel.ForEach`, and PLINQ. It's not the number of threads created — it's the maximum number of concurrent operations. The partitioner may still use fewer if the input is smaller than the cap.
 
 ## Watch out
 
-> **Environment.ProcessorCount returns logical cores (hyperthreads), not physical.** On a 4-core hyperthreaded CPU, it's 8. For pure CPU work, capping at physical core count may be better Ã¢â‚¬â€ but you must measure.
+> **Environment.ProcessorCount returns logical cores (hyperthreads), not physical.** On a 4-core hyperthreaded CPU, it's 8. For pure CPU work, capping at physical core count may be better — but you must measure.
 
 ## Key takeaways
 
 - Cap parallelism to avoid starving other work on the machine.
 - Common starting point: `ProcessorCount - 1`.
-- Always measure Ã¢â‚¬â€ contention and cache effects can make MORE threads SLOWER.
+- Always measure — contention and cache effects can make MORE threads SLOWER.

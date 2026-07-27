@@ -14,6 +14,6 @@ interview:
     a: "The simplest fix is consistent lock ordering  -  always acquire locks in the SAME order everywhere. Never lock A then B in one place and B then A in another. Use timeouts, reduce lock scope, or use lock-free data structures."
 ---
 
-Two threads each grab one lock and wait for the other's lock Ã¢â‚¬â€ classic deadlock.
+Two threads each grab one lock and wait for the other's lock — classic deadlock.
 The demo shows it on the timeline. The exercise gives you deadlocked code and asks
 you to fix the lock order.

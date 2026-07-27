@@ -15,24 +15,24 @@ interview:
 
 ## What is it?
 
-`async void` is the dangerous sibling of `async Task`. It exists for exactly one reason: event handlers must return `void`, not `Task`. But `async void` has two fatal flaws: (1) the caller cannot `await` it Ã¢â‚¬â€ it is true fire-and-forget, and (2) exceptions are not captured into a Task Ã¢â‚¬â€ they crash the process if unhandled.
+`async void` is the dangerous sibling of `async Task`. It exists for exactly one reason: event handlers must return `void`, not `Task`. But `async void` has two fatal flaws: (1) the caller cannot `await` it — it is true fire-and-forget, and (2) exceptions are not captured into a Task — they crash the process if unhandled.
 
 The rule is iron: **never async void outside an event handler.**
 
 ## The real-world picture
 
-A firework with no fuse. You light it and immediately turn your back Ã¢â‚¬â€ you cannot watch it, cannot stop it, and if it explodes in your face, you won't know until you feel the burn. `async Task` is a firework with a long fuse and a launcher you can watch. `async void` is a lit match thrown over your shoulder.
+A firework with no fuse. You light it and immediately turn your back — you cannot watch it, cannot stop it, and if it explodes in your face, you won't know until you feel the burn. `async Task` is a firework with a long fuse and a launcher you can watch. `async void` is a lit match thrown over your shoulder.
 
 ## How it works in C#
 
 ```csharp
-// ONLY acceptable use Ã¢â‚¬â€ UI event handler:
+// ONLY acceptable use — UI event handler:
 private async void SaveButton_Click(object sender, EventArgs e)
 {
-    await SaveAsync(); // works, but if SaveAsync throws Ã¢â€ â€™ process crash
+    await SaveAsync(); // works, but if SaveAsync throws → process crash
 }
 
-// WRONG Ã¢â‚¬â€ should be async Task:
+// WRONG — should be async Task:
 async void FetchDataAsync() // caller cannot await, cannot catch
 {
     await HttpClient.GetAsync("...");
@@ -41,18 +41,18 @@ async void FetchDataAsync() // caller cannot await, cannot catch
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ six fire-and-forget workers start, with no coordination. Three are `async Task` (their completion is tracked), three are `async void` (the demo has no way to know when they finish). Watch the timeline: the void workers appear, run, and vanish Ã¢â‚¬â€ untrackable.
+Press **Run demo** — six fire-and-forget workers start, with no coordination. Three are `async Task` (their completion is tracked), three are `async void` (the demo has no way to know when they finish). Watch the timeline: the void workers appear, run, and vanish — untrackable.
 
 ## Watch out
 
 > **async void + await = untracked exception.** If the awaited task faults, the exception crashes the process. Use `try/catch` INSIDE every async void method and log + swallow (never re-throw).
 
-> **Unit testing async void is impossible.** xUnit/NUnit cannot await void methods and cannot detect failures inside them. If your method is `async void` for testing reasons, refactor to `async Task` Ã¢â‚¬â€ test frameworks handle it.
+> **Unit testing async void is impossible.** xUnit/NUnit cannot await void methods and cannot detect failures inside them. If your method is `async void` for testing reasons, refactor to `async Task` — test frameworks handle it.
 
 > **async void in a fire-and-forget background job is a double trap.** The exception crash might not happen for minutes, making it a time-delayed heisenbug.
 
 ## Key takeaways
 
-- `async void` Ã¢â€ â€™ only for event handlers. Everywhere else: `async Task`.
-- Exceptions crash the process Ã¢â‚¬â€ always try/catch inside them.
+- `async void` → only for event handlers. Everywhere else: `async Task`.
+- Exceptions crash the process — always try/catch inside them.
 - Cannot be awaited, composed, or tested. `async Task` for everything else.

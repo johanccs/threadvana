@@ -15,14 +15,14 @@ interview:
 
 ## What is it?
 
-A `Barrier` coordinates N threads into synchronised phases. Each thread calls `SignalAndWait()` Ã¢â‚¬â€ the barrier blocks until ALL N have done so. Then it optionally fires a post-phase callback (e.g., "phase 2 complete"), and releases all threads again.
+A `Barrier` coordinates N threads into synchronised phases. Each thread calls `SignalAndWait()` — the barrier blocks until ALL N have done so. Then it optionally fires a post-phase callback (e.g., "phase 2 complete"), and releases all threads again.
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ 3 workers complete 3 phases each. Each phase: work Ã¢â€ â€™ SignalAndWait Ã¢â€ â€™ barrier fires when all 3 arrive Ã¢â€ â€™ next phase.
+Press **Run demo** — 3 workers complete 3 phases each. Each phase: work → SignalAndWait → barrier fires when all 3 arrive → next phase.
 
 ## Key takeaways
 
-- `new Barrier(N, action)` Ã¢â€ â€™ N participants, optional per-phase action.
-- `SignalAndWait()` Ã¢â€ â€™ blocks until all participants arrive at the barrier.
+- `new Barrier(N, action)` → N participants, optional per-phase action.
+- `SignalAndWait()` → blocks until all participants arrive at the barrier.
 - Use for phased parallel algorithms (image processing, parallel matrix operations).

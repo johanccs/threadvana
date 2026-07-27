@@ -23,6 +23,6 @@ interview:
 
 ## Key takeaways
 
-- Per-thread local storage Ã¢â€ â€™ fast for add+take on the same thread.
-- Steals from other threads when local is empty Ã¢â‚¬â€ best for work-stealing patterns.
-- No FIFO/LIFO guarantee Ã¢â‚¬â€ use `ConcurrentQueue` when order matters.
+- Per-thread local storage → fast for add+take on the same thread.
+- Steals from other threads when local is empty — best for work-stealing patterns.
+- No FIFO/LIFO guarantee — use `ConcurrentQueue` when order matters.

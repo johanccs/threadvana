@@ -11,4 +11,4 @@ interview:
     a: "1. Capture a dump: dotnet-dump collect -p <pid>. 2. Analyse: dotnet-dump analyze <dump>  -  clrthreads to see all managed threads. 3. Look for threads with long wait times, held locks, or Monitor.Enter at the bottom of the stack. 4. Use dumpheap and gcroot to find large object leaks. 5. If it's a deadlock, the parallel stacks view shows circular waits. The key mindset: don't guess  -  the dump has the answer."
 ---
 
-Conceptual lesson Ã¢â‚¬â€ no exercise. Return `"ok"` from `Solution.Analyze()`.
+Conceptual lesson — no exercise. Return `"ok"` from `Solution.Analyze()`.

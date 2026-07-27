@@ -73,4 +73,4 @@ Press **Run demo**. The thread-pool visualization lights up: watch multiple work
 - PLINQ splits your collection into chunks; each chunk runs on a different thread.
 - Results are **unordered by default**; use .AsOrdered() only when you need the original order.
 - Pure functions only - no side effects inside PLINQ lambdas.
-- PLINQ is for **big, CPU-bound** collections. For small or I/O-bound work, use sync/wait + Task.WhenAll instead.
+- PLINQ is for **big, CPU-bound** collections. For small or I/O-bound work, use sync/wait + Task.WhenAll instead.

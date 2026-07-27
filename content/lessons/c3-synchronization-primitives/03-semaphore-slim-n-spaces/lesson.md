@@ -22,14 +22,14 @@ code at once. You create it with N permits: `new SemaphoreSlim(2)`.
 `WaitAsync()` takes a permit (or waits for one to free up); `Release()` hands
 it back.
 
-In *lock Ã¢â‚¬â€ One Key to the Bathroom* the key had exactly one copy. A semaphore
+In *lock — One Key to the Bathroom* the key had exactly one copy. A semaphore
 is the same idea with N copies of the key.
 
 ## The real-world picture
 
 A parking lot with N spaces. Cars drive in while there is a free space; when
 the lot is full, the rest queue at the entrance. One car leaves, one waiting
-car drives in. The lot does not care WHO parks Ã¢â‚¬â€ only HOW MANY.
+car drives in. The lot does not care WHO parks — only HOW MANY.
 
 ## How it works in C#
 
@@ -53,10 +53,10 @@ public static async Task CallApiAsync()
 ```
 
 The `try/finally` is not decoration: if the work throws and `Release()` is
-skipped, a space is lost FOREVER Ã¢â‚¬â€ until nobody gets in.
+skipped, a space is lost FOREVER — until nobody gets in.
 
 `SemaphoreSlim` vs `Semaphore`, in one line: Slim is the modern, lighter,
-async-friendly one Ã¢â‚¬â€ reach for it by default.
+async-friendly one — reach for it by default.
 
 ## See it move
 
@@ -68,7 +68,7 @@ instantly lets one waiting car in. At every single moment: at most 2 inside.
 
 - You might forget `Release()`, or lose it when an exception flies. One missing
   Release = one less space forever. Always `try/finally`.
-- You might write `new SemaphoreSlim(1)`. That is a lock with extra steps Ã¢â‚¬â€ if
+- You might write `new SemaphoreSlim(1)`. That is a lock with extra steps — if
   you want exactly one thread inside, use `lock`.
 - You might call the blocking `.Wait()` inside async code. `WaitAsync()` queues
   without parking a thread.
@@ -77,6 +77,6 @@ instantly lets one waiting car in. At every single moment: at most 2 inside.
 
 - `SemaphoreSlim(n)` = at most n threads inside at once; the rest queue.
 - `await WaitAsync()` drives in; `Release()` drives out.
-- Always Release in `finally` Ã¢â‚¬â€ a lost permit never comes back.
+- Always Release in `finally` — a lost permit never comes back.
 - n = 1 is a lock; n > 1 is the semaphore's superpower.
 - Prefer SemaphoreSlim over Semaphore: lighter and async-friendly.

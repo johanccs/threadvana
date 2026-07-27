@@ -5,7 +5,7 @@ public static class Demo
 {
     public static async Task RunAsync()
     {
-        Trace.Log("work-start", "? call fails — transient error");
+        Trace.Log("work-start", "? call fails â€” transient error");
         var attempt = 0;
         while (attempt < 3)
         {
@@ -20,7 +20,7 @@ public static class Demo
                 attempt++;
                 if (attempt >= 3) { Trace.Log("message", "all retries exhausted"); break; }
                 var delay = 100 * (int)Math.Pow(2, attempt);
-                Trace.Log("async-suspend", $"? attempt {attempt} failed — backing off {delay}ms");
+                Trace.Log("async-suspend", $"? attempt {attempt} failed â€” backing off {delay}ms");
                 await Task.Delay(delay);
             }
         }

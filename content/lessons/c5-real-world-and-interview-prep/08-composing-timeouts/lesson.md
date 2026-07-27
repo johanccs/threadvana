@@ -19,6 +19,6 @@ Real production calls layer three things: the user's cancellation (they closed t
 
 ## Key takeaways
 
-- `CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutToken)` Ã¢â€ â€™ either cancels.
-- `Task.WhenAny(call, Task.Delay(timeout))` Ã¢â€ â€™ detect timeout, cancel linked source.
+- `CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutToken)` → either cancels.
+- `Task.WhenAny(call, Task.Delay(timeout))` → detect timeout, cancel linked source.
 - Dispose both sources after the call.

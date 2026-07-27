@@ -16,13 +16,13 @@ interview:
 
 ## What is it?
 
-`Task.Run` returns `Task` when the work has no return value ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it is a fire-and-forget signal. But most real work produces a result: a computed value, a parsed object, a fetched price. That is when you use `Task<T>`.
+`Task.Run` returns `Task` when the work has no return value — it is a fire-and-forget signal. But most real work produces a result: a computed value, a parsed object, a fetched price. That is when you use `Task<T>`.
 
-The `T` in `Task<T>` is the type of the value the task will produce. When you `await` the task, you get that value directly ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no casting, no `.Result`.
+The `T` in `Task<T>` is the type of the value the task will produce. When you `await` the task, you get that value directly — no casting, no `.Result`.
 
 ## The real-world picture
 
-Placing an order at a coffee shop: "Task" is the buzzer that vibrates when your drink is ready. `Task<Latte>` is the same buzzer, but when it vibrates, you walk up and pick up an actual `Latte` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â not just "something is done."
+Placing an order at a coffee shop: "Task" is the buzzer that vibrates when your drink is ready. `Task<Latte>` is the same buzzer, but when it vibrates, you walk up and pick up an actual `Latte` — not just "something is done."
 
 ## How it works in C#
 
@@ -30,7 +30,7 @@ Placing an order at a coffee shop: "Task" is the buzzer that vibrates when your 
 Task<int> answerTask = Task.Run(() =>
 {
     Thread.Sleep(500); // pretend heavy math
-    return 42;         // int returned ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Task<int>
+    return 42;         // int returned → Task<int>
 });
 
 // ... main thread can do other work here ...
@@ -40,9 +40,9 @@ Console.WriteLine(answer); // 42
 ```
 
 Key points:
-1. The lambda inside `Task.Run` returns `int` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the compiler infers `Task<int>`.
+1. The lambda inside `Task.Run` returns `int` — the compiler infers `Task<int>`.
 2. `await` unwraps the `Task<int>` into an `int`.
-3. If the task threw, `await` re-throws the exception ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the `T` is never produced.
+3. If the task threw, `await` re-throws the exception — the `T` is never produced.
 
 You can also use `Task.FromResult(value)` to create an already-completed `Task<T>`:
 
@@ -53,12 +53,12 @@ int x = await cached; // immediate
 
 ## Watch out
 
-> **Never use `.Result` if you can use `await`.** `.Result` blocks the calling thread until the value is ready ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it is a synchronous wait disguised as an async operation. Same deadlock risks as `.Wait()`.
+> **Never use `.Result` if you can use `await`.** `.Result` blocks the calling thread until the value is ready — it is a synchronous wait disguised as an async operation. Same deadlock risks as `.Wait()`.
 
-> **`await task` when task is already completed acts like `.Result` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â but without blocking.** It returns the cached result synchronously on the same thread, so it is always safe.
+> **`await task` when task is already completed acts like `.Result` — but without blocking.** It returns the cached result synchronously on the same thread, so it is always safe.
 
 ## Key takeaways
 
-- `Task<T>` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a promise that resolves to a T. Use it when your work returns a value.
+- `Task<T>` — a promise that resolves to a T. Use it when your work returns a value.
 - `await task` unwraps the value (or throws if the task faulted).
 - `.Result` exists for edge cases (e.g., a synchronous method calling into async code), but it has all the same deadlock risks.

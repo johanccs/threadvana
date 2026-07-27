@@ -15,14 +15,14 @@ interview:
 
 ## What is it?
 
-`AutoResetEvent` is a turnstile: each `Set()` loads ONE ticket; exactly ONE waiting thread passes, then the gate locks again. It's the simplest form of producer-consumer signalling Ã¢â‚¬â€ every signal produces exactly one consumer pass.
+`AutoResetEvent` is a turnstile: each `Set()` loads ONE ticket; exactly ONE waiting thread passes, then the gate locks again. It's the simplest form of producer-consumer signalling — every signal produces exactly one consumer pass.
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ a producer calls Set() 4 times, spaced 200ms apart. Eight consumers WaitOne. Exactly 4 pass through, one per Set(). The remaining 4 are still waiting.
+Press **Run demo** — a producer calls Set() 4 times, spaced 200ms apart. Eight consumers WaitOne. Exactly 4 pass through, one per Set(). The remaining 4 are still waiting.
 
 ## Key takeaways
 
-- Turnstile: Set() Ã¢â€ â€™ one thread passes, then auto-closes.
-- `WaitOne()` blocks the thread Ã¢â‚¬â€ no async.
+- Turnstile: Set() → one thread passes, then auto-closes.
+- `WaitOne()` blocks the thread — no async.
 - For async signalling, use `SemaphoreSlim(0, int.MaxValue)` with Release/WaitAsync.

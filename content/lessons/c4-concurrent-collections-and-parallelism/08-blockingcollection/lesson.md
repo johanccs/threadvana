@@ -15,14 +15,14 @@ interview:
 
 ## What is it?
 
-`BlockingCollection<T>` is a thread-safe queue with a lid Ã¢â‚¬â€ it blocks producers when full and consumers when empty. No manual signaling, no polling, no semaphores. Perfect for pipelines where one stage produces items faster than the next stage can consume them. Just set a capacity and the back-pressure is automatic.
+`BlockingCollection<T>` is a thread-safe queue with a lid — it blocks producers when full and consumers when empty. No manual signaling, no polling, no semaphores. Perfect for pipelines where one stage produces items faster than the next stage can consume them. Just set a capacity and the back-pressure is automatic.
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ a fast producer adds 10 items to a BlockingCollection capped at 3. A slow consumer takes one every 400ms. The producer blocks when the buffer hits 3, waiting for the consumer to free a slot.
+Press **Run demo** — a fast producer adds 10 items to a BlockingCollection capped at 3. A slow consumer takes one every 400ms. The producer blocks when the buffer hits 3, waiting for the consumer to free a slot.
 
 ## Key takeaways
 
-- `new BlockingCollection<T>(capacity)` Ã¢â‚¬â€ bounded buffer.
+- `new BlockingCollection<T>(capacity)` — bounded buffer.
 - `Add()` blocks producer when full; `Take()` blocks consumer when empty.
 - `CompleteAdding()` signals end-of-input; `GetConsumingEnumerable()` auto-exits.

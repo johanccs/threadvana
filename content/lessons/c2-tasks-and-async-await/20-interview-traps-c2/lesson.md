@@ -15,7 +15,7 @@ interview:
 
 ## What is it?
 
-This lesson collects the sharp edges from all of Category 2 into one review Ã¢â‚¬â€ the gotchas interviewers love because they reveal whether you truly understand async, or just memorised the keywords.
+This lesson collects the sharp edges from all of Category 2 into one review — the gotchas interviewers love because they reveal whether you truly understand async, or just memorised the keywords.
 
 None of the individual points are new; the value here is seeing them SIDE BY SIDE so you can pattern-match quickly under interview pressure.
 
@@ -24,21 +24,21 @@ None of the individual points are new; the value here is seeing them SIDE BY SID
 | Trap | Why it bites | The fix |
 |------|-------------|---------|
 | `async void` | Exceptions crash the process; cannot be awaited | `async Task` everywhere except event handlers |
-| `.Result` / `.Wait()` | Blocks thread; deadlocks with SynchronizationContext | `await` Ã¢â‚¬â€ async all the way down |
+| `.Result` / `.Wait()` | Blocks thread; deadlocks with SynchronizationContext | `await` — async all the way down |
 | Missing `CancellationToken` | Operation runs forever, no escape hatch | Pass a token; honour `ThrowIfCancellationRequested` |
 | `GetOrAdd` with side effects | Factory runs more than once | Wrap in `Lazy<T>` |
 | `Task.Run` for I/O | Burns a pool thread doing nothing while I/O completes | Use truly async I/O methods |
 | `ContinueWith` without scheduler | Continuation may run on wrong thread | Prefer `await`; if you must, pass a scheduler |
-| `await` inside `lock` | The thread may change after `await` Ã¢â‚¬â€ lock violations | `SemaphoreSlim(1,1).WaitAsync()` |
-| `ConfigureAwait(false)` in app code | UI updates run on pool thread Ã¢â€ â€™ crash | Keep the default in UI/controller code |
+| `await` inside `lock` | The thread may change after `await` — lock violations | `SemaphoreSlim(1,1).WaitAsync()` |
+| `ConfigureAwait(false)` in app code | UI updates run on pool thread → crash | Keep the default in UI/controller code |
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ each row of the trap sheet plays out in a timeline. Watch `.Result` hog a pool thread while the awaiters breeze past. Then watch an `async void` worker throw silently into the void.
+Press **Run demo** — each row of the trap sheet plays out in a timeline. Watch `.Result` hog a pool thread while the awaiters breeze past. Then watch an `async void` worker throw silently into the void.
 
 ## Key takeaways
 
-- Know WHY, not just the rule Ã¢â‚¬â€ interviewers probe for depth.
+- Know WHY, not just the rule — interviewers probe for depth.
 - `async Task` all the way up; `async void` only at the very top for events.
 - If you block on async, you undo all the benefits. `await` or re-architect.
-- Progress, timeout, cancellation Ã¢â‚¬â€ every async pattern has a standard answer.
+- Progress, timeout, cancellation — every async pattern has a standard answer.

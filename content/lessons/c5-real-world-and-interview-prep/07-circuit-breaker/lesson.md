@@ -15,10 +15,10 @@ interview:
 
 ## What is it?
 
-A circuit breaker wraps every call to an external dependency. When failures exceed a threshold in a time window, the breaker "opens" Ã¢â‚¬â€ all subsequent calls fail instantly without hitting the backend. After a cooldown period, it transitions to half-open Ã¢â‚¬â€ one test call goes through. If it succeeds, the breaker closes. If it fails, it stays open.
+A circuit breaker wraps every call to an external dependency. When failures exceed a threshold in a time window, the breaker "opens" — all subsequent calls fail instantly without hitting the backend. After a cooldown period, it transitions to half-open — one test call goes through. If it succeeds, the breaker closes. If it fails, it stays open.
 
 ## Key takeaways
 
-- Three states: Closed Ã¢â€ â€™ Open (threshold reached) Ã¢â€ â€™ HalfOpen (cooldown) Ã¢â€ â€™ Closed/Open.
-- Fails fast when open Ã¢â‚¬â€ no cascading waits.
+- Three states: Closed → Open (threshold reached) → HalfOpen (cooldown) → Closed/Open.
+- Fails fast when open — no cascading waits.
 - Protects both your service and the downstream from overload.

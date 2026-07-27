@@ -32,12 +32,12 @@ if (!createdNew)
 
 ## Watch out
 
-> **Always Release the mutex.** Unlike lock (Monitor), the CLR does not auto-release on thread exit Ã¢â‚¬â€ you must call ReleaseMutex explicitly, ideally in a try/finally block.
+> **Always Release the mutex.** Unlike lock (Monitor), the CLR does not auto-release on thread exit — you must call ReleaseMutex explicitly, ideally in a try/finally block.
 
 > **Named mutex naming rules.** On Windows, prefix with "Global\" to make it accessible across sessions (e.g., services), or "Local\" for the current session only. Names are case-sensitive.
 
 ## Key takeaways
 
-- `Mutex` Ã¢â€ â€™ kernel-level, cross-process mutual exclusion.
+- `Mutex` → kernel-level, cross-process mutual exclusion.
 - Single-instance guard: `new Mutex(true, "name", out createdNew)`.
 - Must always Release; abandoned mutexes throw `AbandonedMutexException`.

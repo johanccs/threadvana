@@ -15,14 +15,14 @@ interview:
 
 ## What is it?
 
-`ThreadLocal<T>` gives each thread its own private slot ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â like a post-office box. One thread writes a value; another thread reading the SAME property sees its own value. No locking needed because the data never crosses threads.
+`ThreadLocal<T>` gives each thread its own private slot — like a post-office box. One thread writes a value; another thread reading the SAME property sees its own value. No locking needed because the data never crosses threads.
 
 ## See it move
 
-Press **Run demo** ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â 4 threads, each incrementing their own ThreadLocal<int> 100 times. The main thread sums all thread-local values and reports 400 (100 ÃƒÆ’Ã†'ÃƒÂ¢Ã¢â€šÂ¬" 4). No race because each thread has its own counter.
+Press **Run demo** — 4 threads, each incrementing their own ThreadLocal<int> 100 times. The main thread sums all thread-local values and reports 400 (100 ÃÆ'â€" 4). No race because each thread has its own counter.
 
 ## Key takeaways
 
-- `new ThreadLocal<T>(factory)` ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ factory runs once per thread.
+- `new ThreadLocal<T>(factory)` → factory runs once per thread.
 - `.Value` accesses the calling thread's private copy.
 - Thread-safe by isolation, not by locking.

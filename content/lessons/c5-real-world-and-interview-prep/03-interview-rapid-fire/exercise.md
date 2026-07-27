@@ -18,7 +18,7 @@ correct answer letter (A, B, C, or D).
    cannot be awaited and exceptions crash the process)
 8. Two locks, reversed order in two threads. What can happen? (A: corruption;
    B: deadlock; C: race condition; D: nothing, they serialize)
-9. Which is thread-safe without any extra locks? (A: List&lt;int&gt;;
+9. Which is thread-safe without any extra locks? (A: List<int>;
    B: Dictionary; C: ConcurrentDictionary; D: Queue)
 10. `_shouldStop` is a `bool` checked in a loop from another thread. Without `volatile`
     the loop might never see the change. Why? (A: deadlock; B: compiler/CPU caching;

@@ -17,14 +17,14 @@ interview:
 
 `AddOrUpdate` is the thread-safe "upsert" for `ConcurrentDictionary`. You give it two factories: one to CREATE the value when the key is missing, and one to UPDATE it when the key exists. The update receives the old value, so you can compute `old + delta` atomically.
 
-Unlike `GetOrAdd`, the update factory never runs redundantly Ã¢â‚¬â€ it's guarded by per-key locking.
+Unlike `GetOrAdd`, the update factory never runs redundantly — it's guarded by per-key locking.
 
 ## Watch out
 
-> **The updateFactory returns the NEW value, it doesn't mutate in-place.** If the old value is a mutable object, `AddOrUpdate` does not prevent another thread from reading a stale reference Ã¢â‚¬â€ use immutable structures alongside it.
+> **The updateFactory returns the NEW value, it doesn't mutate in-place.** If the old value is a mutable object, `AddOrUpdate` does not prevent another thread from reading a stale reference — use immutable structures alongside it.
 
 ## Key takeaways
 
-- `AddOrUpdate(key, addFactory, updateFactory)` Ã¢â‚¬â€ atomic upsert.
-- Update factory gets `(key, oldValue)` Ã¢â€ â€™ compute and return new.
+- `AddOrUpdate(key, addFactory, updateFactory)` — atomic upsert.
+- Update factory gets `(key, oldValue)` → compute and return new.
 - Safer for side-effect-heavy updates than `GetOrAdd`.

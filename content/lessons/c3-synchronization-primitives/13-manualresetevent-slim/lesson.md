@@ -19,10 +19,10 @@ interview:
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ two threads Wait on a gate. After 500ms, Set() opens it Ã¢â‚¬â€ both pass. Then Reset() closes it again, and a third thread blocks.
+Press **Run demo** — two threads Wait on a gate. After 500ms, Set() opens it — both pass. Then Reset() closes it again, and a third thread blocks.
 
 ## Key takeaways
 
 - `Set()` opens the gate; `Reset()` closes it.
 - `Manual` = stays open until explicitly Reset; `Auto` = releases one and closes.
-- `Wait()` blocks the calling thread Ã¢â‚¬â€ no async version. For async, use `TaskCompletionSource`.
+- `Wait()` blocks the calling thread — no async version. For async, use `TaskCompletionSource`.

@@ -72,7 +72,7 @@ over in a blink.
   nobody is waiting, your thread just continues. Yield is politeness, not
   synchronization.
 - You might use `Sleep` to "wait for" another thread's result. That is a
-  guess, and guesses flake - use `Join` (see "Join Ã¢â‚¬â€ Waiting for a Worker to
+  guess, and guesses flake - use `Join` (see "Join — Waiting for a Worker to
   Finish"). Sleep is for pacing, not for waiting on results.
 
 ## Key takeaways

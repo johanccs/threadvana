@@ -16,9 +16,9 @@ interview:
 
 ## What is it?
 
-Exceptions thrown inside `async` methods behave differently from synchronous methods. The key rule: the exception is **captured** inside the `Task` the moment the method returns a Task to the caller. It does NOT propagate up the call stack immediately Ã¢â‚¬â€ because the caller might be long gone when the task faults.
+Exceptions thrown inside `async` methods behave differently from synchronous methods. The key rule: the exception is **captured** inside the `Task` the moment the method returns a Task to the caller. It does NOT propagate up the call stack immediately — because the caller might be long gone when the task faults.
 
-When you `await` a faulted task, the exception is **re-thrown** at the `await` point Ã¢â‚¬â€ but not the raw exception: `await` unwraps any `AggregateException` and throws the first inner exception, preserving the original stack trace as best it can.
+When you `await` a faulted task, the exception is **re-thrown** at the `await` point — but not the raw exception: `await` unwraps any `AggregateException` and throws the first inner exception, preserving the original stack trace as best it can.
 
 ## The real-world picture
 
@@ -27,13 +27,13 @@ You order a pizza for delivery. If the pizza kitchen catches fire before they ac
 ## How it works in C#
 
 ```csharp
-// Before first await Ã¢â‚¬â€ synchronous throw, immediate.
+// Before first await — synchronous throw, immediate.
 async Task<string> BuggyAsync()
 {
     throw new InvalidOperationException("Boom!"); // thrown NOW, not captured.
 }
 
-// After first await Ã¢â‚¬â€ captured in the Task.
+// After first await — captured in the Task.
 async Task<string> BuggyAsync()
 {
     await Task.Delay(1);
@@ -54,12 +54,12 @@ catch (Exception ex) { Console.WriteLine(ex.Message); } // E1
 
 ## Watch out
 
-> **async void methods cannot be catch-ed.** The exception is thrown directly on the SynchronizationContext (or the thread pool) Ã¢â‚¬â€ if unhandled, it crashes the process. Never use async void outside event handlers.
+> **async void methods cannot be catch-ed.** The exception is thrown directly on the SynchronizationContext (or the thread pool) — if unhandled, it crashes the process. Never use async void outside event handlers.
 
 > **Don't assume WhenAll reports ALL exceptions.** `await WhenAll` throws only the first. Loop the tasks' `.Exception` field to collect all.
 
 ## Key takeaways
 
-- Exceptions after `await` Ã¢â€ â€™ captured in the Task Ã¢â€ â€™ re-thrown by `await`.
-- `await` unwraps AggregateException Ã¢â€ â€™ the first inner exception.
-- `async void` exceptions bypass Task capture Ã¢â€ â€™ immediate crash if unhandled.
+- Exceptions after `await` → captured in the Task → re-thrown by `await`.
+- `await` unwraps AggregateException → the first inner exception.
+- `async void` exceptions bypass Task capture → immediate crash if unhandled.

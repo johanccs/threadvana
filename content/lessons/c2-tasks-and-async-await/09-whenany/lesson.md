@@ -16,13 +16,13 @@ interview:
 
 ## What is it?
 
-Up until now we have used `Task.WhenAll` Ã¢â‚¬â€ wait for EVERY task to finish. `Task.WhenAny` does the opposite: it completes as soon as the FIRST task finishes (success or fault). You get back the completed task, and the others keep running (unless you stop them).
+Up until now we have used `Task.WhenAll` — wait for EVERY task to finish. `Task.WhenAny` does the opposite: it completes as soon as the FIRST task finishes (success or fault). You get back the completed task, and the others keep running (unless you stop them).
 
-The classic use is a **timeout**: race your real work against `Task.Delay(timeout)` Ã¢â‚¬â€ whichever finishes first decides the path.
+The classic use is a **timeout**: race your real work against `Task.Delay(timeout)` — whichever finishes first decides the path.
 
 ## The real-world picture
 
-You phone three friends asking for a ride. The first one who says "I'm coming" Ã¢â‚¬â€ you stop the other calls. `WhenAny` is exactly that: you fire off all the options, react to the first response, and cancel the rest.
+You phone three friends asking for a ride. The first one who says "I'm coming" — you stop the other calls. `WhenAny` is exactly that: you fire off all the options, react to the first response, and cancel the rest.
 
 ## How it works in C#
 
@@ -34,12 +34,12 @@ var winner = await Task.WhenAny(dataTask, timeoutTask);
 
 if (winner == timeoutTask)
 {
-    // Timeout Ã¢â‚¬â€ the slow API never answered.
+    // Timeout — the slow API never answered.
     Console.WriteLine("Timed out after 5 seconds.");
 }
 else
 {
-    // dataTask finished first Ã¢â‚¬â€ unwrap the result.
+    // dataTask finished first — unwrap the result.
     var data = await dataTask;
     Console.WriteLine($"Got data: {data}");
 }
@@ -47,16 +47,16 @@ else
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ three faked network calls finish at 300ms, 600ms and 900ms. `WhenAny` returns after 300ms (the fastest). The timeline shows the other two cancelled gracefully right after.
+Press **Run demo** — three faked network calls finish at 300ms, 600ms and 900ms. `WhenAny` returns after 300ms (the fastest). The timeline shows the other two cancelled gracefully right after.
 
 ## Watch out
 
 > **WhenAny doesn't cancel the losers.** You must cancel them yourself or they will run to completion wasting CPU. Always pass a shared CancellationToken.
 
-> **WhenAny + fire-and-forget = resource leak.** If you don't store the returned task, the work keeps running with no observer Ã¢â‚¬â€ exceptions go unobserved until the finalizer (or the GC) complains.
+> **WhenAny + fire-and-forget = resource leak.** If you don't store the returned task, the work keeps running with no observer — exceptions go unobserved until the finalizer (or the GC) complains.
 
 ## Key takeaways
 
-- `Task.WhenAny` Ã¢â€ â€™ completes when the FIRST task finishes.
+- `Task.WhenAny` → completes when the FIRST task finishes.
 - Classic use: timeout = race against `Task.Delay`.
 - Always cancel the losers; always dispose the `CancellationTokenSource`.

@@ -16,11 +16,11 @@ interview:
 
 ## What is it?
 
-`ConcurrentDictionary<K,V>` is .NET's built-in thread-safe dictionary. You can call `TryAdd`, `TryGetValue`, `TryUpdate`, `TryRemove` from any thread without an external `lock`. But the *composed* operations Ã¢â‚¬â€ especially `GetOrAdd` Ã¢â‚¬â€ hide a subtle trap that interviewers love.
+`ConcurrentDictionary<K,V>` is .NET's built-in thread-safe dictionary. You can call `TryAdd`, `TryGetValue`, `TryUpdate`, `TryRemove` from any thread without an external `lock`. But the *composed* operations — especially `GetOrAdd` — hide a subtle trap that interviewers love.
 
 ## The real-world picture
 
-Imagine a phone book shared by 10 receptionists. If Alice asks "what is Bob's extension?" and nobody has written it yet, Alice's manager says "I'll look it up, give me a second." Meanwhile Bob asks "what is Bob's extension?" Ã¢â‚¬â€ another manager also starts looking it up. Both managers do the work. Only one extension ends up in the book. If "looking it up" also sent an email, the email goes out twice.
+Imagine a phone book shared by 10 receptionists. If Alice asks "what is Bob's extension?" and nobody has written it yet, Alice's manager says "I'll look it up, give me a second." Meanwhile Bob asks "what is Bob's extension?" — another manager also starts looking it up. Both managers do the work. Only one extension ends up in the book. If "looking it up" also sent an email, the email goes out twice.
 
 `GetOrAdd` is exactly like that phone book: the factory (the "look it up") may run more than once, but the dictionary guarantees only one value is stored.
 
@@ -40,7 +40,7 @@ Parallel.For(0, 10, _ =>
     });
 });
 
-// emailsSent may be > 1 Ã¢â‚¬â€ the factory ran more than once!
+// emailsSent may be > 1 — the factory ran more than once!
 Console.WriteLine($"Factory ran {emailsSent} time(s)");
 ```
 
@@ -54,18 +54,18 @@ int result = lazy.Value; // HeavyCompute runs at most once
 
 ## See it move
 
-Press **Run demo**. Ten threads race to `GetOrAdd` the same key, each factory pings a shared counter. Watch the trace Ã¢â‚¬â€ some factories run, some don't. Then we show the `Lazy<T>` wrapper fixing it.
+Press **Run demo**. Ten threads race to `GetOrAdd` the same key, each factory pings a shared counter. Watch the trace — some factories run, some don't. Then we show the `Lazy<T>` wrapper fixing it.
 
 ## Watch out
 
-> **GetOrAdd is thread-safe per-key, not across keys.** Two different keys can run their factories in parallel Ã¢â‚¬â€ that's the point. But if those factories share mutable state, you have a race.
+> **GetOrAdd is thread-safe per-key, not across keys.** Two different keys can run their factories in parallel — that's the point. But if those factories share mutable state, you have a race.
 
-> **Don't put side effects in the factory.** Database calls, logging, incrementing counters Ã¢â‚¬â€ all can happen more than once.
+> **Don't put side effects in the factory.** Database calls, logging, incrementing counters — all can happen more than once.
 
-> **AddOrUpdate runs the factory under a lock per key.** If you need exactly-one semantics without Lazy<T>, AddOrUpdate is single-invocation Ã¢â‚¬â€ it uses internal locking per key so the factory runs exactly once per key.
+> **AddOrUpdate runs the factory under a lock per key.** If you need exactly-one semantics without Lazy<T>, AddOrUpdate is single-invocation — it uses internal locking per key so the factory runs exactly once per key.
 
 ## Key takeaways
 
-- `GetOrAdd` may call the factory multiple times Ã¢â‚¬â€ use `Lazy<T>` to guard side effects.
-- `ConcurrentDictionary` uses internal locking per bucket, not a single global lock Ã¢â‚¬â€ great for read-heavy workloads.
+- `GetOrAdd` may call the factory multiple times — use `Lazy<T>` to guard side effects.
+- `ConcurrentDictionary` uses internal locking per bucket, not a single global lock — great for read-heavy workloads.
 - `TryAdd`, `TryGetValue`, `TryUpdate`, `TryRemove` are individually atomic; composed operations need care.

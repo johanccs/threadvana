@@ -16,7 +16,7 @@ interview:
 
 ## What is it?
 
-A timeout is just a race between your real work and a deadline Ã¢â‚¬â€ exactly what `Task.WhenAny` excels at. But a bare race leaves the loser running. The industry-standard pattern layers a `CancellationToken` timeout INTO the work: the race detects the timeout, and the token actually STOPS the work.
+A timeout is just a race between your real work and a deadline — exactly what `Task.WhenAny` excels at. But a bare race leaves the loser running. The industry-standard pattern layers a `CancellationToken` timeout INTO the work: the race detects the timeout, and the token actually STOPS the work.
 
 ## How it works in C#
 
@@ -37,16 +37,16 @@ public async Task<T> WithTimeoutAsync<T>(Task<T> work, TimeSpan timeout)
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ a slow task runs with a 2-second timeout. At 2s, the delay wins, the CancellationToken fires, and the task catches `OperationCanceledException` and exits clean. No orphaned work.
+Press **Run demo** — a slow task runs with a 2-second timeout. At 2s, the delay wins, the CancellationToken fires, and the task catches `OperationCanceledException` and exits clean. No orphaned work.
 
 ## Watch out
 
 > **Always dispose the CancellationTokenSource.** The internal timer lives until disposed.
 
-> **The real work MUST observe the cancellation token.** If the task ignores `token.ThrowIfCancellationRequested()`, it will keep running after the timeout Ã¢â‚¬â€ a resource leak.
+> **The real work MUST observe the cancellation token.** If the task ignores `token.ThrowIfCancellationRequested()`, it will keep running after the timeout — a resource leak.
 
 ## Key takeaways
 
 - Timeout = `Task.WhenAny` + `CancellationTokenSource(timeout)` + honouring the token.
-- Never leave the loser running Ã¢â‚¬â€ cancel it.
+- Never leave the loser running — cancel it.
 - Always dispose the `CancellationTokenSource`.

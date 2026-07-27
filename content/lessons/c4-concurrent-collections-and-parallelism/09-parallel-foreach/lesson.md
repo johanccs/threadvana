@@ -19,7 +19,7 @@ interview:
 
 ## Watch out
 
-> **Don't use Parallel.ForEach for I/O.** It blocks pool threads waiting for I/O Ã¢â‚¬â€ use `Task.WhenAll` with async instead.
+> **Don't use Parallel.ForEach for I/O.** It blocks pool threads waiting for I/O — use `Task.WhenAll` with async instead.
 
 ## Key takeaways
 

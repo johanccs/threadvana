@@ -15,7 +15,7 @@ interview:
 
 ## What is it?
 
-The c4 decision map Ã¢â‚¬â€ when to use which concurrent data structure and processing pattern.
+The c4 decision map — when to use which concurrent data structure and processing pattern.
 
 ## The decision map
 
@@ -33,6 +33,6 @@ The c4 decision map Ã¢â‚¬â€ when to use which concurrent data structu
 
 ## Key takeaways
 
-- CPU Ã¢â€ â€™ partition; I/O Ã¢â€ â€™ async + throttle.
-- Order matters Ã¢â€ â€™ queue/stack; order doesn't Ã¢â€ â€™ bag/channel.
-- Dictionary Ã¢â€ â€™ ConcurrentDictionary. Simple Ã¢â€ â€™ start with lock.
+- CPU → partition; I/O → async + throttle.
+- Order matters → queue/stack; order doesn't → bag/channel.
+- Dictionary → ConcurrentDictionary. Simple → start with lock.

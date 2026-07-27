@@ -28,7 +28,7 @@ Breakfast for the family. The slow way: boil the eggs and watch them. Fry the
 bacon and watch it. Toast the bread and watch it. Three 5-minute jobs eat 15
 minutes of your morning.
 
-The fast way: eggs on, bacon in the pan, bread in the toaster ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â all started
+The fast way: eggs on, bacon in the pan, bread in the toaster — all started
 within a minute. Then you sit down with one combined "buzzer" that rings when
 the LAST item is ready. That combined buzzer is `Task.WhenAll`.
 
@@ -47,12 +47,12 @@ Task toast = ToastBreadAsync(); // starts too
 await Task.WhenAll(eggs, bacon, toast); // one buzzer for the whole set
 ```
 
-The key idea: **calling** an async method already starts the work ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â the receipt
+The key idea: **calling** an async method already starts the work — the receipt
 is "hot". `await` never starts anything; it only waits. So start all three,
 then await the combined receipt.
 
 `Task.WhenAll` has a cousin worth knowing: `Task.WhenAny` waits for the FIRST
-task to finish ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â handy when several workers race and you only need the fastest.
+task to finish — handy when several workers race and you only need the fastest.
 
 ## See it move
 
@@ -63,8 +63,8 @@ on top of each other, about 0.6 s. Same cooking, a third of the time.
 ## Watch out
 
 - You might `await` each task before starting the next one. The tasks never
-  overlap ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â you get the staircase, not the stack. Start everything first.
-- You might think `WhenAll` starts the tasks. They are already running ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â
+  overlap — you get the staircase, not the stack. Start everything first.
+- You might think `WhenAll` starts the tasks. They are already running —
   `WhenAll` only waits for the set.
 - You might use `WhenAll` when you actually want the FIRST finisher. That is
   `Task.WhenAny`.

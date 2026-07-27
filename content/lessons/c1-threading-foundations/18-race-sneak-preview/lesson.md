@@ -17,9 +17,9 @@ interview:
 ## What is it?
 
 Two threads both grab the same shared counter, read "5", add one, write "6". Both
-write 6. Execution order: both saw 5 before either wrote Ã¢â€ â€™ one increment is LOST.
+write 6. Execution order: both saw 5 before either wrote → one increment is LOST.
 
-The root cause: `counter++` is actually three steps Ã¢â‚¬â€
+The root cause: `counter++` is actually three steps —
 1. Read the value from memory.
 2. Add 1 to it.
 3. Write the new value back.
@@ -42,13 +42,13 @@ private static int _counter = 0;
 // Expected sum: 100,000. Actual: something less (and different every time!).
 ```
 
-No lock, no Interlocked Ã¢â‚¬â€ just a raw, unprotected `_counter++`. Run the demo and
+No lock, no Interlocked — just a raw, unprotected `_counter++`. Run the demo and
 see the damage.
 
 ## See it move
 
 Press **Run demo**. Two threads both hammer the same counter. The final total is
-shown Ã¢â‚¬â€ it's always less than 100,000 (and the exact number changes every run).
+shown — it's always less than 100,000 (and the exact number changes every run).
 
 ## Watch out
 
@@ -56,11 +56,11 @@ shown Ã¢â‚¬â€ it's always less than 100,000 (and the exact number cha
   That's what makes it the hardest bug to catch.
 - `volatile` alone does NOT make `counter++` atomic. You need `lock` or
   `Interlocked.Increment` (Category 3).
-- The debugger makes races appear to disappear Ã¢â‚¬â€ it pauses time.
+- The debugger makes races appear to disappear — it pauses time.
 
 ## Key takeaways
 
 - A race happens when two threads touch the same data without coordination.
-- `counter++` is NOT one step Ã¢â‚¬â€ it's read, add, write.
+- `counter++` is NOT one step — it's read, add, write.
 - Races are non-deterministic: the result changes every run.
 - Category 3 gives you all the tools to fix them.

@@ -19,7 +19,7 @@ interview:
 
 ## Watch out
 
-> **It does NOT run iterations in parallel on different threads.** It runs them concurrently Ã¢â‚¬â€ when one iteration awaits, another can start. The actual parallelism depends on the I/O.
+> **It does NOT run iterations in parallel on different threads.** It runs them concurrently — when one iteration awaits, another can start. The actual parallelism depends on the I/O.
 
 ## Key takeaways
 

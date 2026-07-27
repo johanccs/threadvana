@@ -11,11 +11,11 @@ public static class Demo
         using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(userCts.Token, timeoutCts.Token);
 
-        Trace.Log("async-suspend", "? awaiting with linked token — either cancel source stops it");
+        Trace.Log("async-suspend", "? awaiting with linked token â€” either cancel source stops it");
         try { await Task.Delay(5000, linked.Token); }
         catch (OperationCanceledException)
         {
-            Trace.Log("async-resume", "? operation cancelled — timeout (1s) won the race");
+            Trace.Log("async-resume", "? operation cancelled â€” timeout (1s) won the race");
         }
         Trace.Log("message", "Linked CancellationToken: any source cancels the operation. Used for timeout + user-cancel in real APIs.");
     }

@@ -15,5 +15,5 @@ interview:
 ---
 
 A Channel is a pipe: write on one end, read on the other. The exercise builds a
-producer that sends 5 items and a consumer that reads them Ã¢â‚¬â€ using a bounded
+producer that sends 5 items and a consumer that reads them — using a bounded
 Channel with one slot.

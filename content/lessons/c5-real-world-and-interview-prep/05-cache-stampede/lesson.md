@@ -15,7 +15,7 @@ interview:
 
 ## What is it?
 
-A cache stampede is the thundering-herd problem for caches: expired key Ã¢â€ â€™ 100 simultaneous recomputes. The single-flight pattern wraps the value in `Lazy<Task<T>>` so the first request triggers the recompute and all others wait for the SAME lazy Task to complete.
+A cache stampede is the thundering-herd problem for caches: expired key → 100 simultaneous recomputes. The single-flight pattern wraps the value in `Lazy<Task<T>>` so the first request triggers the recompute and all others wait for the SAME lazy Task to complete.
 
 ## How it works
 
@@ -27,6 +27,6 @@ var data = await lazy.Value;
 
 ## Key takeaways
 
-- `Lazy<Task<T>>` Ã¢â€ â€™ one fetch, all concurrent callers share the same Task.
+- `Lazy<Task<T>>` → one fetch, all concurrent callers share the same Task.
 - `ConcurrentDictionary.GetOrAdd` with Lazy ensures key is created once.
 - Protects backend from thundering-herd recomputation on cache expiry.

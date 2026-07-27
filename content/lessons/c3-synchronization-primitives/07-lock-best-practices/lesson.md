@@ -15,15 +15,15 @@ interview:
 
 ## What is it?
 
-`lock` is the simplest synchronisation primitive in C# Ã¢â‚¬â€ one thread enters, others wait. But three details decide whether your lock is safe or a time bomb: what you lock ON, what you do INSIDE the lock, and how long you hold it.
+`lock` is the simplest synchronisation primitive in C# — one thread enters, others wait. But three details decide whether your lock is safe or a time bomb: what you lock ON, what you do INSIDE the lock, and how long you hold it.
 
 ## The lock object rules
 
 | Rule | Good | Bad |
 |------|------|-----|
 | **Private** | `private readonly object _gate = new();` | `lock(this)`, `lock(typeof(Foo))` |
-| **Reference type** | Any `object` | Value types (box silently Ã¢â€ â€™ no lock) |
-| **Readonly** | `readonly` field | Reassignable Ã¢â‚¬â€ lock silently switches object |
+| **Reference type** | Any `object` | Value types (box silently → no lock) |
+| **Readonly** | `readonly` field | Reassignable — lock silently switches object |
 | **Dedicated** | One object per lock domain | Strings, `this`, `typeof()` |
 
 ## The critical section rules
@@ -40,18 +40,18 @@ public void Transfer(Account from, Account to, decimal amount)
         to.Balance += amount;
     }
 
-    // DANGEROUS: await inside lock Ã¢â‚¬â€ the thread may change after await.
+    // DANGEROUS: await inside lock — the thread may change after await.
     // Use SemaphoreSlim(1,1).WaitAsync() instead.
 }
 ```
 
 ## Watch out
 
-> **Never `await` inside a `lock`.** The thread that enters the lock may not be the same thread that returns from `await` Ã¢â‚¬â€ the lock will not be released on the original thread, causing a violation.
+> **Never `await` inside a `lock`.** The thread that enters the lock may not be the same thread that returns from `await` — the lock will not be released on the original thread, causing a violation.
 
 > **Keep locks SHORT.** A lock held for 100ms blocks every other thread that touches that object. Never do I/O or heavy computation inside a lock.
 
-> **Don't lock on interned strings.** `"MyLock"` is shared across the process Ã¢â‚¬â€ multiple classes locking on the same string will accidentally serialise with each other.
+> **Don't lock on interned strings.** `"MyLock"` is shared across the process — multiple classes locking on the same string will accidentally serialise with each other.
 
 ## Key takeaways
 

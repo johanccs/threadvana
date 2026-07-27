@@ -15,13 +15,13 @@ interview:
 
 ## What is it?
 
-Most of the time you get a `Task` from `Task.Run`, an `async` method, or a BCL API. But what if you have a legacy callback Ã¢â‚¬â€ an event, a timer, a `Socket.Begin/End` Ã¢â‚¬â€ and you want to expose it as a modern `Task`?
+Most of the time you get a `Task` from `Task.Run`, an `async` method, or a BCL API. But what if you have a legacy callback — an event, a timer, a `Socket.Begin/End` — and you want to expose it as a modern `Task`?
 
 `TaskCompletionSource<T>` is the bridge. You create one, start the legacy operation, and call `SetResult(value)` from the legacy callback. The `Task` it exposes can then be `await`ed by the rest of your async code.
 
 ## The real-world picture
 
-You have a pager (legacy API) that beeps when your laundry is done. You wrap that pager in a `TaskCompletionSource` Ã¢â‚¬â€ the whole app can now `await LaundryTask` instead of listening for a beep. You transformed a callback into a promise.
+You have a pager (legacy API) that beeps when your laundry is done. You wrap that pager in a `TaskCompletionSource` — the whole app can now `await LaundryTask` instead of listening for a beep. You transformed a callback into a promise.
 
 ## How it works in C#
 
@@ -42,12 +42,12 @@ public Task<string> RunCommandAsync(string command)
 
 > **SetResult, SetException, SetCanceled each complete the source ONCE.** Calling any twice throws. Use the `Try` variants (e.g., `TrySetResult`) if multiple threads may race to complete it.
 
-> **Always complete the source Ã¢â‚¬â€ even on failure.** If your legacy callback never fires, the Task will hang forever. Put a timeout or cancellation guard around it.
+> **Always complete the source — even on failure.** If your legacy callback never fires, the Task will hang forever. Put a timeout or cancellation guard around it.
 
 > **Don't use TaskCompletionSource for simple fire-and-forget.** If you don't need to bridge legacy code, there is probably a simpler pattern.
 
 ## Key takeaways
 
-- `TaskCompletionSource<T>` Ã¢â€ â€™ hand-crafted Task you complete manually.
+- `TaskCompletionSource<T>` → hand-crafted Task you complete manually.
 - Perfect for bridging legacy callback/event APIs into the async world.
 - Call `SetResult`, `SetException`, or `SetCanceled` exactly once.

@@ -16,18 +16,18 @@ interview:
 
 ## What is it?
 
-You know `foreach` iterates an `IEnumerable` Ã¢â‚¬â€ each step is synchronous. `await foreach` iterates an `IAsyncEnumerable<T>` Ã¢â‚¬â€ each step may `await` some I/O before the next item arrives. This means you can stream items AS they arrive, without waiting for the whole batch to complete.
+You know `foreach` iterates an `IEnumerable` — each step is synchronous. `await foreach` iterates an `IAsyncEnumerable<T>` — each step may `await` some I/O before the next item arrives. This means you can stream items AS they arrive, without waiting for the whole batch to complete.
 
 Under the hood, `await foreach` calls `MoveNextAsync()` instead of `MoveNext()`, yielding control between items so the consumer never blocks.
 
 ## The real-world picture
 
-A sushi conveyor belt. `IEnumerable<T>` is the chef placing all 40 plates on a tray and handing it to you at once. `IAsyncEnumerable<T>` is the belt slowly delivering one plate at a time Ã¢â‚¬â€ you eat as they arrive, and the chef replenishes as needed.
+A sushi conveyor belt. `IEnumerable<T>` is the chef placing all 40 plates on a tray and handing it to you at once. `IAsyncEnumerable<T>` is the belt slowly delivering one plate at a time — you eat as they arrive, and the chef replenishes as needed.
 
 ## How it works in C#
 
 ```csharp
-// Producer Ã¢â‚¬â€ returns items one at a time with await between each.
+// Producer — returns items one at a time with await between each.
 public static async IAsyncEnumerable<int> ReadSensorDataAsync(
     [EnumeratorCancellation] CancellationToken token = default)
 {
@@ -38,7 +38,7 @@ public static async IAsyncEnumerable<int> ReadSensorDataAsync(
     }
 }
 
-// Consumer Ã¢â‚¬â€ await foreach
+// Consumer — await foreach
 await foreach (var reading in ReadSensorDataAsync())
 {
     Console.WriteLine($"Sensor: {reading}");
@@ -53,7 +53,7 @@ await foreach (var reading in ReadSensorDataAsync())
 
 ## Key takeaways
 
-- `IAsyncEnumerable<T>` Ã¢â€ â€™ stream items with `await` between each.
+- `IAsyncEnumerable<T>` → stream items with `await` between each.
 - Producer: `async IAsyncEnumerable<T>` + `yield return`.
 - Consumer: `await foreach`.
 - Always add `[EnumeratorCancellation] CancellationToken` to the iterator.

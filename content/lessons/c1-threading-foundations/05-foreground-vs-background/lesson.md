@@ -80,7 +80,7 @@ fits in a second; in a real program the process itself would end.)
   Set it before.
 - You might think making a thread foreground is a way to wait for it. It is
   not: foreground only keeps the PROCESS alive, your method still returns
-  immediately. To wait, use `Join` (see "Join Ã¢â‚¬â€ Waiting for a Worker to
+  immediately. To wait, use `Join` (see "Join — Waiting for a Worker to
   Finish").
 
 ## Key takeaways

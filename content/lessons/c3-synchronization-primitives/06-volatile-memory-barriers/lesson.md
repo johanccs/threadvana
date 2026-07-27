@@ -16,23 +16,23 @@ interview:
 
 ## What is it?
 
-CPUs and compilers lie to you Ã¢â‚¬â€ they reorder reads/writes and cache values in registers to go faster. Most of the time this is invisible and harmless. But in multithreaded code, it means one thread may never see a value another thread just wrote.
+CPUs and compilers lie to you — they reorder reads/writes and cache values in registers to go faster. Most of the time this is invisible and harmless. But in multithreaded code, it means one thread may never see a value another thread just wrote.
 
-`volatile` is the fence that says: "do not optimise this field Ã¢â‚¬â€ read it from memory every single time, and write it through every single time."
+`volatile` is the fence that says: "do not optimise this field — read it from memory every single time, and write it through every single time."
 
 ## The real-world picture
 
-Two people sharing a whiteboard. Without volatile, each person looks at their own notepad (register cache) and never looks up at the board. The first person erases and rewrites a number Ã¢â‚¬â€ the second person never sees the change because they are still reading their notepad. `volatile` forces everyone to look at the actual whiteboard.
+Two people sharing a whiteboard. Without volatile, each person looks at their own notepad (register cache) and never looks up at the board. The first person erases and rewrites a number — the second person never sees the change because they are still reading their notepad. `volatile` forces everyone to look at the actual whiteboard.
 
 ## How it works in C#
 
 ```csharp
-// WITHOUT volatile Ã¢â‚¬â€ the loop may never exit (compiler hoists _running to a register).
+// WITHOUT volatile — the loop may never exit (compiler hoists _running to a register).
 private bool _running = false;
 // Thread 1: while (!_running) { } // may loop forever
 // Thread 2: _running = true;
 
-// WITH volatile Ã¢â‚¬â€ the read always goes to memory.
+// WITH volatile — the read always goes to memory.
 private volatile bool _running = false;
 // Thread 1: while (!_running) { } // will definitely exit
 // Thread 2: _running = true;
@@ -40,7 +40,7 @@ private volatile bool _running = false;
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ one thread spins on a volatile flag, another sets it after 500ms. Watch the spin counter stop exactly at 500ms. Then watch the same code WITHOUT volatile (simulated) Ã¢â‚¬â€ the spinner never stops.
+Press **Run demo** — one thread spins on a volatile flag, another sets it after 500ms. Watch the spin counter stop exactly at 500ms. Then watch the same code WITHOUT volatile (simulated) — the spinner never stops.
 
 ## Watch out
 
@@ -50,6 +50,6 @@ Press **Run demo** Ã¢â‚¬â€ one thread spins on a volatile flag, anoth
 
 ## Key takeaways
 
-- `volatile` Ã¢â€ â€™ read/write go directly to memory, never cached.
+- `volatile` → read/write go directly to memory, never cached.
 - Good for simple status flags; insufficient for compound operations.
 - Prefer `Volatile.Read(ref field)` and `Volatile.Write(ref field, value)` for explicit control.

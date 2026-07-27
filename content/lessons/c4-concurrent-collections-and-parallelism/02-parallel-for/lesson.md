@@ -14,5 +14,5 @@ interview:
 ---
 
 Parallel.For splits a loop across multiple pool workers. The demo squares 5 million
-numbers both ways Ã¢â‚¬â€ sequential and parallel Ã¢â‚¬â€ and compares the elapsed time on screen.
+numbers both ways — sequential and parallel — and compares the elapsed time on screen.
 The exercise has you convert a sequential loop to Parallel.For and observe the speedup.

@@ -15,13 +15,13 @@ interview:
 
 ## What is it?
 
-A rate limiter controls how many actions can happen in a time window Ã¢â‚¬â€ the famous "N requests per second" you see in every API gateway. The most elegant .NET implementation is the **token bucket**: one async timer refills tokens at a steady rate; incoming requests `await` a token. If the bucket is empty, they queue naturally.
+A rate limiter controls how many actions can happen in a time window — the famous "N requests per second" you see in every API gateway. The most elegant .NET implementation is the **token bucket**: one async timer refills tokens at a steady rate; incoming requests `await` a token. If the bucket is empty, they queue naturally.
 
-This is not a toy Ã¢â‚¬â€ this pattern runs production rate limiters in real services.
+This is not a toy — this pattern runs production rate limiters in real services.
 
 ## The real-world picture
 
-A coffee shop has exactly 3 machines. Every 200 ms, one machine finishes its brew and a bell rings Ã¢â‚¬â€ one more order can start. Customers wait in line; when a machine is free, the next customer starts. No polling, no busy-waiting Ã¢â‚¬â€ just a semaphore.
+A coffee shop has exactly 3 machines. Every 200 ms, one machine finishes its brew and a bell rings — one more order can start. Customers wait in line; when a machine is free, the next customer starts. No polling, no busy-waiting — just a semaphore.
 
 ## How it works in C#
 
@@ -58,22 +58,22 @@ public sealed class TokenBucket
 }
 ```
 
-Key design: the semaphore serialises the check-and-decrement Ã¢â‚¬â€ it's the *critical section* guard, not the rate limit itself; the `_tokens` count is the actual limit.
+Key design: the semaphore serialises the check-and-decrement — it's the *critical section* guard, not the rate limit itself; the `_tokens` count is the actual limit.
 
 ## See it move
 
-Press **Run demo** Ã¢â‚¬â€ 20 requesters try to consume tokens from a bucket that refills at 5/s. The timeline shows requests that pass (green) and requests that are told to wait (amber). Count how many pass in the first 2 seconds.
+Press **Run demo** — 20 requesters try to consume tokens from a bucket that refills at 5/s. The timeline shows requests that pass (green) and requests that are told to wait (amber). Count how many pass in the first 2 seconds.
 
 ## Watch out
 
-> **Timer fire-and-forget catches no exceptions.** If `Refill()` throws, the timer silently stops. Keep it bullet-proof Ã¢â‚¬â€ no allocations, no external calls.
+> **Timer fire-and-forget catches no exceptions.** If `Refill()` throws, the timer silently stops. Keep it bullet-proof — no allocations, no external calls.
 
-> **The semaphore is the gate guard, not the room.** With `MaxTokens = 10` and `_semaphore = new(1, 10)`, the semaphore allows only ONE at a time through the check Ã¢â‚¬â€ but up to 10 may be waiting in line.
+> **The semaphore is the gate guard, not the room.** With `MaxTokens = 10` and `_semaphore = new(1, 10)`, the semaphore allows only ONE at a time through the check — but up to 10 may be waiting in line.
 
-> **For production, consider the System.Threading.RateLimiting namespace** (NET 7+): `TokenBucketRateLimiter` is built-in. But interviewers want to see you build one from primitives Ã¢â‚¬â€ hence this exercise.
+> **For production, consider the System.Threading.RateLimiting namespace** (NET 7+): `TokenBucketRateLimiter` is built-in. But interviewers want to see you build one from primitives — hence this exercise.
 
 ## Key takeaways
 
 - Token bucket = SemaphoreSlim serialising access + a counter + a timer.
 - The semaphore is One-At-A-Time inside the critical check; the token count is the actual limit.
-- For async callers, use `WaitAsync` instead of `Wait()` Ã¢â‚¬â€ no thread blocking.
+- For async callers, use `WaitAsync` instead of `Wait()` — no thread blocking.

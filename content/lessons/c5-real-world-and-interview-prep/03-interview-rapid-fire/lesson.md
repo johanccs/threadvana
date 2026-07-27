@@ -14,4 +14,4 @@ interview:
 ---
 
 A rapid-fire quiz covering the entire course. 10 scenario-based questions.
-No demo Ã¢â‚¬â€ just think and answer.
+No demo — just think and answer.

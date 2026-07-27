@@ -18,7 +18,7 @@ interview:
 
 Three threads share one lock. Thread A grabs it, Thread B waits. Thread A finishes
 and calls `Re-enterImmediately()`, grabbing the lock again before Thread B even has
-a chance. Thread B starves Ã¢â‚¬â€ it makes no forward progress while A and its friends
+a chance. Thread B starves — it makes no forward progress while A and its friends
 keep jumping the queue.
 
 This is thread starvation: a lockholder (or a set of them together) prevents others
@@ -28,7 +28,7 @@ from ever getting a turn.
 
 A busy coffee shop has one espresso machine (the lock). One barista makes drinks
 all morning, never stepping away. The second barista stands there with an empty
-cup in her hand Ã¢â‚¬â€ permanently waiting. She is starved.
+cup in her hand — permanently waiting. She is starved.
 
 ## How it works in C#
 
@@ -37,11 +37,11 @@ lock (_gate)  // Thread A grabs the lock
 {
     DoWork();
 }
-// lock released here Ã¢â‚¬â€ but Thread A immediately re-enters before Thread B can.
+// lock released here — but Thread A immediately re-enters before Thread B can.
 lock (_gate)  // Thread A again!
 ```
 
-`lock` is NOT fair Ã¢â‚¬â€ it does not guarantee who gets in next. If one thread
+`lock` is NOT fair — it does not guarantee who gets in next. If one thread
 re-acquires the lock rapidly, others may starve.
 
 ## See it move
@@ -60,6 +60,6 @@ workers wait. Watch one lane stacked with grey wait spans.
 ## Key takeaways
 
 - Starvation = a thread waiting indefinitely for a resource others keep taking.
-- Keep locked sections SHORT Ã¢â‚¬â€ milliseconds, not seconds.
+- Keep locked sections SHORT — milliseconds, not seconds.
 - Never I/O inside a lock.
 - In Category 3 you learn fairer primitives like SemaphoreSlim.

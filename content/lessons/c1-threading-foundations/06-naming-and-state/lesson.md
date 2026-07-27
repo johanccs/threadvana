@@ -73,7 +73,7 @@ after `Join`: always `Stopped`.
   it a second time and an exception is thrown. Name it where you create it.
 - You might write logic that depends on `ThreadState` ("if it is Running,
   do X"). States change constantly - peek for debugging, never for decisions.
-  To wait for a thread, use `Join` (see "Join Ã¢â‚¬â€ Waiting for a Worker to
+  To wait for a thread, use `Join` (see "Join — Waiting for a Worker to
   Finish").
 - You might give every thread the same name - or none. Future-you, staring at
   a log full of "Thread 1" to "Thread 12", will not be amused.
