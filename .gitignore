@@ -200,6 +200,9 @@ publish/
 # Ad-hoc deploy artifacts (publish zips, run markers) — build output, not source
 deploy.zip
 deploy_done.txt
+deploy_ok.txt
+cov.log
+cov.err
 
 # Publish Web Output
 *.[Pp]ublish.xml
