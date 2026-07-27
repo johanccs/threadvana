@@ -27,3 +27,36 @@ jobs:
 
       - name: Test
         run: dotnet test tests/ThreadCraft.Web.Tests/ThreadCraft.Web.Tests.csproj --no-restore --configuration Release --logger "console;verbosity=normal"
+
+  deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://threadcraft-academy.azurewebsites.net
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      # Publishing the web project alone is enough: its .csproj already copies
+      # content/lessons and the ThreadCraft.Sandbox runner (Roslyn + deps) into
+      # the output via project reference / Content items.
+      - name: Publish
+        run: dotnet publish src/ThreadCraft.Web/ThreadCraft.Web.csproj --configuration Release --output ${{ github.workspace }}/publish
+
+      # threadcraft-academy is a Linux App Service (Basic B1, DOTNETCORE|8.0) in
+      # resource group threadcraft-rg. This replaces the old manual zip-deploy
+      # workflow (deploy.zip / deploy_done.txt) with the same target.
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: threadcraft-academy
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ github.workspace }}/publish
