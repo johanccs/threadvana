@@ -32,6 +32,9 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     environment:
       name: production
       url: https://threadcraft-academy.azurewebsites.net
@@ -51,6 +54,16 @@ jobs:
       - name: Publish
         run: dotnet publish src/ThreadCraft.Web/ThreadCraft.Web.csproj --configuration Release --output ${{ github.workspace }}/publish
 
+      # OIDC federated login (app registration "gh-actions-threadcraft") — no
+      # long-lived secret. SCM basic-auth publishing is disabled on this App
+      # Service, so a publish-profile deploy would be rejected outright.
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       # threadcraft-academy is a Linux App Service (Basic B1, DOTNETCORE|8.0) in
       # resource group threadcraft-rg. This replaces the old manual zip-deploy
       # workflow (deploy.zip / deploy_done.txt) with the same target.
@@ -58,5 +71,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: threadcraft-academy
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ github.workspace }}/publish
