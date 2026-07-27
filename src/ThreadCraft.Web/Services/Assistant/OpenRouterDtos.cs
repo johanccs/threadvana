@@ -13,16 +13,23 @@ internal sealed record ChatRequestDto(
     [property: JsonPropertyName("model")] string Model,
     [property: JsonPropertyName("messages")] ChatMessageDto[] Messages,
     [property: JsonPropertyName("temperature")] double Temperature,
-    [property: JsonPropertyName("max_tokens")] int MaxTokens);
+    [property: JsonPropertyName("max_tokens")] int MaxTokens,
+    [property: JsonPropertyName("stream")] bool Stream);
 
-internal sealed class ChatResponseDto
+/// <summary>One `data: {...}` frame from OpenRouter's server-sent-event chat stream.</summary>
+internal sealed class ChatStreamChunkDto
 {
-    [JsonPropertyName("choices")] public ChatChoiceDto[]? Choices { get; set; }
+    [JsonPropertyName("choices")] public ChatStreamChoiceDto[]? Choices { get; set; }
 }
 
-internal sealed class ChatChoiceDto
+internal sealed class ChatStreamChoiceDto
 {
-    [JsonPropertyName("message")] public ChatMessageDto? Message { get; set; }
+    [JsonPropertyName("delta")] public ChatDeltaDto? Delta { get; set; }
+}
+
+internal sealed class ChatDeltaDto
+{
+    [JsonPropertyName("content")] public string? Content { get; set; }
 }
 
 /// <summary>OpenRouter error bodies look like {"error":{"message":"...","code":401}}.</summary>

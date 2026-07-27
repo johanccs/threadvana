@@ -175,8 +175,17 @@
 
         try
         {
-            var answer = await Assistant.AskAsync(request, _cts.Token);
-            exchange.AnswerMarkdown = SvgFence.Unwrap(answer);
+            var buffer = new System.Text.StringBuilder();
+            await foreach (var delta in Assistant.AskStreamingAsync(request, _cts.Token))
+            {
+                buffer.Append(delta);
+                exchange.AnswerMarkdown = SvgFence.Unwrap(buffer.ToString());
+                // First token flips the spinner to real content; every token after
+                // re-renders so the answer appears to type itself out.
+                exchange.Pending = false;
+                _scrollPending = true;
+                StateHasChanged();
+            }
         }
         catch (AssistantException friendly)
         {

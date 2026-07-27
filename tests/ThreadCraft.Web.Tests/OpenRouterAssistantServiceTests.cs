@@ -8,7 +8,8 @@ namespace ThreadCraft.Web.Tests;
 
 /// <summary>
 /// Verifies the OpenRouter client against a stub HTTP handler: the request shape the API
-/// expects, and that every failure surfaces as a friendly <see cref="AssistantException"/>.
+/// expects (including stream:true), that streamed SSE tokens come out in order, and that
+/// every failure surfaces as a friendly <see cref="AssistantException"/>.
 /// </summary>
 public sealed class OpenRouterAssistantServiceTests
 {
@@ -20,18 +21,40 @@ public sealed class OpenRouterAssistantServiceTests
         Question = "What is a thread?",
     };
 
-    [Fact]
-    public async Task AskAsync_sends_context_then_question_and_returns_the_answer()
+    private static string SseBody(params string[] tokens)
     {
-        var (service, handler) = CreateService(HttpStatusCode.OK,
-            """{"choices":[{"message":{"role":"assistant","content":"A thread is a worker."}}]}""");
+        var sb = new StringBuilder();
+        foreach (var token in tokens)
+        {
+            var chunk = JsonSerializer.Serialize(new { choices = new[] { new { delta = new { content = token } } } });
+            sb.Append("data: ").Append(chunk).Append("\n\n");
+        }
+        sb.Append("data: [DONE]\n\n");
+        return sb.ToString();
+    }
 
-        var answer = await service.AskAsync(Request());
+    private static async Task<string> CollectAsync(IAsyncEnumerable<string> stream)
+    {
+        var sb = new StringBuilder();
+        await foreach (var chunk in stream)
+        {
+            sb.Append(chunk);
+        }
+        return sb.ToString();
+    }
+
+    [Fact]
+    public async Task AskStreamingAsync_sends_context_then_question_and_streams_the_answer()
+    {
+        var (service, handler) = CreateService(HttpStatusCode.OK, SseBody("A thread ", "is a worker."));
+
+        var answer = await CollectAsync(service.AskStreamingAsync(Request()));
 
         Assert.Equal("A thread is a worker.", answer);
 
         var sent = JsonDocument.Parse(handler.LastRequestBody!).RootElement;
         Assert.Equal("openai/gpt-oss-20b:free", sent.GetProperty("model").GetString());
+        Assert.True(sent.GetProperty("stream").GetBoolean());
 
         var messages = sent.GetProperty("messages");
         Assert.Equal("system", messages[0].GetProperty("role").GetString());
@@ -44,7 +67,7 @@ public sealed class OpenRouterAssistantServiceTests
     {
         var (service, _) = CreateService(HttpStatusCode.Unauthorized, """{"error":{"message":"bad key"}}""");
 
-        var ex = await Assert.ThrowsAsync<AssistantException>(() => service.AskAsync(Request()));
+        var ex = await Assert.ThrowsAsync<AssistantException>(() => CollectAsync(service.AskStreamingAsync(Request())));
 
         Assert.Contains("API key was rejected", ex.Message);
     }
@@ -54,9 +77,19 @@ public sealed class OpenRouterAssistantServiceTests
     {
         var (service, _) = CreateService(HttpStatusCode.TooManyRequests, "{}");
 
-        var ex = await Assert.ThrowsAsync<AssistantException>(() => service.AskAsync(Request()));
+        var ex = await Assert.ThrowsAsync<AssistantException>(() => CollectAsync(service.AskStreamingAsync(Request())));
 
         Assert.Contains("rate-limited", ex.Message);
+    }
+
+    [Fact]
+    public async Task Empty_stream_becomes_a_friendly_message()
+    {
+        var (service, _) = CreateService(HttpStatusCode.OK, "data: [DONE]\n\n");
+
+        var ex = await Assert.ThrowsAsync<AssistantException>(() => CollectAsync(service.AskStreamingAsync(Request())));
+
+        Assert.Contains("empty answer", ex.Message);
     }
 
     [Fact]
@@ -70,7 +103,7 @@ public sealed class OpenRouterAssistantServiceTests
             new AssistantRateLimiter(options, new GlobalAssistantRateLimiter(options)));
 
         Assert.False(service.IsConfigured);
-        await Assert.ThrowsAsync<AssistantException>(() => service.AskAsync(Request()));
+        await Assert.ThrowsAsync<AssistantException>(() => CollectAsync(service.AskStreamingAsync(Request())));
         Assert.Null(handler.LastRequestBody);
     }
 
@@ -106,7 +139,7 @@ public sealed class OpenRouterAssistantServiceTests
                 : await request.Content.ReadAsStringAsync(cancellationToken);
             return new HttpResponseMessage(_status)
             {
-                Content = new StringContent(_body, Encoding.UTF8, "application/json"),
+                Content = new StringContent(_body, Encoding.UTF8, "text/event-stream"),
             };
         }
     }

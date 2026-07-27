@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
@@ -6,12 +7,15 @@ namespace ThreadCraft.Web.Services;
 
 /// <summary>
 /// Talks to OpenRouter's OpenAI-compatible chat endpoint: one POST with system prompt,
-/// lesson context, recent history and the question; the answer comes back in
-/// choices[0].message.content. Every failure becomes a friendly <see cref="AssistantException"/>.
+/// lesson context, recent history and the question, streamed back as server-sent events
+/// so the UI can show the answer as it is generated. Every failure becomes a friendly
+/// <see cref="AssistantException"/>.
 /// </summary>
 public sealed class OpenRouterAssistantService : IAssistantService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private const string DataPrefix = "data: ";
+    private const string DoneMarker = "[DONE]";
 
     private readonly HttpClient _http;
     private readonly AssistantOptions _options;
@@ -28,7 +32,8 @@ public sealed class OpenRouterAssistantService : IAssistantService
 
     public string ModelName => _options.Model;
 
-    public async Task<string> AskAsync(AssistantRequest request, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<string> AskStreamingAsync(
+        AssistantRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (!IsConfigured)
         {
@@ -38,48 +43,12 @@ public sealed class OpenRouterAssistantService : IAssistantService
 
         _rateLimiter.EnsureNotRateLimited();
 
-        var messages = new List<ChatMessageDto>
-        {
-            new("system", AssistantPromptBuilder.BuildSystemPrompt()),
-            new("user", AssistantPromptBuilder.BuildContextMessage(request, _options)),
-        };
+        using var httpRequest = BuildRequest(request);
 
-        foreach (var turn in request.History.TakeLast(_options.MaxHistoryTurns * 2))
-        {
-            messages.Add(new ChatMessageDto(turn.Role, turn.Content));
-        }
-
-        messages.Add(new ChatMessageDto("user", request.Question));
-
-        var payload = new ChatRequestDto(
-            _options.Model, messages.ToArray(), Temperature: 0.4, MaxTokens: _options.MaxAnswerTokens);
-
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
-        {
-            Content = new StringContent(
-                JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json"),
-        };
-        httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
-        // OpenRouter attribution headers (optional, good practice).
-        httpRequest.Headers.TryAddWithoutValidation("HTTP-Referer", "https://threadcraft.local");
-        httpRequest.Headers.TryAddWithoutValidation("X-Title", "ThreadCraft Academy");
-
-        ChatResponseDto? response;
+        HttpResponseMessage httpResponse;
         try
         {
-            using var httpResponse = await _http.SendAsync(httpRequest, cancellationToken);
-            var body = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
-
-            if (!httpResponse.IsSuccessStatusCode)
-            {
-                throw MapFailure((int)httpResponse.StatusCode, body);
-            }
-
-            response = JsonSerializer.Deserialize<ChatResponseDto>(body, JsonOptions);
-        }
-        catch (AssistantException)
-        {
-            throw;
+            httpResponse = await _http.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -94,15 +63,104 @@ public sealed class OpenRouterAssistantService : IAssistantService
             throw new AssistantException(
                 "Could not reach the coach service. Check your internet connection and try again.");
         }
-        catch (JsonException)
+
+        using (httpResponse)
         {
-            throw new AssistantException("The coach answered in a way I could not read. Please try again.");
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                var body = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
+                throw MapFailure((int)httpResponse.StatusCode, body);
+            }
+
+            var gotAnyContent = false;
+            var stream = await httpResponse.Content.ReadAsStreamAsync(cancellationToken);
+            await using (stream.ConfigureAwait(false))
+            using (var reader = new StreamReader(stream))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string? line;
+                    try
+                    {
+                        line = await reader.ReadLineAsync(cancellationToken);
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (IOException)
+                    {
+                        throw new AssistantException("The coach's connection dropped mid-answer. Please try again.");
+                    }
+
+                    if (string.IsNullOrEmpty(line) || !line.StartsWith(DataPrefix, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    var data = line[DataPrefix.Length..];
+                    if (data == DoneMarker)
+                    {
+                        break;
+                    }
+
+                    var delta = TryReadDelta(data);
+                    if (!string.IsNullOrEmpty(delta))
+                    {
+                        gotAnyContent = true;
+                        yield return delta;
+                    }
+                }
+            }
+
+            if (!gotAnyContent)
+            {
+                throw new AssistantException("The coach came back with an empty answer. Please try again.");
+            }
+        }
+    }
+
+    private HttpRequestMessage BuildRequest(AssistantRequest request)
+    {
+        var messages = new List<ChatMessageDto>
+        {
+            new("system", AssistantPromptBuilder.BuildSystemPrompt()),
+            new("user", AssistantPromptBuilder.BuildContextMessage(request, _options)),
+        };
+
+        foreach (var turn in request.History.TakeLast(_options.MaxHistoryTurns * 2))
+        {
+            messages.Add(new ChatMessageDto(turn.Role, turn.Content));
         }
 
-        var answer = response?.Choices?.FirstOrDefault()?.Message?.Content;
-        return string.IsNullOrWhiteSpace(answer)
-            ? throw new AssistantException("The coach came back with an empty answer. Please try again.")
-            : answer.Trim();
+        messages.Add(new ChatMessageDto("user", request.Question));
+
+        var payload = new ChatRequestDto(
+            _options.Model, messages.ToArray(), Temperature: 0.4, MaxTokens: _options.MaxAnswerTokens, Stream: true);
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
+        {
+            Content = new StringContent(
+                JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json"),
+        };
+        httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.ApiKey);
+        // OpenRouter attribution headers (optional, good practice).
+        httpRequest.Headers.TryAddWithoutValidation("HTTP-Referer", "https://threadcraft.local");
+        httpRequest.Headers.TryAddWithoutValidation("X-Title", "ThreadCraft Academy");
+        return httpRequest;
+    }
+
+    private static string? TryReadDelta(string data)
+    {
+        try
+        {
+            var chunk = JsonSerializer.Deserialize<ChatStreamChunkDto>(data, JsonOptions);
+            return chunk?.Choices?.FirstOrDefault()?.Delta?.Content;
+        }
+        catch (JsonException)
+        {
+            return null; // OpenRouter occasionally sends non-JSON keep-alive comments.
+        }
     }
 
     private static AssistantException MapFailure(int statusCode, string body)

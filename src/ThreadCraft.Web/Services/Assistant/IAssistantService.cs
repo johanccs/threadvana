@@ -13,8 +13,10 @@ public interface IAssistantService
     string ModelName { get; }
 
     /// <summary>
-    /// Asks the coach. Returns the answer as Markdown (may contain one raw SVG diagram).
-    /// Throws <see cref="AssistantException"/> with a learner-friendly message on failure.
+    /// Asks the coach and streams the answer as it is generated — each item is a
+    /// Markdown fragment (may together contain one raw SVG diagram once fully joined).
+    /// Throws <see cref="AssistantException"/> with a learner-friendly message on failure;
+    /// the exception may surface partway through enumeration if the connection drops.
     /// </summary>
-    Task<string> AskAsync(AssistantRequest request, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<string> AskStreamingAsync(AssistantRequest request, CancellationToken cancellationToken = default);
 }
