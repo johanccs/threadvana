@@ -1,0 +1,58 @@
+@page "/privacy"
+
+<PageTitle>Privacy — ThreadCraft Academy</PageTitle>
+
+<article class="legal-page">
+    <h1>Privacy Policy</h1>
+    <p class="legal-updated">Last updated: @LastUpdated.ToString("d MMMM yyyy")</p>
+
+    <p>
+        ThreadCraft Academy is a free, no-signup learning tool. There are no user accounts,
+        and we do not knowingly collect any information that identifies you personally. This
+        page explains, plainly, what data the app does handle.
+    </p>
+
+    <h2>Lesson progress</h2>
+    <p>
+        Which lessons you have passed is stored in a small database on the server so the
+        dashboard and checkmarks work. It is not linked to your name, email, or any account —
+        there isn't one. Because the app has no login, this progress is shared by everyone
+        visiting the same deployment rather than kept separate per visitor.
+    </p>
+
+    <h2>The AI coach</h2>
+    <p>
+        When you ask the "Ask the coach" panel a question, your question, your current code,
+        the lesson text, and your recent chat history for that lesson are sent to
+        <a href="https://openrouter.ai" target="_blank" rel="noopener">OpenRouter</a>, a
+        third-party API that routes the request to an underlying AI model, in order to
+        generate an answer. That data leaves this app and is handled under OpenRouter's own
+        privacy policy and that of whichever model answers the request. Don't paste secrets,
+        credentials, or anything sensitive into a question or your code — treat it the way
+        you'd treat a message to any outside service.
+    </p>
+
+    <h2>Your certificate name</h2>
+    <p>
+        If you use the completion certificate page and type a name for it, that name is saved
+        only in your browser's local storage so it's remembered next time you visit. It is
+        never sent to the server or to any third party.
+    </p>
+
+    <h2>Server logs</h2>
+    <p>
+        Like any hosted website, the underlying infrastructure (Microsoft Azure) may keep
+        standard web server access logs (e.g. IP address, timestamp, requested page) for
+        operational and security purposes. We do not use analytics or tracking cookies.
+    </p>
+
+    <h2>Questions</h2>
+    <p>
+        This is a small, independently run project. If you have a question about this policy,
+        reach out at <a href="mailto:johan.ccs@gmail.com">johan.ccs@gmail.com</a>.
+    </p>
+</article>
+
+@code {
+    private static readonly DateOnly LastUpdated = new(2026, 7, 27);
+}

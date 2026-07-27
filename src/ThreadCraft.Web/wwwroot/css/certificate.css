@@ -112,7 +112,7 @@
 }
 
 @media print {
-    .topbar, .sidebar, .no-print {
+    .topbar, .sidebar, .site-footer, .no-print {
         display: none !important;
     }
 

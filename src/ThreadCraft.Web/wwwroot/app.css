@@ -100,6 +100,38 @@ body {
     margin: 0 auto;
 }
 
+.site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--panel-border);
+    background: var(--panel);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.footer-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+
+.footer-badge {
+    color: var(--text-dim);
+}
+
 .category-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1226,6 +1258,11 @@ body {
 
     .topbar-progress-label { display: none; }
 }
+
+/* ---- Legal pages (Privacy, Terms) ---- */
+.legal-page { max-width: 42rem; margin: 0 auto; line-height: 1.7; }
+.legal-page h2 { margin-top: 2rem; }
+.legal-updated { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 2rem; }
 
 /* ---- Setup page ---- */
 .setup-intro { color: var(--text-dim); margin-bottom: 1.5rem; }
