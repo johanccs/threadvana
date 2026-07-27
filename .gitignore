@@ -197,6 +197,10 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# Ad-hoc deploy artifacts (publish zips, run markers) — build output, not source
+deploy.zip
+deploy_done.txt
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
