@@ -2,7 +2,7 @@
 
 **Stop guessing what `await`, `lock`, and the thread pool do — watch them work, then prove it in the editor.**
 
-> 🌐 **Live:** [threadcraft-academy.azurewebsites.net](https://threadcraft-academy.azurewebsites.net/)
+> 🌐 **Live:** [threadcraft-academy.azurewebsites.net](https://threadcraft-academy.azurewebsites.net/) · **About:** [johanccs.github.io/threadvana](https://johanccs.github.io/threadvana/)
 
 ThreadCraft Academy is an interactive .NET multithreading course with 100 lessons, animated visual explainers, live sandbox demos, and auto-graded exercises. From your first thread to interview-ready concurrency patterns.
 
@@ -71,77 +71,11 @@ Without a key, the coach panel shows setup instructions instead.
 
 ---
 
-## Deploy to Azure
+## Deployment
 
-### Option A: Azure App Service (Linux)
-
-```bash
-# 1. Publish the app
-dotnet publish src/ThreadCraft.Web -c Release -o ./publish
-
-# 2. Deploy with Azure CLI
-az webapp up \
-  --name threadcraft-academy \
-  --resource-group threadcraft-rg \
-  --plan threadcraft-plan \
-  --sku B1 \
-  --runtime "DOTNET:8.0" \
-  --location eastus \
-  --os-type Linux
-
-# 3. Set the API key (optional)
-az webapp config appsettings set \
-  --name threadcraft-academy \
-  --resource-group threadcraft-rg \
-  --settings OPENROUTER_API_KEY="sk-or-v1-..."
-```
-
-First deployment takes ~2 minutes. The SQLite database is auto-created in the app's home directory.
-
-### Option B: Azure App Service (Windows)
-
-```powershell
-# Publish
-dotnet publish src/ThreadCraft.Web -c Release -o ./publish
-
-# Create resources
-az group create --name threadcraft-rg --location eastus
-az appservice plan create --name threadcraft-plan --resource-group threadcraft-rg --sku B1
-az webapp create --name threadcraft-academy --resource-group threadcraft-rg --plan threadcraft-plan --runtime "DOTNET:8.0"
-
-# Deploy (from the publish folder)
-Compress-Archive -Path .\publish\* -DestinationPath .\deploy.zip -Force
-az webapp deploy --name threadcraft-academy --resource-group threadcraft-rg --src-path .\deploy.zip --type zip
-
-# Set API key
-az webapp config appsettings set --name threadcraft-academy --resource-group threadcraft-rg --settings OPENROUTER_API_KEY="sk-or-v1-..."
-```
-
-### Option C: Azure Container Apps
-
-```bash
-# Build and push the container
-docker build -t threadcraft:latest .
-docker tag threadcraft:latest <registry>.azurecr.io/threadcraft:latest
-docker push <registry>.azurecr.io/threadcraft:latest
-
-# Deploy
-az containerapp create \
-  --name threadcraft \
-  --resource-group threadcraft-rg \
-  --environment threadcraft-env \
-  --image <registry>.azurecr.io/threadcraft:latest \
-  --target-port 8080 \
-  --ingress external \
-  --env-vars OPENROUTER_API_KEY="sk-or-v1-..."
-```
-
-### Post-Deployment
-
-- The app creates `threadcraft-progress.db` in the home directory automatically
-- Set `ASPNETCORE_ENVIRONMENT=Production` for production logging
-- Scale the App Service Plan to B2 or higher if you expect heavy traffic
-- Enable **Always On** in the App Service configuration to prevent cold starts
+This app deploys automatically via GitHub Actions on every push to `main` — see
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) for the pipeline (build, test,
+publish, deploy). No manual steps are required.
 
 ---
 
