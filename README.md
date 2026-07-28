@@ -1,10 +1,16 @@
 # ThreadCraft Academy
 
+[![CI](https://github.com/johanccs/threadvana/actions/workflows/ci.yml/badge.svg)](https://github.com/johanccs/threadvana/actions/workflows/ci.yml)
+![License](https://img.shields.io/badge/license-proprietary-lightgrey)
+
 **Stop guessing what `await`, `lock`, and the thread pool do — watch them work, then prove it in the editor.**
 
 > 🌐 **Live:** [threadcraft-academy.azurewebsites.net](https://threadcraft-academy.azurewebsites.net/) · **About:** [johanccs.github.io/threadvana](https://johanccs.github.io/threadvana/)
 
 ThreadCraft Academy is an interactive .NET multithreading course with 100 lessons, animated visual explainers, live sandbox demos, and auto-graded exercises. From your first thread to interview-ready concurrency patterns.
+
+![ThreadCraft Academy home page](docs/screenshots/screenshot-home.png)
+![A ThreadCraft lesson with animated explainer and code editor](docs/screenshots/screenshot-lesson.png)
 
 ---
 
