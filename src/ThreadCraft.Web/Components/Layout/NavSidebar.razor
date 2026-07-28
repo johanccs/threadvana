@@ -6,8 +6,14 @@
 <aside class="sidebar">
     <div class="sidebar-heading-row">
         <p class="sidebar-heading">Course map</p>
-        <button type="button" class="sidebar-toggle-all" @onclick="ToggleAll">
-            @(_allCollapsed ? "Expand all" : "Collapse all")
+        <button type="button" class="sidebar-toggle-all" @onclick="ToggleAll"
+                title="@(_allCollapsed ? "Expand every category" : "Collapse every category")">
+            <svg class="sidebar-toggle-all-icon @(_allCollapsed ? "" : "expanded")" aria-hidden="true"
+                 width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.6"
+                      stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>@(_allCollapsed ? "Expand all" : "Collapse all")</span>
         </button>
     </div>
     @foreach (var category in Curriculum.GetCategories())

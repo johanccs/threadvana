@@ -13,6 +13,11 @@
 
 * { box-sizing: border-box; }
 
+/* Blazor's <FocusOnNavigate Selector="h1" /> programmatically focuses each
+   page's h1 after navigation (for screen readers) — suppress the resulting
+   default browser focus ring, which reads as a stray box to sighted users. */
+h1:focus { outline: none; }
+
 body {
     margin: 0;
     background: var(--bg);
@@ -182,18 +187,35 @@ body {
 }
 
 .sidebar-toggle-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     flex-shrink: 0;
-    padding: 0.2rem 0.55rem;
-    border: 1px solid var(--panel-border);
-    border-radius: 6px;
-    background: transparent;
-    color: var(--text-dim);
+    padding: 0.3rem 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: color-mix(in srgb, var(--accent) 70%, var(--text) 30%);
     font-size: 0.72rem;
     font-weight: 600;
+    letter-spacing: 0.01em;
     cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
-.sidebar-toggle-all:hover { border-color: var(--accent); color: var(--text); }
+.sidebar-toggle-all:hover {
+    background: color-mix(in srgb, var(--accent) 24%, transparent);
+    color: var(--text);
+}
+
+.sidebar-toggle-all:active { transform: scale(0.96); }
+
+.sidebar-toggle-all-icon {
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+}
+
+.sidebar-toggle-all-icon.expanded { transform: rotate(180deg); }
 
 .sidebar-category { margin-bottom: 0.25rem; }
 
@@ -1357,4 +1379,32 @@ body {
 .setup-reference { margin-top: 2rem; }
 .setup-reference h3 { margin: 1.25rem 0 .25rem; }
 .setup-reference pre { background: var(--bg); padding: .75rem 1rem; border-radius: 6px; overflow-x: auto; font-size: .8rem; }
+
+.fontsize-settings { margin-top: 2rem; }
+.fontsize-settings > p { color: var(--text-dim); max-width: 60ch; }
+
+.fontsize-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.fontsize-settings-card { padding: 1rem 1.1rem; }
+
+.fontsize-settings-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+.fontsize-settings-card-header h3 { margin: 0; font-size: 0.95rem; }
+
+.fontsize-settings-preview {
+    margin: 0;
+    color: var(--text-dim);
+    line-height: 1.5;
+}
 

@@ -15,6 +15,30 @@
     @(_running ? "Running..." : "Run Diagnostics")
 </button>
 
+<hr />
+
+<section class="fontsize-settings">
+    <h2>Text size</h2>
+    <p>Each lesson panel has its own text size — change it here, or with the A−/A+ control in the panel itself. Your choices are saved on this device.</p>
+
+    <div class="fontsize-settings-grid">
+        @foreach (var panel in _fontSizePanels)
+        {
+            <article class="panel fontsize-settings-card">
+                <div class="fontsize-settings-card-header">
+                    <h3>@panel.Label</h3>
+                    <FontSizeControl StorageKey="@panel.Key" Label="@panel.Label" DefaultSize="@panel.DefaultSize"
+                                      SizeChanged="size => _previewSizes[panel.Key] = size" />
+                </div>
+                <p class="fontsize-settings-preview fontsize-zoom-wrap"
+                   style="--panel-zoom: @(PreviewSize(panel) / (double)panel.DefaultSize)">
+                    @panel.PreviewText
+                </p>
+            </article>
+        }
+    </div>
+</section>
+
 @if (_ran)
 {
     <section class="setup-results">
@@ -70,6 +94,28 @@ setx OPENROUTER_API_KEY "sk-or-v1-..."
     private bool _running;
     private bool _ran;
     private readonly List<CheckItem> _checks = [];
+
+    private sealed record FontSizePanel(string Key, string Label, int DefaultSize, string PreviewText);
+
+    private readonly List<FontSizePanel> _fontSizePanels =
+    [
+        new("theory", "Lesson text", 16,
+            "lock (key) { ... } means only one thread may run the code between the braces at a time."),
+        new("demo", "See it move", 16,
+            "Press Run demo — the picture below shows YOUR run, thread by thread, moment by moment."),
+        new("exercise", "Your turn", 16,
+            "Wrap the WHOLE transfer — check, subtract, add — in one lock, using the shared key that's provided."),
+        new("interview", "Interview corner", 16,
+            "\"What does the lock keyword do in C#?\" Say your answer out loud first — then peek."),
+        new("assistant", "Ask the coach", 15,
+            "Stuck or curious? Ask anything about this lesson — the coach can see the lesson text and your code."),
+    ];
+
+    // Keyed by panel, populated as each FontSizeControl reports its (persisted or default) size.
+    private readonly Dictionary<string, int> _previewSizes = [];
+
+    private int PreviewSize(FontSizePanel panel) =>
+        _previewSizes.TryGetValue(panel.Key, out var size) ? size : panel.DefaultSize;
 
     private sealed record CheckItem(string Label, string Detail, string? Hint, bool Passed);
 
