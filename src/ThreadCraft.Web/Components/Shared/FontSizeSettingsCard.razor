@@ -8,7 +8,6 @@
             <button type="button" class="fontsize-btn" @onclick="Decrease" disabled="@(_size <= Min)" title="Decrease text size" aria-label="Decrease text size">A−</button>
             <span class="fontsize-value">@_size px</span>
             <button type="button" class="fontsize-btn" @onclick="Increase" disabled="@(_size >= Max)" title="Increase text size" aria-label="Increase text size">A+</button>
-            <button type="button" class="fontsize-btn fontsize-reset-btn" @onclick="Reset" disabled="@(_size == DefaultSize)" title="Reset to default size" aria-label="Reset to default size">↺</button>
         </div>
     </div>
     <p class="fontsize-settings-preview fontsize-zoom-wrap" style="--panel-zoom: @(_size / (double)DefaultSize)">@PreviewText</p>
@@ -50,7 +49,8 @@
 
     private Task Decrease() => SetSizeAsync(Math.Max(Min, _size - Step));
 
-    private Task Reset() => SetSizeAsync(DefaultSize);
+    /// <summary>Called by the page's single "Reset all text sizes" button.</summary>
+    public Task ResetAsync() => SetSizeAsync(DefaultSize);
 
     private async Task SetSizeAsync(int size)
     {

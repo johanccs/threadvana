@@ -5,7 +5,6 @@
     <button type="button" class="fontsize-btn" @onclick="Decrease" disabled="@(_size <= Min)" title="Decrease text size" aria-label="Decrease text size">A−</button>
     <span class="fontsize-value">@_size px</span>
     <button type="button" class="fontsize-btn" @onclick="Increase" disabled="@(_size >= Max)" title="Increase text size" aria-label="Increase text size">A+</button>
-    <button type="button" class="fontsize-btn fontsize-reset-btn" @onclick="Reset" disabled="@(_size == DefaultSize)" title="Reset to default size" aria-label="Reset to default size">↺</button>
 </div>
 
 @code {
@@ -45,11 +44,6 @@
     private Task Increase() => SetSizeAsync(Math.Min(Max, _size + Step));
 
     private Task Decrease() => SetSizeAsync(Math.Max(Min, _size - Step));
-
-    private Task Reset() => SetSizeAsync(DefaultSize);
-
-    /// <summary>Lets a parent force this control back to its default (e.g. a page-level "Reset all").</summary>
-    public Task ResetAsync() => Reset();
 
     private async Task SetSizeAsync(int size)
     {

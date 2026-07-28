@@ -18,14 +18,19 @@
 <hr />
 
 <section class="fontsize-settings">
-    <h2>Text size</h2>
-    <p>Each lesson panel has its own text size — change it here, or with the A−/A+ control in the panel itself. Your choices are saved on this device.</p>
+    <div class="fontsize-settings-header">
+        <div>
+            <h2>Text size</h2>
+            <p>Each lesson panel has its own text size — change it here, or with the A−/A+ control in the panel itself. Your choices are saved on this device.</p>
+        </div>
+        <button type="button" class="btn btn-secondary" @onclick="ResetAllFontSizes">Reset all text sizes</button>
+    </div>
 
     <div class="fontsize-settings-grid">
         @foreach (var panel in _fontSizePanels)
         {
-            <FontSizeSettingsCard StorageKey="@panel.Key" Label="@panel.Label" DefaultSize="@panel.DefaultSize"
-                                   PreviewText="@panel.PreviewText" />
+            <FontSizeSettingsCard @ref="_fontSizeCardRefs[panel.Key]" StorageKey="@panel.Key" Label="@panel.Label"
+                                   DefaultSize="@panel.DefaultSize" PreviewText="@panel.PreviewText" />
         }
     </div>
 </section>
@@ -87,6 +92,16 @@ setx OPENROUTER_API_KEY "sk-or-v1-..."
     private readonly List<CheckItem> _checks = [];
 
     private sealed record FontSizePanel(string Key, string Label, int DefaultSize, string PreviewText);
+
+    private readonly Dictionary<string, FontSizeSettingsCard> _fontSizeCardRefs = [];
+
+    private async Task ResetAllFontSizes()
+    {
+        foreach (var card in _fontSizeCardRefs.Values)
+        {
+            await card.ResetAsync();
+        }
+    }
 
     private readonly List<FontSizePanel> _fontSizePanels =
     [

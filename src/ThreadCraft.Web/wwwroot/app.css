@@ -321,9 +321,6 @@ body {
 .fontsize-btn:hover:not(:disabled) { border-color: var(--accent); }
 .fontsize-btn:disabled { opacity: 0.4; cursor: default; }
 
-.fontsize-reset-btn { color: var(--text-dim); font-size: 0.85rem; }
-.fontsize-reset-btn:hover:not(:disabled) { color: var(--text); }
-
 .fontsize-value {
     min-width: 3.2em;
     text-align: center;
@@ -1384,7 +1381,17 @@ body {
 .setup-reference pre { background: var(--bg); padding: .75rem 1rem; border-radius: 6px; overflow-x: auto; font-size: .8rem; }
 
 .fontsize-settings { margin-top: 2rem; }
-.fontsize-settings > p { color: var(--text-dim); max-width: 60ch; }
+
+.fontsize-settings-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.fontsize-settings-header p { color: var(--text-dim); max-width: 60ch; margin: 0.35rem 0 0; }
+.fontsize-settings-header .btn { flex-shrink: 0; }
 
 .fontsize-settings-grid {
     display: grid;
