@@ -1393,6 +1393,27 @@ body {
 .fontsize-settings-header p { color: var(--text-dim); max-width: 60ch; margin: 0.35rem 0 0; }
 .fontsize-settings-header .btn { flex-shrink: 0; }
 
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.75rem;
+    transform: translateX(-50%);
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 0.65rem 1.1rem;
+    font-size: 0.85rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+    animation: toast-in 0.15s ease-out;
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translate(-50%, 0.5rem); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
 .fontsize-settings-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

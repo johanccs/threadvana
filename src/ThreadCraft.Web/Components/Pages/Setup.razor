@@ -23,7 +23,13 @@
             <h2>Text size</h2>
             <p>Each lesson panel has its own text size — change it here, or with the A−/A+ control in the panel itself. Your choices are saved on this device.</p>
         </div>
-        <button type="button" class="btn btn-secondary" @onclick="ResetAllFontSizes">Reset all text sizes</button>
+        <button type="button" class="btn btn-secondary btn-reset-all" @onclick="ResetAllFontSizes">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M13.5 8A5.5 5.5 0 1 1 11.8 4M13.5 1.5v3.2h-3.2" stroke="currentColor"
+                      stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Reset all text sizes</span>
+        </button>
     </div>
 
     <div class="fontsize-settings-grid">
@@ -34,6 +40,11 @@
         }
     </div>
 </section>
+
+@if (_fontSizeToastVisible)
+{
+    <div class="toast" role="status" aria-live="polite">Text sizes reset to default.</div>
+}
 
 @if (_ran)
 {
@@ -94,6 +105,7 @@ setx OPENROUTER_API_KEY "sk-or-v1-..."
     private sealed record FontSizePanel(string Key, string Label, int DefaultSize, string PreviewText);
 
     private readonly Dictionary<string, FontSizeSettingsCard> _fontSizeCardRefs = [];
+    private bool _fontSizeToastVisible;
 
     private async Task ResetAllFontSizes()
     {
@@ -101,6 +113,12 @@ setx OPENROUTER_API_KEY "sk-or-v1-..."
         {
             await card.ResetAsync();
         }
+
+        _fontSizeToastVisible = true;
+        StateHasChanged();
+        await Task.Delay(2500);
+        _fontSizeToastVisible = false;
+        StateHasChanged();
     }
 
     private readonly List<FontSizePanel> _fontSizePanels =
