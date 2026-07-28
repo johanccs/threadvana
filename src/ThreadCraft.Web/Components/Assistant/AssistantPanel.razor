@@ -4,9 +4,12 @@
 @inject IJSRuntime JS
 
 <div class="panel workspace-panel assistant-panel">
-    <div class="assistant-header">
-        <h2>Ask the coach</h2>
-        <span class="assistant-model-badge" title="The AI model answering you">@Assistant.ModelName</span>
+    <div class="workspace-panel-header">
+        <div class="assistant-header">
+            <h2>Ask the coach</h2>
+            <span class="assistant-model-badge" title="The AI model answering you">@Assistant.ModelName</span>
+        </div>
+        <FontSizeControl StorageKey="assistant" Label="AI Coach" DefaultSize="15" SizeChanged="OnFontSizeChanged" />
     </div>
     <p class="panel-intro">
         Stuck or curious? Ask anything about this lesson — the coach can see the lesson text,
@@ -36,7 +39,7 @@
 
         @if (_exchanges.Count > 0)
         {
-            <div class="assistant-transcript" @ref="_transcript">
+            <div class="assistant-transcript fontsize-zoom-wrap" style="--panel-zoom: @ZoomFactor" @ref="_transcript">
                 @foreach (var exchange in _exchanges)
                 {
                     <div class="chat-msg chat-question">@exchange.Question</div>
@@ -109,6 +112,10 @@
     private string? _loadedLessonId;
     private ElementReference _transcript;
     private readonly CancellationTokenSource _cts = new();
+    private int _fontSize = 15;
+    private double ZoomFactor => _fontSize / 15.0;
+
+    private void OnFontSizeChanged(int size) => _fontSize = size;
 
     protected override void OnParametersSet()
     {

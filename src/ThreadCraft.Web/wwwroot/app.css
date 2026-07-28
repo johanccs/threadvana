@@ -249,6 +249,49 @@ body {
     padding: 1.25rem 1.5rem;
 }
 
+/* ---------- Per-panel text size control ---------- */
+
+.fontsize-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.fontsize-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.fontsize-btn:hover:not(:disabled) { border-color: var(--accent); }
+.fontsize-btn:disabled { opacity: 0.4; cursor: default; }
+
+.fontsize-value {
+    min-width: 3.2em;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+}
+
+/* Scopes the effect of a panel's own font-size control to just that panel's
+   body — zoom (not transform) is used so it reflows layout correctly instead
+   of overlapping neighbors, since the rest of the app's type scale is in rem
+   (root-relative), which a plain font-size override on a wrapper won't affect. */
+.fontsize-zoom-wrap {
+    zoom: var(--panel-zoom, 1);
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -632,6 +675,15 @@ body {
 }
 
 .workspace-panel h2 { margin-top: 0; }
+
+.workspace-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.workspace-panel-header h2 { margin: 0; }
 
 .panel-intro { color: var(--text-dim); }
 

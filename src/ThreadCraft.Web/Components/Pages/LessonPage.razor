@@ -39,18 +39,21 @@ else
                 </button>
             </div>
 
-            <header class="lesson-header">
-                <div class="lesson-header-badges">
-                    <DifficultyBadge Difficulty="_lesson.Difficulty" />
-                    @if (Summary.IsPassed(_lesson.Id))
-                    {
-                        <span class="chip chip-passed">✓ Passed</span>
-                    }
-                </div>
-                <h1>@_lesson.Title</h1>
-            </header>
+            <div class="workspace-panel-header">
+                <header class="lesson-header">
+                    <div class="lesson-header-badges">
+                        <DifficultyBadge Difficulty="_lesson.Difficulty" />
+                        @if (Summary.IsPassed(_lesson.Id))
+                        {
+                            <span class="chip chip-passed">✓ Passed</span>
+                        }
+                    </div>
+                    <h1>@_lesson.Title</h1>
+                </header>
+                <FontSizeControl StorageKey="theory" Label="Lesson text" DefaultSize="16" SizeChanged="size => _theoryFontSize = size" />
+            </div>
 
-            <div class="theory-body">
+            <div class="theory-body fontsize-zoom-wrap" style="--panel-zoom: @(_theoryFontSize / 16.0)">
                 @Markdown.ToMarkup(_lesson.TheoryMarkdown)
             </div>
 
@@ -82,11 +85,14 @@ else
             @if (ExplainerId is not null || _lesson.VisualizationId is not null || _lesson.DemoCode is not null)
             {
                 <div class="panel workspace-panel">
-                    <h2>See it move</h2>
+                    <div class="workspace-panel-header">
+                        <h2>See it move</h2>
+                        <FontSizeControl StorageKey="demo" Label="See it move" DefaultSize="16" SizeChanged="size => _demoFontSize = size" />
+                    </div>
 
                     @if (ExplainerId is not null)
                     {
-                        <p class="panel-intro">
+                        <p class="panel-intro fontsize-zoom-wrap" style="--panel-zoom: @(_demoFontSize / 16.0)">
                             First — what is happening <strong>under the hood</strong>? Watch the
                             animated walkthrough (it plays on its own; use the dots to step).
                         </p>
@@ -95,7 +101,7 @@ else
 
                     @if (_lesson.VisualizationId is not null || _lesson.DemoCode is not null)
                     {
-                        <p class="panel-intro">
+                        <p class="panel-intro fontsize-zoom-wrap" style="--panel-zoom: @(_demoFontSize / 16.0)">
                             Now press <strong>Run demo</strong> — the picture below shows YOUR run,
                             thread by thread, moment by moment.
                         </p>
@@ -131,7 +137,7 @@ else
                         </div>
                     }
 
-                    <div class="console-block">
+                    <div class="console-block fontsize-zoom-wrap" style="--panel-zoom: @(_demoFontSize / 16.0)">
                         <p class="console-title">Console</p>
                         <pre class="console-output">@ConsoleText</pre>
                     </div>
@@ -142,10 +148,13 @@ else
             {
                 var exercise = _lesson.Exercise;
                 <div class="panel workspace-panel">
-                    <h2>Your turn</h2>
-                    <div class="exercise-prompt">@Markdown.ToMarkup(exercise.PromptMarkdown)</div>
+                    <div class="workspace-panel-header">
+                        <h2>Your turn</h2>
+                        <FontSizeControl StorageKey="exercise" Label="Your turn" DefaultSize="16" SizeChanged="size => _exerciseFontSize = size" />
+                    </div>
+                    <div class="exercise-prompt fontsize-zoom-wrap" style="--panel-zoom: @(_exerciseFontSize / 16.0)">@Markdown.ToMarkup(exercise.PromptMarkdown)</div>
 
-                    <CodeEditor @ref="_editor" @bind-Value="_code" Markers="_markers" Height="360px" />
+                    <CodeEditor @ref="_editor" @bind-Value="_code" Markers="_markers" Height="360px" FontSize="@EditorFontSize" />
 
                     <div class="exercise-actions">
                         <button class="btn btn-primary" @onclick="CheckCodeAsync" disabled="@_validating">
@@ -165,6 +174,7 @@ else
                         }
                     </div>
 
+                    <div class="fontsize-zoom-wrap" style="--panel-zoom: @(_exerciseFontSize / 16.0)">
                     @if (_validationError is not null)
                     {
                         <div class="result-panel result-error">
@@ -285,6 +295,7 @@ else
                             }
                         </div>
                     }
+                    </div>
 
                     <div class="solution-block">
                         @if (_solutionVisible)
@@ -312,11 +323,14 @@ else
             @if (_lesson.InterviewQuestions.Count > 0)
             {
                 <div class="panel workspace-panel">
-                    <h2>Interview corner</h2>
+                    <div class="workspace-panel-header">
+                        <h2>Interview corner</h2>
+                        <FontSizeControl StorageKey="interview" Label="Interview corner" DefaultSize="16" SizeChanged="size => _interviewFontSize = size" />
+                    </div>
                     <p class="panel-intro">
                         Questions interviewers love to ask about this topic. Say your answer out loud first — then peek.
                     </p>
-                    <div class="interview-list">
+                    <div class="interview-list fontsize-zoom-wrap" style="--panel-zoom: @(_interviewFontSize / 16.0)">
                         @for (var i = 0; i < _lesson.InterviewQuestions.Count; i++)
                         {
                             var index = i;
@@ -367,6 +381,15 @@ else
     // --- "See it move" demo state ---
     private bool _demoRunning;
     private bool _theoryCollapsed;
+
+    // --- Per-panel text size (independent settings, persisted per-panel in localStorage) ---
+    private int _theoryFontSize = 16;
+    private int _demoFontSize = 16;
+    private int _exerciseFontSize = 16;
+    private int _interviewFontSize = 16;
+
+    // Maps the "Your turn" panel's 12-24px text-size range onto Monaco's own font-size scale.
+    private int EditorFontSize => _exerciseFontSize - 3;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

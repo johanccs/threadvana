@@ -48,6 +48,11 @@
     /// <summary>True to make the editor read-only (e.g. showing the solution).</summary>
     [Parameter] public bool ReadOnly { get; set; }
 
+    /// <summary>Editor text size in px — independent of every other panel's font-size control.</summary>
+    [Parameter] public int FontSize { get; set; } = 13;
+
+    private int _lastFontSize = 13;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -56,9 +61,10 @@
             try
             {
                 await JS.InvokeVoidAsync(
-                    "threadCraftEditor.createAsync", _dotNetRef, _elementId, Value, ReadOnly);
+                    "threadCraftEditor.createAsync", _dotNetRef, _elementId, Value, ReadOnly, FontSize);
                 _isReady = true;
                 _lastEditorValue = Value;
+                _lastFontSize = FontSize;
             }
             catch (JSException)
             {
@@ -85,6 +91,12 @@
         {
             _lastMarkers = Markers;
             await PushMarkersAsync();
+        }
+
+        if (FontSize != _lastFontSize)
+        {
+            _lastFontSize = FontSize;
+            await JS.InvokeVoidAsync("threadCraftEditor.setFontSize", _elementId, FontSize);
         }
     }
 

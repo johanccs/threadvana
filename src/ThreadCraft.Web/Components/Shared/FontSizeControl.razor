@@ -1,0 +1,58 @@
+@namespace ThreadCraft.Web.Components.Shared
+@inject IJSRuntime JS
+
+<div class="fontsize-control" role="group" aria-label="@($"{Label} text size")">
+    <button type="button" class="fontsize-btn" @onclick="Decrease" disabled="@(_size <= Min)" title="Decrease text size" aria-label="Decrease text size">A−</button>
+    <span class="fontsize-value">@_size px</span>
+    <button type="button" class="fontsize-btn" @onclick="Increase" disabled="@(_size >= Max)" title="Increase text size" aria-label="Increase text size">A+</button>
+</div>
+
+@code {
+    /// <summary>Unique localStorage key for this panel's setting (independent of every other panel).</summary>
+    [Parameter, EditorRequired] public string StorageKey { get; set; } = "";
+
+    /// <summary>Accessible label describing which panel this control resizes.</summary>
+    [Parameter] public string Label { get; set; } = "Panel";
+
+    [Parameter] public int DefaultSize { get; set; } = 16;
+    [Parameter] public int Min { get; set; } = 12;
+    [Parameter] public int Max { get; set; } = 24;
+    [Parameter] public int Step { get; set; } = 1;
+
+    /// <summary>Raised once on load (with the persisted or default size) and again on every change.</summary>
+    [Parameter] public EventCallback<int> SizeChanged { get; set; }
+
+    private int _size;
+
+    protected override void OnInitialized()
+    {
+        _size = DefaultSize;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        _size = await JS.InvokeAsync<int>("ThreadCraft.fontSize.get", StorageKey, DefaultSize);
+        await SizeChanged.InvokeAsync(_size);
+        StateHasChanged();
+    }
+
+    private Task Increase() => SetSizeAsync(Math.Min(Max, _size + Step));
+
+    private Task Decrease() => SetSizeAsync(Math.Max(Min, _size - Step));
+
+    private async Task SetSizeAsync(int size)
+    {
+        if (size == _size)
+        {
+            return;
+        }
+        _size = size;
+        await JS.InvokeVoidAsync("ThreadCraft.fontSize.set", StorageKey, size);
+        await SizeChanged.InvokeAsync(size);
+    }
+}

@@ -56,7 +56,7 @@ window.threadCraftEditor = (function () {
     return {
         // Creates an editor on the element and reports edits back to .NET
         // (debounced ~300ms so we don't round-trip on every keystroke).
-        createAsync: function (dotNetRef, elementId, initialValue, readOnly) {
+        createAsync: function (dotNetRef, elementId, initialValue, readOnly, fontSize) {
             return loadMonaco().then(function () {
                 var host = document.getElementById(elementId);
                 if (!host) {
@@ -70,7 +70,7 @@ window.threadCraftEditor = (function () {
                     readOnly: !!readOnly,
                     automaticLayout: true,
                     minimap: { enabled: false },
-                    fontSize: 13,
+                    fontSize: fontSize || 13,
                     lineNumbers: "on",
                     scrollBeyondLastLine: false,
                     renderWhitespace: "none",
@@ -95,6 +95,15 @@ window.threadCraftEditor = (function () {
 
                 return true;
             });
+        },
+
+        // Updates the editor's own font size — independent of every other panel's.
+        setFontSize: function (elementId, fontSize) {
+            var entry = editors[elementId];
+            if (!entry) {
+                return;
+            }
+            entry.editor.updateOptions({ fontSize: fontSize });
         },
 
         // Replaces the editor content (used when the parent resets the code).
