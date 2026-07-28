@@ -4,7 +4,12 @@
 @inject ProgressSummaryService Summary
 
 <aside class="sidebar">
-    <p class="sidebar-heading">Course map</p>
+    <div class="sidebar-heading-row">
+        <p class="sidebar-heading">Course map</p>
+        <button type="button" class="sidebar-toggle-all" @onclick="ToggleAll">
+            @(_allCollapsed ? "Expand all" : "Collapse all")
+        </button>
+    </div>
     @foreach (var category in Curriculum.GetCategories())
     {
         var isCollapsed = _collapsedCategoryIds.Contains(category.Id);
@@ -48,9 +53,16 @@
 @code {
     private readonly HashSet<string> _collapsedCategoryIds = [];
 
+    // All categories start collapsed — an easier first impression than a wall of 100 lessons.
+    private bool _allCollapsed => _collapsedCategoryIds.Count >= Curriculum.GetCategories().Count;
+
     protected override void OnInitialized()
     {
         Summary.Changed += OnSummaryChanged;
+        foreach (var category in Curriculum.GetCategories())
+        {
+            _collapsedCategoryIds.Add(category.Id);
+        }
     }
 
     private Task OnSummaryChanged() => InvokeAsync(StateHasChanged);
@@ -60,6 +72,21 @@
         if (!_collapsedCategoryIds.Remove(categoryId))
         {
             _collapsedCategoryIds.Add(categoryId);
+        }
+    }
+
+    private void ToggleAll()
+    {
+        if (_allCollapsed)
+        {
+            _collapsedCategoryIds.Clear();
+        }
+        else
+        {
+            foreach (var category in Curriculum.GetCategories())
+            {
+                _collapsedCategoryIds.Add(category.Id);
+            }
         }
     }
 
