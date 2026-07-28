@@ -64,9 +64,8 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # threadcraft-academy is a Linux App Service (Basic B1, DOTNETCORE|8.0) in
-      # resource group threadcraft-rg. This replaces the old manual zip-deploy
-      # workflow (deploy.zip / deploy_done.txt) with the same target.
+      # Deploys to the Linux App Service target below. This replaces the old
+      # manual zip-deploy workflow (deploy.zip / deploy_done.txt).
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
