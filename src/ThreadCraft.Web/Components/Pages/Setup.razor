@@ -24,17 +24,8 @@
     <div class="fontsize-settings-grid">
         @foreach (var panel in _fontSizePanels)
         {
-            <article class="panel fontsize-settings-card">
-                <div class="fontsize-settings-card-header">
-                    <h3>@panel.Label</h3>
-                    <FontSizeControl StorageKey="@panel.Key" Label="@panel.Label" DefaultSize="@panel.DefaultSize"
-                                      SizeChanged="size => _previewSizes[panel.Key] = size" />
-                </div>
-                <p class="fontsize-settings-preview fontsize-zoom-wrap"
-                   style="--panel-zoom: @(PreviewSize(panel) / (double)panel.DefaultSize)">
-                    @panel.PreviewText
-                </p>
-            </article>
+            <FontSizeSettingsCard StorageKey="@panel.Key" Label="@panel.Label" DefaultSize="@panel.DefaultSize"
+                                   PreviewText="@panel.PreviewText" />
         }
     </div>
 </section>
@@ -110,12 +101,6 @@ setx OPENROUTER_API_KEY "sk-or-v1-..."
         new("assistant", "Ask the coach", 15,
             "Stuck or curious? Ask anything about this lesson — the coach can see the lesson text and your code."),
     ];
-
-    // Keyed by panel, populated as each FontSizeControl reports its (persisted or default) size.
-    private readonly Dictionary<string, int> _previewSizes = [];
-
-    private int PreviewSize(FontSizePanel panel) =>
-        _previewSizes.TryGetValue(panel.Key, out var size) ? size : panel.DefaultSize;
 
     private sealed record CheckItem(string Label, string Detail, string? Hint, bool Passed);
 
