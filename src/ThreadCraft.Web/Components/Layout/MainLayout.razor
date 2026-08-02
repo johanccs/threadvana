@@ -12,7 +12,16 @@
                 aria-label="@(_sidebarCollapsed ? "Show sidebar" : "Hide sidebar")">
             <span class="sidebar-toggle-icon">@(_sidebarCollapsed ? "☰" : "✕")</span>
         </button>
-        <a class="brand" href="/">🧵 ThreadCraft Academy</a>
+        <a class="brand" href="/">
+            <svg class="brand-mark" viewBox="0 0 24 24" width="18" height="18" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true" focusable="false">
+                <path d="m12 2 9 5-9 5-9-5 9-5z" />
+                <path d="m3 12 9 5 9-5" />
+                <path d="m3 17 9 5 9-5" />
+            </svg>
+            <span>ThreadCraft Academy</span>
+        </a>
         <nav class="topbar-nav">
             <NavLink href="/" Match="NavLinkMatch.All">Dashboard</NavLink>
             <NavLink href="/certificate">Certificate</NavLink>
@@ -36,7 +45,7 @@
         </main>
     </div>
     <footer class="site-footer">
-        <span class="footer-copyright">© @DateTime.UtcNow.Year Johan Potgieter</span>
+        <span class="footer-copyright">© @DateTime.UtcNow.Year CCS</span>
         <nav class="footer-links">
             <NavLink href="/privacy">Privacy</NavLink>
             <NavLink href="/terms">Terms</NavLink>
