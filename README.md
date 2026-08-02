@@ -117,6 +117,8 @@ dotnet test tests/ThreadCraft.Content.Tests --filter RealContent
 
 ---
 
-## License
+## Attribution & licence
+
+Built and maintained by **CCS**. © 2026 CCS.
 
 Proprietary — all rights reserved.
