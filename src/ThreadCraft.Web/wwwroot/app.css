@@ -57,10 +57,19 @@ body {
 .sidebar-toggle-icon { line-height: 1; }
 
 .topbar .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-weight: 700;
     font-size: 1.1rem;
     color: var(--text);
     text-decoration: none;
+}
+
+/* The mark takes the accent colour via currentColor. */
+.topbar .brand .brand-mark {
+    color: var(--accent);
+    flex: none;
 }
 
 .topbar {
